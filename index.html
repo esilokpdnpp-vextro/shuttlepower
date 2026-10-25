@@ -6,17 +6,17 @@
     <title>Sistem Kejohanan Badminton KPDN Pulau Pinang</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS for Excel / CSV Parsing -->
+    <!-- SheetJS for Excel / CSV Parsing & Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Fail Konfigurasi Firebase Luaran (Kekal di GitHub tanpa perlu diedit setiap kali kemas kini index.html) -->
     <script src="./firebase-config.js" onerror="console.info('Fail firebase-config.js belum diwujudkan, menggunakan konfigurasi sedia ada.')"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .tab-active { border-bottom: 4px solid #10b981; color: #10b981; font-weight: 600; }
+        .tab-active { border-bottom: 4px solid #10b981; color: #10b981; font-weight: 700; }
         .score-btn { user-select: none; touch-action: manipulation; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -29,17 +29,17 @@
 <body class="text-gray-800 h-screen flex flex-col overflow-hidden">
 
     <!-- Header -->
-    <header class="bg-gradient-to-r from-teal-600 to-green-600 text-white shadow-md z-10">
+    <header class="bg-gradient-to-r from-teal-700 via-teal-600 to-green-600 text-white shadow-md z-10">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center gap-2">
-            <div class="flex items-center gap-3">
-                <div class="bg-white p-2 rounded-full text-teal-600 shadow-xs">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="bg-white p-2 rounded-full text-teal-600 shadow-xs shrink-0">
                     <i class="fa-solid fa-trophy text-xl"></i>
                 </div>
-                <div>
-                    <h1 class="text-base sm:text-lg font-bold leading-tight">Badminton KPDN P.Pinang</h1>
+                <div class="min-w-0">
+                    <h1 id="main-tournament-title" class="text-base sm:text-xl font-extrabold leading-tight truncate">Badminton KPDN P.Pinang</h1>
                     <p class="text-xs text-teal-100 flex flex-wrap items-center gap-2 mt-0.5">
                         <span id="role-badge" class="bg-teal-900/60 text-teal-100 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-teal-400/30">
-                            <i class="fa-solid fa-eye mr-1"></i>Paparan Awam (Langsung)
+                            <i class="fa-solid fa-eye mr-1"></i>Paparan Awam (Viewer)
                         </span>
                         <button onclick="handleCloudStatusClick()" id="cloud-status" class="bg-amber-500 hover:opacity-90 text-[10px] px-2.5 py-0.5 rounded-full text-white font-semibold transition cursor-pointer shadow-xs" title="Status penyelarasan data langsung">
                             <i class="fa-solid fa-cloud mr-1"></i>Menghubungkan Awan...
@@ -48,13 +48,13 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-1.5 sm:gap-2">
+            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <!-- Butang Kongsi Link Penonton (Sentiasa Ada) -->
                 <button onclick="openShareModal()" class="text-xs bg-white/15 hover:bg-white/25 border border-white/30 px-2.5 py-1.5 rounded-lg shadow-xs text-white transition font-semibold flex items-center gap-1.5" title="Kongsi Pautan Paparan Awam ke WhatsApp">
                     <i class="fa-solid fa-share-nodes"></i><span class="hidden md:inline">Kongsi Link Awam</span>
                 </button>
 
-                <!-- Butang Admin Sahaja (Disembunyikan Dalam Mod Penonton) -->
+                <!-- Butang Super Admin Sahaja -->
                 <button id="btn-cloud-setup" onclick="openFirebaseSetupModal()" class="hidden text-xs bg-teal-800/70 hover:bg-teal-900 px-2.5 py-1.5 rounded-lg shadow-xs text-white transition font-semibold" title="Konfigurasi Firebase Awan">
                     <i class="fa-solid fa-cloud-bolt mr-1"></i><span class="hidden lg:inline">Tetapan Awan</span>
                 </button>
@@ -62,15 +62,15 @@
                     <i class="fa-solid fa-rotate-right mr-1"></i><span class="hidden lg:inline">Reset Sistem</span>
                 </button>
 
-                <!-- Butang Log Masuk / Log Keluar Admin -->
-                <button id="btn-admin-toggle" onclick="toggleAdminAuth()" class="text-xs bg-teal-900/50 hover:bg-teal-900 border border-teal-400/30 px-2.5 py-1.5 rounded-lg text-teal-100 transition font-semibold flex items-center gap-1" title="Log Masuk Urusetia / Pengadil">
+                <!-- Butang Log Masuk / Log Keluar (Super Admin / Pengadil) -->
+                <button id="btn-admin-toggle" onclick="toggleAdminAuth()" class="text-xs bg-teal-900/50 hover:bg-teal-900 border border-teal-400/30 px-2.5 py-1.5 rounded-lg text-teal-100 transition font-semibold flex items-center gap-1" title="Log Masuk Super Admin / Pengadil">
                     <i id="admin-lock-icon" class="fa-solid fa-lock"></i>
-                    <span id="admin-lock-text" class="hidden sm:inline">Urusetia</span>
+                    <span id="admin-lock-text" class="hidden sm:inline">Log Masuk</span>
                 </button>
             </div>
         </div>
         
-        <!-- Navigation Tabs (Hanya Muncul Untuk Urusetia / Pengadil) -->
+        <!-- Navigation Tabs (Dikawal Mengikut Layer: Awam / Pengadil / Super Admin) -->
         <nav id="main-nav-tabs" class="hidden flex overflow-x-auto bg-white text-gray-500 shadow-inner border-t">
             <button onclick="switchTab('public')" id="tab-public" class="tab-btn tab-active px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-tv mr-2"></i>Paparan Awam</button>
             <button onclick="switchTab('admin')" id="tab-admin" class="tab-btn px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-users-gear mr-2"></i>Pendaftaran</button>
@@ -85,40 +85,25 @@
         <!-- 1. TAB: PAPARAN AWAM -->
         <section id="view-public" class="view-section animate-fade-in space-y-6">
             
-            <!-- Banner Makluman Mod Penonton (Hanya Kelihatan Kepada Admin) -->
+            <!-- Banner Makluman Mod Penonton (Hanya Kelihatan Kepada Super Admin) -->
             <div id="admin-link-banner" class="hidden bg-teal-50 border border-teal-200 rounded-xl p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs text-teal-900">
                 <div class="flex items-center gap-2">
                     <i class="fa-brands fa-whatsapp text-lg text-green-600"></i>
-                    <span><strong>Tips Urusetia:</strong> Gunakan pautan khas penonton supaya pemain & penonton hanya melihat <strong>Paparan Awam</strong> tanpa menu tetapan.</span>
+                    <span><strong>Tips Super Admin:</strong> Kongsikan pautan awam kepada penonton (terus memaparkan Paparan Awam). Gunakan PIN Pengadil untuk pengadil gelanggang.</span>
                 </div>
                 <button onclick="openShareModal()" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded-lg font-bold whitespace-nowrap transition shadow-2xs">
                     <i class="fa-solid fa-copy mr-1"></i> Dapatkan Link Penonton
                 </button>
             </div>
 
-            <!-- BAHAGIAN PUSINGAN KALAH MATI (Muncul apabila dijana) -->
-            <div id="public-knockout-container" class="hidden space-y-6">
-                <div class="bg-white rounded-xl shadow-md border-2 border-indigo-200 overflow-hidden">
-                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 flex justify-between items-center text-white">
-                        <h2 class="font-bold flex items-center text-base md:text-lg">
-                            <i class="fa-solid fa-sitemap mr-2"></i>Carta & Jadual Pusingan Kalah Mati
-                        </h2>
-                        <span id="knockout-phase-badge" class="bg-white text-indigo-700 text-xs px-3 py-1 rounded-full font-extrabold shadow-sm"></span>
-                    </div>
-                    
-                    <!-- Visual Bracket Mengikut Fasa -->
-                    <div id="public-knockout-bracket" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-indigo-50/40">
-                        <!-- Generated via JS -->
-                    </div>
+            <!-- POSTER PEMENANG KEJOHANAN (Muncul Secara Automatik Selepas Perlawanan Akhir Tamat) -->
+            <div id="public-winner-poster" class="hidden">
+                <!-- Dijana secara dinamik oleh JS -->
+            </div>
 
-                    <!-- Senarai Perlawanan Kalah Mati Terperinci -->
-                    <div class="border-t border-indigo-100 p-4 bg-white">
-                        <h3 class="text-sm font-bold text-gray-700 mb-3"><i class="fa-solid fa-fire text-orange-500 mr-1"></i>Keputusan & Perlawanan Semasa (Pusingan Kalah Mati)</h3>
-                        <div id="public-knockout-matches" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <!-- Generated via JS -->
-                        </div>
-                    </div>
-                </div>
+            <!-- BAHAGIAN PUSINGAN KALAH MATI (Setiap Peringkat Kekal & Boleh Dibuka/Tutup) -->
+            <div id="public-knockout-container" class="hidden space-y-4">
+                <!-- Dijana secara dinamik mengikut fasa (Pusingan 16, Suku Akhir, Separuh Akhir, Penentuan Ke-3/4, Pusingan Akhir) -->
             </div>
 
             <!-- KLAUSA (COLLAPSIBLE) PERINGKAT KUMPULAN -->
@@ -162,7 +147,7 @@
 
         </section>
 
-        <!-- 2. TAB: PENDAFTARAN & JADUAL (ADMIN) -->
+        <!-- 2. TAB: PENDAFTARAN & JADUAL (SUPER ADMIN) -->
         <section id="view-admin" class="view-section hidden animate-fade-in">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 
@@ -266,7 +251,7 @@
                 <div class="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <h2 class="font-bold text-lg text-gray-800"><i class="fa-solid fa-trophy mr-2 text-yellow-500"></i>Pusingan Seterusnya (Kalah Mati)</h2>
-                        <p class="text-xs text-gray-500">Jana jadual Pusingan Kalah Mati / Suku Akhir / Separuh Akhir / Akhir selepas pusingan semasa selesai.</p>
+                        <p class="text-xs text-gray-500">Jana jadual Pusingan Kalah Mati / Suku Akhir / Separuh Akhir / Penentuan Ke-3 & Akhir selepas pusingan semasa selesai.</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <button id="btn-next-round" onclick="generateNextRound()" class="bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition flex items-center">
@@ -278,17 +263,22 @@
                     <div id="match-status-info" class="mb-3 p-3 bg-blue-50 rounded-lg text-blue-700 border border-blue-100 flex flex-wrap items-center justify-between gap-2">
                         <span>Status Perlawanan Semasa: 0 Selesai / 0 Belum Mula</span>
                     </div>
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                        <div>
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 text-xs text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <div class="flex flex-wrap items-center gap-y-1">
                             <span>Rujukan Ketetapan: <strong id="active-qualify-label" class="text-teal-700">2 Pasukan Setiap Kumpulan</strong></span>
                             <span class="mx-1.5 text-gray-300">|</span>
                             <span>Kaedah Pelengkap: <strong id="active-method-label" class="text-indigo-700">Format Bye (Biasa)</strong></span>
+                            <span class="mx-1.5 text-gray-300">|</span>
+                            <span>Tempat Ke-3/4: <strong id="active-third-place-label" class="text-amber-700">Pemenang Bersama</strong></span>
                         </div>
-                        <div class="flex items-center gap-2 w-full sm:w-auto">
-                            <label for="quick-qualify-method" class="font-semibold text-gray-700 whitespace-nowrap">Pilihan Kuota Ganjil:</label>
-                            <select id="quick-qualify-method" onchange="changeQuickQualifyMethod(this.value)" class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 flex-1 sm:flex-initial">
-                                <option value="bye">Kekalkan Format Bye (Biasa)</option>
-                                <option value="best_third">Pilih Tempat Ke-3 Terbaik (Genapkan Kuota)</option>
+                        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                            <select id="quick-qualify-method" onchange="changeQuickQualifyMethod(this.value)" class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="bye">Kuota Ganjil: Format Bye (Biasa)</option>
+                                <option value="best_third">Kuota Ganjil: Pilih Ke-3 Terbaik</option>
+                            </select>
+                            <select id="quick-third-place-method" onchange="changeQuickThirdPlaceOption(this.value)" class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="joint">Ke-3/4: Pemenang Bersama Ke-3</option>
+                                <option value="playoff">Ke-3/4: Buat Perlawanan Penentuan</option>
                             </select>
                         </div>
                     </div>
@@ -363,91 +353,149 @@
 
         </section>
 
-        <!-- 4. TAB: KETETAPAN (SETTINGS) -->
+        <!-- 4. TAB: KETETAPAN (SETTINGS - SUPER ADMIN SAHAJA) -->
         <section id="view-settings" class="view-section hidden animate-fade-in h-full space-y-6">
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-5xl mx-auto flex flex-col md:flex-row p-6 gap-6">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-6xl mx-auto flex flex-col lg:flex-row p-6 gap-6">
                 
                 <div class="flex-1">
                     <div class="border-b pb-3 mb-4">
                         <h2 class="font-bold text-gray-700 text-lg"><i class="fa-solid fa-gear mr-2 text-gray-500"></i>Ketetapan Sistem & Perlawanan</h2>
-                        <p class="text-xs text-gray-400 mt-0.5">Masukkan ketetapan dan tekan simpan untuk merekodkan parameter kejohanan.</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Tetapkan nama kejohanan, format perlawanan, penentuan tempat ke-3/4, dan PIN akses.</p>
                     </div>
                     <form id="settings-form" class="space-y-4" onsubmit="saveSettingsForm(event)">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Peringkat / Kategori</label>
-                            <input type="text" id="set-peringkat" list="list-peringkat" oninput="handlePhaseSettings()" placeholder="Pilih atau taip peringkat (Contoh: Peringkat Kumpulan)" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 bg-white" required>
-                            <datalist id="list-peringkat">
-                                <option value="Peringkat Kumpulan"></option>
-                                <option value="Pusingan Kalah Mati"></option>
-                                <option value="Suku Akhir"></option>
-                                <option value="Separuh Akhir"></option>
-                                <option value="Pusingan Akhir"></option>
-                            </datalist>
+                        <!-- Nama Kejohanan (Tajuk Besar Sistem) -->
+                        <div class="bg-teal-50/60 border border-teal-200 rounded-lg p-3">
+                            <label class="block text-sm font-bold text-teal-900 mb-1"><i class="fa-solid fa-heading mr-1.5 text-teal-600"></i>Nama Kejohanan (Tajuk Utama Sistem)</label>
+                            <input type="text" id="set-tournament-name" placeholder="Contoh: Kejohanan Piala CEO KPDN 2026" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm font-semibold" required>
+                            <p class="text-[11px] text-teal-700 mt-1">Tajuk ini akan dipaparkan di bahagian paling atas sistem, poster pemenang, dan laporan rasmi.</p>
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Format Perlawanan</label>
-                            <input type="text" id="set-format" list="list-format" placeholder="Pilih atau taip format (Contoh: Round Robin)" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 bg-white" required>
-                            <datalist id="list-format">
-                                <option value="Round Robin"></option>
-                                <option value="Kalah Mati (Knockout)"></option>
-                                <option value="Timbal Balik"></option>
-                            </datalist>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Peringkat / Kategori</label>
+                                <input type="text" id="set-peringkat" list="list-peringkat" oninput="handlePhaseSettings()" placeholder="Contoh: Peringkat Kumpulan" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm" required>
+                                <datalist id="list-peringkat">
+                                    <option value="Peringkat Kumpulan"></option>
+                                    <option value="Pusingan Kalah Mati"></option>
+                                    <option value="Suku Akhir"></option>
+                                    <option value="Separuh Akhir"></option>
+                                    <option value="Pusingan Akhir"></option>
+                                </datalist>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Format Perlawanan</label>
+                                <input type="text" id="set-format" list="list-format" placeholder="Contoh: Round Robin" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm" required>
+                                <datalist id="list-format">
+                                    <option value="Round Robin"></option>
+                                    <option value="Kalah Mati (Knockout)"></option>
+                                    <option value="Timbal Balik"></option>
+                                </datalist>
+                            </div>
                         </div>
+
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Mata Tamat Maksimum (Contoh: 15, 21, 30)</label>
-                            <input type="number" id="set-max-score" placeholder="Biarkan kosong jika tiada had mata" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 bg-white">
+                            <input type="number" id="set-max-score" placeholder="Biarkan kosong jika tiada had mata" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm">
                         </div>
                         
-                        <div class="pt-2" id="setting-qualify-wrapper">
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Pasukan Layak Ke Pusingan Seterusnya (Dari Setiap Kumpulan)</label>
-                            <select id="set-num-qualify" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm" onchange="updatePhaseIndicator()">
-                                <option value="2">2 Pasukan (Setiap Kump.)</option>
-                                <option value="4">4 Pasukan (Setiap Kump.)</option>
-                                <option value="8">8 Pasukan (Setiap Kump.)</option>
-                                <option value="16">16 Pasukan (Setiap Kump.)</option>
-                            </select>
+                        <div class="pt-2 space-y-3" id="setting-qualify-wrapper">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Pasukan Layak Ke Pusingan Seterusnya (Dari Setiap Kumpulan)</label>
+                                <select id="set-num-qualify" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm" onchange="updatePhaseIndicator()">
+                                    <option value="2">2 Pasukan (Setiap Kump.)</option>
+                                    <option value="4">4 Pasukan (Setiap Kump.)</option>
+                                    <option value="8">8 Pasukan (Setiap Kump.)</option>
+                                    <option value="16">16 Pasukan (Setiap Kump.)</option>
+                                </select>
+                            </div>
                             
-                            <label class="block text-sm font-semibold text-gray-700 mt-3 mb-1">Pilihan Jika Kuota Pasukan Tidak Genap (Bukan Kuasa 2)</label>
-                            <select id="set-qualify-method" onchange="updatePhaseIndicator()" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm">
-                                <option value="bye">Format Bye (Beri Bye kepada pasukan terbaik seperti biasa)</option>
-                                <option value="best_third">Pilih Tempat Ke-3 Terbaik Automatik (Mata > Beza Mata > Markah Terkumpul)</option>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Pilihan Jika Kuota Pasukan Tidak Genap (Bukan Kuasa 2)</label>
+                                <select id="set-qualify-method" onchange="updatePhaseIndicator()" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm">
+                                    <option value="bye">Format Bye (Beri Bye kepada pasukan terbaik seperti biasa)</option>
+                                    <option value="best_third">Pilih Tempat Ke-3 Terbaik Automatik (Mata > Beza Mata > Markah Terkumpul)</option>
+                                </select>
+                                <p id="phase-indicator" class="text-[11px] text-blue-600 mt-1 font-bold"></p>
+                            </div>
+                        </div>
+
+                        <!-- Pilihan Penentuan Tempat Ke-3 dan Ke-4 -->
+                        <div class="pt-2 border-t">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1"><i class="fa-solid fa-medal mr-1 text-amber-500"></i>Penentuan Tempat Ke-3 & Ke-4 (Selepas Separuh Akhir)</label>
+                            <select id="set-third-place-playoff" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm">
+                                <option value="joint">Tiada Perlawanan (Kedua-dua Pasukan Kalah Separuh Akhir adalah Pemenang Bersama Tempat Ke-3)</option>
+                                <option value="playoff">Buat Perlawanan Penentuan Tempat Ke-3 & Ke-4</option>
                             </select>
-                            <p id="phase-indicator" class="text-[11px] text-blue-600 mt-1.5 font-bold"></p>
+                        </div>
+
+                        <!-- Tetapan PIN 3-Layer (Super Admin & Pengadil) -->
+                        <div class="pt-3 border-t grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1"><i class="fa-solid fa-user-shield mr-1 text-teal-600"></i>Kod PIN Super Admin (Semua Menu)</label>
+                                <input type="text" id="set-admin-pin" placeholder="Lalai: 1234" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm font-mono">
+                                <p class="text-[10px] text-gray-400 mt-1">Boleh melihat kesemua menu sistem.</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1"><i class="fa-solid fa-gavel mr-1 text-indigo-600"></i>Kod PIN Pengadil (Awam & Skor)</label>
+                                <input type="text" id="set-umpire-pin" placeholder="Lalai: 2222" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 bg-white text-sm font-mono">
+                                <p class="text-[10px] text-gray-400 mt-1">Hanya melihat Paparan Awam & Pengadil Skor.</p>
+                            </div>
                         </div>
 
                         <div class="pt-3 border-t">
-                            <label class="block text-sm font-semibold text-gray-700 mb-1"><i class="fa-solid fa-key mr-1 text-amber-500"></i>Kod PIN Urusetia / Pengadil</label>
-                            <input type="text" id="set-admin-pin" placeholder="PIN Lalai: 1234" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm">
-                            <p class="text-[11px] text-gray-400 mt-1">Digunakan untuk membuka menu Pendaftaran, Pengadil dan Ketetapan.</p>
-                        </div>
-
-                        <div class="pt-4 border-t mt-4">
-                            <button type="submit" class="bg-teal-600 text-white px-6 py-2.5 rounded-lg hover:bg-teal-700 shadow transition w-full font-bold"><i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Ke Rekod Ketetapan</button>
+                            <button type="submit" class="bg-teal-600 text-white px-6 py-2.5 rounded-lg hover:bg-teal-700 shadow transition w-full font-bold text-sm"><i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Ke Rekod Ketetapan</button>
                         </div>
                     </form>
                 </div>
 
-                <div class="flex-1 md:border-l md:pl-6 mt-8 md:mt-0 flex flex-col h-full">
-                    <div class="border-b pb-3 mb-4 flex justify-between items-center">
-                        <div>
-                            <h2 class="font-bold text-gray-700 text-lg"><i class="fa-solid fa-clock-rotate-left mr-2 text-teal-600"></i>Rekod Ketetapan (Rujukan Sistem)</h2>
-                            <p class="text-xs text-gray-400">Sistem merujuk kepada rekod ketetapan di bawah.</p>
+                <!-- Kanan: Muat Turun Keputusan Penuh & Rekod Ketetapan -->
+                <div class="flex-1 lg:border-l lg:pl-6 mt-6 lg:mt-0 flex flex-col justify-between gap-6">
+                    
+                    <!-- Kotak Muat Turun Keputusan Penuh (Aktif Selepas Perlawanan Akhir Tamat) -->
+                    <div class="bg-gradient-to-br from-indigo-50 to-teal-50 border border-indigo-200 rounded-xl p-4 shadow-2xs">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-file-arrow-down text-indigo-600 text-base"></i> Muat Turun Keputusan Penuh Kejohanan
+                            </h3>
+                            <span id="export-status-badge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">Menunggu Akhir Tamat</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mb-3 leading-relaxed">
+                            Muat turun laporan lengkap keseluruhan perlawanan (Senarai Pemenang, Kedudukan Kumpulan, Keputusan Peringkat Kumpulan hingga Pusingan Akhir). Butang ini hanya akan aktif sebaik sahaja <strong>Pusingan Akhir</strong> tamat.
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <button type="button" id="btn-export-excel" onclick="downloadFullResultsExcel()" disabled class="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-lg text-xs font-bold shadow-xs transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-file-excel text-sm"></i> Muat Turun Excel (.xlsx)
+                            </button>
+                            <button type="button" id="btn-export-word" onclick="downloadFullResultsWord()" disabled class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-lg text-xs font-bold shadow-xs transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-file-word text-sm"></i> Muat Turun Word (.doc)
+                            </button>
                         </div>
                     </div>
-                    <div class="overflow-y-auto flex-1 max-h-[420px] border rounded-lg bg-gray-50">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-gray-200 text-gray-600 text-xs uppercase">
-                                <tr>
-                                    <th class="p-2.5">Masa</th>
-                                    <th class="p-2.5">Butiran Ketetapan (Aktif)</th>
-                                    <th class="p-2.5 text-center w-12">Tindakan</th>
-                                </tr>
-                            </thead>
-                            <tbody id="settings-history-body">
-                                <tr><td colspan="3" class="p-4 text-center text-gray-400">Tiada rekod ketetapan.</td></tr>
-                            </tbody>
-                        </table>
+
+                    <!-- Rekod Sejarah Ketetapan -->
+                    <div class="flex-1 flex flex-col">
+                        <div class="border-b pb-2 mb-3 flex justify-between items-center">
+                            <div>
+                                <h2 class="font-bold text-gray-700 text-base"><i class="fa-solid fa-clock-rotate-left mr-2 text-teal-600"></i>Rekod Ketetapan (Rujukan Sistem)</h2>
+                                <p class="text-xs text-gray-400">Sistem merujuk kepada rekod ketetapan di bawah.</p>
+                            </div>
+                        </div>
+                        <div class="overflow-y-auto flex-1 max-h-[340px] border rounded-lg bg-gray-50">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-200 text-gray-600 text-xs uppercase">
+                                    <tr>
+                                        <th class="p-2.5">Masa</th>
+                                        <th class="p-2.5">Butiran Ketetapan (Aktif)</th>
+                                        <th class="p-2.5 text-center w-12">Tindakan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="settings-history-body">
+                                    <tr><td colspan="3" class="p-4 text-center text-gray-400">Tiada rekod ketetapan.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+
                 </div>
 
             </div>
@@ -466,11 +514,11 @@
             </div>
 
             <p class="text-xs text-gray-600 mb-3 leading-relaxed">
-                Kongsikan pautan di bawah kepada para pemain dan penonton. Apabila mereka membuka pautan ini, mereka <strong>hanya akan melihat Paparan Awam</strong> (kedudukan kumpulan, carta kalah mati & keputusan langsung) tanpa boleh mengubah sebarang tetapan.
+                Kongsikan pautan di bawah kepada para pemain dan penonton. Apabila mereka membuka pautan ini, mereka <strong>terus melihat Paparan Awam sahaja</strong> (kedudukan kumpulan, carta kalah mati, keputusan langsung & poster pemenang).
             </p>
 
             <div class="bg-gray-50 border rounded-lg p-2.5 mb-4">
-                <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Pautan Paparan Awam Sahaja:</label>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Pautan Paparan Awam (Viewer):</label>
                 <div class="flex gap-2">
                     <input type="text" id="public-share-url" readonly class="flex-1 bg-white border rounded px-2.5 py-1.5 text-xs font-mono text-gray-700 focus:outline-none">
                     <button onclick="copyPublicLink()" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded text-xs font-bold transition whitespace-nowrap">
@@ -490,16 +538,16 @@
         </div>
     </div>
 
-    <!-- Modal Log Masuk PIN Urusetia / Pengadil -->
+    <!-- Modal Log Masuk PIN 3-Layer (Super Admin / Pengadil) -->
     <div id="admin-login-overlay" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center">
             <div class="w-12 h-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center mx-auto mb-3 text-xl">
-                <i class="fa-solid fa-user-shield"></i>
+                <i class="fa-solid fa-user-lock"></i>
             </div>
-            <h3 class="text-lg font-bold text-gray-800 mb-1">Akses Urusetia & Pengadil</h3>
-            <p class="text-xs text-gray-500 mb-4">Masukkan Kod PIN untuk membuka menu Pendaftaran, Pengadil dan Ketetapan.</p>
+            <h3 class="text-lg font-bold text-gray-800 mb-1">Log Masuk Sistem</h3>
+            <p class="text-xs text-gray-500 mb-4">Masukkan <strong>PIN Super Admin</strong> (semua menu) atau <strong>PIN Pengadil</strong> (Paparan Awam & Pengadil Skor sahaja).</p>
             <form onsubmit="verifyAdminPin(event)">
-                <input type="password" id="admin-pin-input" placeholder="Masukkan PIN (Lalai: 1234)" class="w-full text-center border rounded-lg px-4 py-2.5 text-lg font-bold tracking-widest mb-4 focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                <input type="password" id="admin-pin-input" placeholder="Masukkan Kod PIN" class="w-full text-center border rounded-lg px-4 py-2.5 text-lg font-bold tracking-widest mb-4 focus:outline-none focus:ring-2 focus:ring-teal-500" required>
                 <div class="flex gap-2">
                     <button type="button" onclick="closeAdminLoginModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 rounded-lg font-semibold text-sm transition">Batal</button>
                     <button type="submit" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg font-bold text-sm transition shadow">Masuk</button>
@@ -508,7 +556,7 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Modals Umum -->
     <div id="modal-overlay" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center transform scale-95 transition-transform duration-200">
             <div id="modal-icon" class="text-4xl mb-4"></div>
@@ -564,7 +612,6 @@
                 <button onclick="closeFirebaseSetupModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
 
-            <!-- Kotak Status Semasa -->
             <div id="fb-diagnostic-box" class="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 space-y-1">
                 <div class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-info"></i> Status Sambungan Semasa:</div>
                 <div id="fb-diagnostic-msg">Menyemak konfigurasi...</div>
@@ -628,12 +675,11 @@
         let app = null, db = null, auth = null, unsubscribeSnapshot = null;
         let lastCloudError = "";
 
-        // Semak sama ada pautan dibuka dengan parameter ?view=public atau di dalam mod Admin
+        // Sistem 3 Layer Akses: 'public' (Orang Awam), 'umpire' (Pengadil), 'superadmin' (Super Admin)
         const urlParams = new URLSearchParams(window.location.search);
         const isForcedPublicLink = urlParams.get('view') === 'public' || urlParams.get('mode') === 'public';
-        let isAdminAuthenticated = !isForcedPublicLink && sessionStorage.getItem('kpdnAdminAuth') === 'true';
+        let currentUserRole = isForcedPublicLink ? 'public' : (sessionStorage.getItem('kpdnUserRole') || 'public');
 
-        // Fungsi untuk mengekstrak objek JSON walaupun pengguna tampal kod JS "const firebaseConfig = {...}"
         function parseFirebaseConfigInput(rawStr) {
             if (!rawStr) return null;
             try {
@@ -656,24 +702,20 @@
         }
 
         function getActiveFirebaseConfig() {
-            // 1. Utamakan fail luaran firebase-config.js (window.FIREBASE_CONFIG atau window.firebaseConfig)
             if (typeof window.FIREBASE_CONFIG === 'object' && window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey) {
                 return window.FIREBASE_CONFIG;
             }
             if (typeof window.firebaseConfig === 'object' && window.firebaseConfig && window.firebaseConfig.apiKey) {
                 return window.firebaseConfig;
             }
-            // 2. Semak simpanan localStorage pada pelayar semasa
             const savedCustom = localStorage.getItem('customFirebaseConfigKPDN');
             if (savedCustom) {
                 const parsed = parseFirebaseConfigInput(savedCustom);
                 if (parsed && parsed.apiKey && parsed.projectId) return parsed;
             }
-            // 3. Semak pembolehubah MANUAL_FIREBASE_CONFIG di dalam fail ini
             if (MANUAL_FIREBASE_CONFIG.apiKey && !MANUAL_FIREBASE_CONFIG.apiKey.includes("MASUKKAN_")) {
                 return MANUAL_FIREBASE_CONFIG;
             }
-            // 4. Semak persekitaran kanvas
             if (typeof __firebase_config !== 'undefined') {
                 return JSON.parse(__firebase_config);
             }
@@ -715,7 +757,7 @@
         }
 
         window.handleCloudStatusClick = function() {
-            if (isAdminAuthenticated) {
+            if (currentUserRole === 'superadmin') {
                 window.openFirebaseSetupModal();
             } else {
                 showModal('Status Sambungan Langsung', 'Paparan ini disambungkan terus ke pangkalan data awan kejohanan. Markah dan kedudukan akan dikemas kini secara automatik.', 'info');
@@ -747,7 +789,7 @@
                         await signInAnonymously(auth);
                     }
                 } catch (authErr) {
-                    console.warn("Amaran Auth (Akan cuba akses Firestore secara terus):", authErr.message);
+                    console.warn("Amaran Auth:", authErr.message);
                 }
 
                 setupCloudListener();
@@ -764,15 +806,19 @@
             matches: [],
             activeMatchId: null,
             groupClauseCollapsed: false,
+            collapsedKnockoutPhases: {},
             settingsHistory: [],
             settings: {
+                tournamentName: 'Badminton KPDN P.Pinang',
                 peringkat: 'Peringkat Kumpulan',
                 format: 'Round Robin',
                 maxScore: '',
                 numGroups: '2',
                 numQualify: '2',
                 qualifyMethod: 'bye',
-                adminPin: '1234'
+                thirdPlacePlayoff: 'joint', // 'joint' (Pemenang Bersama) atau 'playoff' (Perlawanan Penentuan)
+                adminPin: '1234',
+                umpirePin: '2222'
             }
         };
 
@@ -781,6 +827,16 @@
 
         function getTournamentDocRef() {
             return doc(db, 'artifacts', appId, 'public', 'data', 'kpdn_state', 'main');
+        }
+
+        function ensureDefaultSettings() {
+            if (!window.state.settings) window.state.settings = {};
+            if (!window.state.settings.tournamentName) window.state.settings.tournamentName = 'Badminton KPDN P.Pinang';
+            if (!window.state.settings.adminPin) window.state.settings.adminPin = '1234';
+            if (!window.state.settings.umpirePin) window.state.settings.umpirePin = '2222';
+            if (!window.state.settings.thirdPlacePlayoff) window.state.settings.thirdPlacePlayoff = 'joint';
+            if (!window.state.collapsedKnockoutPhases) window.state.collapsedKnockoutPhases = {};
+            if (!window.state.settingsHistory) window.state.settingsHistory = [];
         }
 
         function setupCloudListener() {
@@ -795,8 +851,7 @@
                         try {
                             const parsed = JSON.parse(cloudData.statePayload);
                             window.state = { ...window.state, ...parsed };
-                            if (!window.state.settingsHistory) window.state.settingsHistory = [];
-                            if (!window.state.settings.adminPin) window.state.settings.adminPin = '1234';
+                            ensureDefaultSettings();
                             localStorage.setItem('badmintonKPDNState', JSON.stringify(window.state));
                             updateCloudIndicator('synced', 'Langsung (Live)');
                             renderAll();
@@ -805,7 +860,7 @@
                         }
                     }
                 } else {
-                    if (isAdminAuthenticated) saveDataToCloud(true);
+                    if (currentUserRole !== 'public') saveDataToCloud(true);
                 }
             }, (error) => {
                 console.warn("Cloud listener error:", error);
@@ -818,6 +873,7 @@
         }
 
         async function saveDataToCloud(isInitial = false) {
+            ensureDefaultSettings();
             localStorage.setItem('badmintonKPDNState', JSON.stringify(window.state));
             renderAll();
 
@@ -848,42 +904,94 @@
             saveDataToCloud(false);
         };
 
-        // --- Kawalan Mod Penonton (Awam) vs Mod Urusetia (Admin) ---
+        // --- Kawalan 3 Layer Akses: Public (Awam) vs Umpire (Pengadil) vs Super Admin ---
         function applyAccessControlUI() {
+            ensureDefaultSettings();
             const navTabs = document.getElementById('main-nav-tabs');
+            const tabPublic = document.getElementById('tab-public');
+            const tabAdmin = document.getElementById('tab-admin');
+            const tabUmpire = document.getElementById('tab-umpire');
+            const tabSettings = document.getElementById('tab-settings');
+
             const btnCloud = document.getElementById('btn-cloud-setup');
             const btnReset = document.getElementById('btn-reset-system');
             const lockIcon = document.getElementById('admin-lock-icon');
             const lockText = document.getElementById('admin-lock-text');
             const roleBadge = document.getElementById('role-badge');
             const adminBanner = document.getElementById('admin-link-banner');
-            const pinInputSetting = document.getElementById('set-admin-pin');
 
-            if (pinInputSetting && window.state.settings.adminPin) {
-                pinInputSetting.value = window.state.settings.adminPin;
-            }
+            // Kemas kini Tajuk Utama Kejohanan
+            const titleEl = document.getElementById('main-tournament-title');
+            const tName = window.state.settings.tournamentName || 'Badminton KPDN P.Pinang';
+            if (titleEl) titleEl.innerText = tName;
+            document.title = tName;
 
-            if (isAdminAuthenticated) {
+            // Isi nilai dalam borang Ketetapan jika tidak sedang ditaip
+            const pinAdminInput = document.getElementById('set-admin-pin');
+            const pinUmpireInput = document.getElementById('set-umpire-pin');
+            const tNameInput = document.getElementById('set-tournament-name');
+            const thirdPlaceSelect = document.getElementById('set-third-place-playoff');
+
+            if (pinAdminInput && document.activeElement !== pinAdminInput) pinAdminInput.value = window.state.settings.adminPin || '1234';
+            if (pinUmpireInput && document.activeElement !== pinUmpireInput) pinUmpireInput.value = window.state.settings.umpirePin || '2222';
+            if (tNameInput && document.activeElement !== tNameInput && !tNameInput.value) tNameInput.value = tName;
+            if (thirdPlaceSelect && document.activeElement !== thirdPlaceSelect) thirdPlaceSelect.value = window.state.settings.thirdPlacePlayoff || 'joint';
+
+            if (currentUserRole === 'superadmin') {
+                // Layer 1: Super Admin (Semua Menu)
                 navTabs?.classList.remove('hidden');
+                tabPublic?.classList.remove('hidden');
+                tabAdmin?.classList.remove('hidden');
+                tabUmpire?.classList.remove('hidden');
+                tabSettings?.classList.remove('hidden');
+
                 btnCloud?.classList.remove('hidden');
                 btnReset?.classList.remove('hidden');
                 adminBanner?.classList.remove('hidden');
-                if (lockIcon) lockIcon.className = 'fa-solid fa-lock-open text-amber-300';
-                if (lockText) lockText.innerText = 'Mod Penonton';
+
+                if (lockIcon) lockIcon.className = 'fa-solid fa-user-shield text-amber-300';
+                if (lockText) lockText.innerText = 'Log Keluar';
                 if (roleBadge) {
-                    roleBadge.className = 'bg-amber-500/90 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-2xs';
-                    roleBadge.innerHTML = '<i class="fa-solid fa-user-gear mr-1"></i>Mod Urusetia / Pengadil';
+                    roleBadge.className = 'bg-amber-500 text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-2xs';
+                    roleBadge.innerHTML = '<i class="fa-solid fa-crown mr-1"></i>Super Admin';
+                }
+            } else if (currentUserRole === 'umpire') {
+                // Layer 2: Pengadil (Hanya Paparan Awam & Pengadil Skor)
+                navTabs?.classList.remove('hidden');
+                tabPublic?.classList.remove('hidden');
+                tabUmpire?.classList.remove('hidden');
+                tabAdmin?.classList.add('hidden');
+                tabSettings?.classList.add('hidden');
+
+                btnCloud?.classList.add('hidden');
+                btnReset?.classList.add('hidden');
+                adminBanner?.classList.add('hidden');
+
+                if (lockIcon) lockIcon.className = 'fa-solid fa-gavel text-indigo-200';
+                if (lockText) lockText.innerText = 'Log Keluar';
+                if (roleBadge) {
+                    roleBadge.className = 'bg-indigo-600 text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-2xs';
+                    roleBadge.innerHTML = '<i class="fa-solid fa-whistle mr-1"></i>Mod Pengadil';
+                }
+
+                // Jika sedang berada di tab terlarang, alihkan ke tab Pengadil atau Awam
+                const activeAdminView = !document.getElementById('view-admin')?.classList.contains('hidden');
+                const activeSettingsView = !document.getElementById('view-settings')?.classList.contains('hidden');
+                if (activeAdminView || activeSettingsView) {
+                    window.switchTab('umpire');
                 }
             } else {
+                // Layer 3: Orang Awam / Viewer (Hanya Paparan Awam)
                 navTabs?.classList.add('hidden');
                 btnCloud?.classList.add('hidden');
                 btnReset?.classList.add('hidden');
                 adminBanner?.classList.add('hidden');
+
                 if (lockIcon) lockIcon.className = 'fa-solid fa-lock';
-                if (lockText) lockText.innerText = 'Urusetia';
+                if (lockText) lockText.innerText = 'Log Masuk';
                 if (roleBadge) {
                     roleBadge.className = 'bg-teal-900/60 text-teal-100 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-teal-400/30';
-                    roleBadge.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Paparan Awam (Langsung)';
+                    roleBadge.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Paparan Awam (Viewer)';
                 }
                 document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
                 document.getElementById('view-public')?.classList.remove('hidden');
@@ -891,11 +999,11 @@
         }
 
         window.toggleAdminAuth = function() {
-            if (isAdminAuthenticated) {
-                isAdminAuthenticated = false;
-                sessionStorage.removeItem('kpdnAdminAuth');
+            if (currentUserRole !== 'public') {
+                currentUserRole = 'public';
+                sessionStorage.removeItem('kpdnUserRole');
                 applyAccessControlUI();
-                showModal('Mod Penonton Aktif', 'Anda kini melihat paparan seperti yang dilihat oleh pemain dan penonton awam.', 'info');
+                showModal('Mod Penonton (Awam) Aktif', 'Anda telah log keluar dan kini melihat Paparan Awam sahaja.', 'info');
             } else {
                 const overlay = document.getElementById('admin-login-overlay');
                 const input = document.getElementById('admin-pin-input');
@@ -915,16 +1023,24 @@
         window.verifyAdminPin = function(e) {
             e.preventDefault();
             const entered = document.getElementById('admin-pin-input').value.trim();
-            const correctPin = (window.state.settings && window.state.settings.adminPin) ? String(window.state.settings.adminPin) : '1234';
+            const superAdminPin = (window.state.settings && window.state.settings.adminPin) ? String(window.state.settings.adminPin) : '1234';
+            const umpirePin = (window.state.settings && window.state.settings.umpirePin) ? String(window.state.settings.umpirePin) : '2222';
 
-            if (entered === correctPin) {
-                isAdminAuthenticated = true;
-                sessionStorage.setItem('kpdnAdminAuth', 'true');
+            if (entered === superAdminPin) {
+                currentUserRole = 'superadmin';
+                sessionStorage.setItem('kpdnUserRole', 'superadmin');
                 closeAdminLoginModal();
                 applyAccessControlUI();
-                showModal('Akses Dibenarkan', 'Selamat datang ke Mod Urusetia & Pengadil.', 'success');
+                showModal('Akses Super Admin Dibenarkan', 'Selamat datang! Kesemua menu Pendaftaran, Pengadil dan Ketetapan kini dibuka.', 'success');
+            } else if (entered === umpirePin) {
+                currentUserRole = 'umpire';
+                sessionStorage.setItem('kpdnUserRole', 'umpire');
+                closeAdminLoginModal();
+                applyAccessControlUI();
+                window.switchTab('umpire');
+                showModal('Akses Pengadil Dibenarkan', 'Selamat bertugas! Anda boleh mengakses Paparan Awam dan Pengadil / Skor.', 'success');
             } else {
-                showModal('PIN Tidak Sah', 'Kod PIN yang dimasukkan salah. Sila cuba lagi.', 'error');
+                showModal('PIN Tidak Sah', 'Kod PIN yang dimasukkan salah. Sila masukkan PIN Super Admin atau PIN Pengadil yang betul.', 'error');
             }
         };
 
@@ -964,12 +1080,13 @@
 
         window.shareToWhatsApp = function() {
             const url = window.getPublicShareUrl();
-            const text = `🏸 *KEPUTUSAN & JADUAL LANGSUNG KEJOHANAN BADMINTON TERTUTUP KPDN PULAU PINANG*\n\nSila klik pautan di bawah untuk melihat kedudukan kumpulan, carta kalah mati dan keputusan perlawanan secara langsung:\n👉 ${url}`;
+            const tName = window.state.settings.tournamentName || 'Kejohanan Badminton KPDN Pulau Pinang';
+            const text = `🏸 *KEPUTUSAN & JADUAL LANGSUNG: ${tName.toUpperCase()}*\n\nSila klik pautan di bawah untuk melihat kedudukan kumpulan, carta kalah mati dan keputusan perlawanan secara langsung:\n👉 ${url}`;
             const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
             window.open(waUrl, '_blank');
         };
 
-        // --- Fungsi Modal Tetapan Firebase & Muat Turun Fail firebase-config.js ---
+        // --- Fungsi Modal Tetapan Firebase ---
         window.openFirebaseSetupModal = function() {
             const overlay = document.getElementById('firebase-setup-overlay');
             const input = document.getElementById('fb-config-input');
@@ -1031,8 +1148,12 @@
         };
 
         window.switchTab = function(tabId) {
-            if (!isAdminAuthenticated && tabId !== 'public') {
+            if (currentUserRole === 'public' && tabId !== 'public') {
                 window.toggleAdminAuth();
+                return;
+            }
+            if (currentUserRole === 'umpire' && (tabId === 'admin' || tabId === 'settings')) {
+                showModal('Akses Terhad', 'Menu ini hanya untuk Super Admin.', 'error');
                 return;
             }
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
@@ -1048,12 +1169,24 @@
 
         window.toggleGroupClauseManual = function(e) {
             const detailsEl = document.getElementById('public-group-clause');
-            if (detailsEl && isAdminAuthenticated) {
+            if (detailsEl && currentUserRole === 'superadmin') {
                 setTimeout(() => {
                     window.state.groupClauseCollapsed = !detailsEl.hasAttribute('open');
                     window.saveData();
                 }, 0);
             }
+        };
+
+        window.toggleKnockoutPhaseClause = function(phaseName, detailsEl) {
+            if (!window.state.collapsedKnockoutPhases) window.state.collapsedKnockoutPhases = {};
+            setTimeout(() => {
+                window.state.collapsedKnockoutPhases[phaseName] = !detailsEl.hasAttribute('open');
+                if (currentUserRole === 'superadmin') {
+                    window.saveData();
+                } else {
+                    localStorage.setItem('badmintonKPDNState', JSON.stringify(window.state));
+                }
+            }, 0);
         };
 
         window.showModal = function(title, message, type = 'info') {
@@ -1164,10 +1297,11 @@
         };
 
         window.getQualifyMethod = function() {
-            if (window.state.settings && window.state.settings.qualifyMethod) {
-                return window.state.settings.qualifyMethod;
-            }
-            return 'bye';
+            return (window.state.settings && window.state.settings.qualifyMethod) ? window.state.settings.qualifyMethod : 'bye';
+        };
+
+        window.getThirdPlaceOption = function() {
+            return (window.state.settings && window.state.settings.thirdPlacePlayoff) ? window.state.settings.thirdPlacePlayoff : 'joint';
         };
 
         window.getTargetBracketSize = function(count) {
@@ -1181,6 +1315,13 @@
         window.changeQuickQualifyMethod = function(val) {
             window.state.settings.qualifyMethod = val;
             const setSelect = document.getElementById('set-qualify-method');
+            if (setSelect) setSelect.value = val;
+            window.saveData();
+        };
+
+        window.changeQuickThirdPlaceOption = function(val) {
+            window.state.settings.thirdPlacePlayoff = val;
+            const setSelect = document.getElementById('set-third-place-playoff');
             if (setSelect) setSelect.value = val;
             window.saveData();
         };
@@ -1211,19 +1352,27 @@
 
         window.saveSettingsForm = function(e) {
             e.preventDefault();
+            const tournamentName = document.getElementById('set-tournament-name').value.trim() || 'Badminton KPDN P.Pinang';
             const peringkat = document.getElementById('set-peringkat').value.trim() || 'Peringkat Kumpulan';
             const format = document.getElementById('set-format').value.trim() || 'Round Robin';
             const maxScore = document.getElementById('set-max-score').value.trim();
             const numQualify = document.getElementById('set-num-qualify').value.trim() || '2';
             const qualifyMethodEl = document.getElementById('set-qualify-method');
             const qualifyMethod = qualifyMethodEl ? qualifyMethodEl.value : 'bye';
-            const newPinEl = document.getElementById('set-admin-pin');
-            const newPin = newPinEl && newPinEl.value.trim() ? newPinEl.value.trim() : '1234';
+            const thirdPlaceEl = document.getElementById('set-third-place-playoff');
+            const thirdPlacePlayoff = thirdPlaceEl ? thirdPlaceEl.value : 'joint';
 
+            const newAdminPin = document.getElementById('set-admin-pin')?.value.trim() || '1234';
+            const newUmpirePin = document.getElementById('set-umpire-pin')?.value.trim() || '2222';
+
+            window.state.settings.tournamentName = tournamentName;
             window.state.settings.peringkat = peringkat;
             window.state.settings.format = format;
             window.state.settings.maxScore = maxScore;
-            window.state.settings.adminPin = newPin;
+            window.state.settings.thirdPlacePlayoff = thirdPlacePlayoff;
+            window.state.settings.adminPin = newAdminPin;
+            window.state.settings.umpirePin = newUmpirePin;
+
             if (peringkat === 'Peringkat Kumpulan') {
                 window.state.settings.numQualify = numQualify;
                 window.state.settings.qualifyMethod = qualifyMethod;
@@ -1234,6 +1383,7 @@
             const dateStr = date.toLocaleDateString('ms-MY');
             
             const methodText = qualifyMethod === 'best_third' ? 'Tempat Ke-3 Terbaik' : 'Format Bye';
+            const thirdPlaceText = thirdPlacePlayoff === 'playoff' ? 'Perlawanan Ke-3/4' : 'Ke-3 Bersama';
             const qualifyInfo = peringkat === 'Peringkat Kumpulan' ? ` | Layak: Top ${numQualify} (${methodText})` : '';
             const maxScoreInfo = maxScore ? ` | Mata Maks: ${maxScore}` : ' | Mata: Bebas';
 
@@ -1245,16 +1395,13 @@
                 maxScore: maxScore,
                 numQualify: peringkat === 'Peringkat Kumpulan' ? numQualify : window.state.settings.numQualify,
                 qualifyMethod: peringkat === 'Peringkat Kumpulan' ? qualifyMethod : window.state.settings.qualifyMethod,
-                details: `${peringkat} (${format})${maxScoreInfo}${qualifyInfo}`
+                thirdPlacePlayoff: thirdPlacePlayoff,
+                details: `[${tournamentName}] ${peringkat} (${format})${maxScoreInfo}${qualifyInfo} | ${thirdPlaceText}`
             });
-
-            document.getElementById('set-peringkat').value = '';
-            document.getElementById('set-format').value = '';
-            document.getElementById('set-max-score').value = '';
 
             window.saveData();
             window.handlePhaseSettings();
-            showModal('Rekod Ketetapan Disimpan', 'Maklumat ketetapan & PIN sistem telah disimpan.', 'success');
+            showModal('Rekod Ketetapan Disimpan', 'Nama kejohanan, ketetapan perlawanan & PIN sistem telah dikemas kini.', 'success');
         };
 
         window.handlePhaseSettings = function() {
@@ -1347,6 +1494,56 @@
                 return b.pf - a.pf;
             });
             return arr;
+        };
+
+        // --- Semak Status Tamat Kejohanan & Senarai Pemenang Rasmi ---
+        window.getTournamentWinnersSummary = function() {
+            const finalMatches = window.state.matches.filter(m => m.group === 'Pusingan Akhir');
+            if (finalMatches.length === 0) return { isFinished: false };
+
+            const finalMatch = finalMatches[finalMatches.length - 1];
+            if (finalMatch.status !== 'completed') return { isFinished: false };
+
+            // Jika wujud perlawanan Penentuan Tempat Ke-3 & Ke-4, pastikan ia juga selesai
+            const thirdPlaceMatches = window.state.matches.filter(m => m.group === 'Penentuan Tempat Ke-3 & Ke-4');
+            if (thirdPlaceMatches.length > 0 && thirdPlaceMatches.some(m => m.status !== 'completed')) {
+                return { isFinished: false };
+            }
+
+            const champion = finalMatch.score1 >= finalMatch.score2 ? finalMatch.team1 : finalMatch.team2;
+            const runnerUp = finalMatch.score1 >= finalMatch.score2 ? finalMatch.team2 : finalMatch.team1;
+
+            let thirdPlace = [];
+            let fourthPlace = null;
+            let isJointThird = true;
+
+            if (thirdPlaceMatches.length > 0) {
+                const tpMatch = thirdPlaceMatches[thirdPlaceMatches.length - 1];
+                const tpWinner = tpMatch.score1 >= tpMatch.score2 ? tpMatch.team1 : tpMatch.team2;
+                const tpLoser = tpMatch.score1 >= tpMatch.score2 ? tpMatch.team2 : tpMatch.team1;
+                thirdPlace = [tpWinner];
+                fourthPlace = tpLoser;
+                isJointThird = false;
+            } else {
+                // Ambil pasukan yang kalah di Separuh Akhir sebagai Pemenang Bersama Tempat Ke-3
+                const semiMatches = window.state.matches.filter(m => m.group === 'Separuh Akhir' && m.status === 'completed');
+                semiMatches.forEach(sm => {
+                    const loser = sm.score1 >= sm.score2 ? sm.team2 : sm.team1;
+                    if (loser && loser.id !== 'bye') thirdPlace.push(loser);
+                });
+                isJointThird = true;
+            }
+
+            return {
+                isFinished: true,
+                champion,
+                runnerUp,
+                thirdPlace,
+                fourthPlace,
+                isJointThird,
+                finalMatch,
+                thirdPlaceMatch: thirdPlaceMatches.length > 0 ? thirdPlaceMatches[thirdPlaceMatches.length - 1] : null
+            };
         };
 
         // --- Registration & Excel Bundle ---
@@ -1463,6 +1660,7 @@
                 }
                 window.state.matches = [];
                 window.state.groupClauseCollapsed = false;
+                window.state.collapsedKnockoutPhases = {};
                 window.saveData();
                 showModal('Kumpulan Disediakan', `${numGroups} kumpulan telah diwujudkan.`, 'success');
             };
@@ -1556,6 +1754,7 @@
             const buildSchedule = () => {
                 window.state.matches = [];
                 window.state.groupClauseCollapsed = false;
+                window.state.collapsedKnockoutPhases = {};
                 window.state.settings.peringkat = 'Peringkat Kumpulan';
                 let allGroupMatches = [];
 
@@ -1612,15 +1811,17 @@
             }
         };
 
-        // --- Next Round Generation ---
+        // --- Next Round Generation (Termasuk Pilihan Penentuan Tempat Ke-3 & Ke-4) ---
         window.generateNextRound = function() {
             let qualifiedTeams = [];
+            let losingSemiTeams = [];
             let nextPhaseName = '';
             
             const groupKeys = Object.keys(window.state.groups).sort();
             const knockoutMatches = window.state.matches.filter(m => !groupKeys.includes(m.group));
             const pullingFromGroups = knockoutMatches.length === 0;
             const qualifyMethod = window.getQualifyMethod();
+            const thirdPlaceOption = window.getThirdPlaceOption();
 
             if (pullingFromGroups) {
                 const numQualifyPerGroup = window.getQualifyCountPerGroup();
@@ -1690,13 +1891,18 @@
                 else nextPhaseName = `Kalah Mati (${qualifiedTeams.length} Pasukan)`;
                 
             } else {
-                const phases = [...new Set(knockoutMatches.map(m => m.group))];
+                const phases = [...new Set(knockoutMatches.map(m => m.group))].filter(p => p !== 'Penentuan Tempat Ke-3 & Ke-4');
                 const lastPhase = phases[phases.length - 1]; 
                 const currentMatches = knockoutMatches.filter(m => m.group === lastPhase);
                 
                 currentMatches.forEach(m => {
-                    if (m.score1 >= m.score2) qualifiedTeams.push(m.team1);
-                    else qualifiedTeams.push(m.team2);
+                    if (m.score1 >= m.score2) {
+                        qualifiedTeams.push(m.team1);
+                        if (m.team2 && m.team2.id !== 'bye') losingSemiTeams.push(m.team2);
+                    } else {
+                        qualifiedTeams.push(m.team2);
+                        if (m.team1 && m.team1.id !== 'bye') losingSemiTeams.push(m.team1);
+                    }
                 });
                 
                 const t = qualifiedTeams.length;
@@ -1711,9 +1917,29 @@
                 else if (bracketSize === 4) nextPhaseName = 'Separuh Akhir';
                 else if (bracketSize === 2) nextPhaseName = 'Pusingan Akhir';
                 else nextPhaseName = `Kalah Mati (${t} Pasukan)`;
+
+                // Lipatkan fasa sebelum ini supaya fasa baharu lebih menonjol tetapi fasa lama masih boleh dibuka
+                if (!window.state.collapsedKnockoutPhases) window.state.collapsedKnockoutPhases = {};
+                window.state.collapsedKnockoutPhases[lastPhase] = true;
             }
 
             let newMatchesCreated = 0;
+
+            // Jika melangkah ke Pusingan Akhir dan pilihan Penentuan Tempat Ke-3 & Ke-4 diaktifkan
+            if (nextPhaseName === 'Pusingan Akhir' && thirdPlaceOption === 'playoff' && losingSemiTeams.length >= 2) {
+                window.state.matches.push({
+                    id: window.generateId(),
+                    group: 'Penentuan Tempat Ke-3 & Ke-4',
+                    team1: losingSemiTeams[0],
+                    team2: losingSemiTeams[1],
+                    score1: 0,
+                    score2: 0,
+                    status: 'pending'
+                });
+                window.state.collapsedKnockoutPhases['Penentuan Tempat Ke-3 & Ke-4'] = false;
+                newMatchesCreated++;
+            }
+
             const totalTeams = qualifiedTeams.length;
             const targetBracket = window.getTargetBracketSize(totalTeams);
             const numByes = targetBracket - totalTeams;
@@ -1765,6 +1991,8 @@
             }
 
             window.state.groupClauseCollapsed = true;
+            if (!window.state.collapsedKnockoutPhases) window.state.collapsedKnockoutPhases = {};
+            window.state.collapsedKnockoutPhases[nextPhaseName] = false;
             window.state.settings.peringkat = nextPhaseName;
 
             const date = new Date();
@@ -1781,7 +2009,7 @@
 
             window.saveData();
             window.handlePhaseSettings();
-            showModal('Jadual Kalah Mati Dijana!', `Sebanyak ${newMatchesCreated} perlawanan bagi "${nextPhaseName}" telah dijana.`, 'success');
+            showModal('Jadual Kalah Mati Dijana!', `Sebanyak ${newMatchesCreated} perlawanan telah dijana untuk fasa seterusnya.`, 'success');
         };
 
         // --- Audio Umpire ---
@@ -1864,7 +2092,11 @@
         };
 
         window.resetData = function() {
+            if (currentUserRole !== 'superadmin') return;
             showConfirm('Reset Sistem', 'Adakah anda pasti untuk memadam semua data kejohanan?', () => {
+                const savedTName = window.state.settings?.tournamentName || 'Badminton KPDN P.Pinang';
+                const savedAdminPin = window.state.settings?.adminPin || '1234';
+                const savedUmpirePin = window.state.settings?.umpirePin || '2222';
                 localStorage.removeItem('badmintonKPDNState');
                 window.state = {
                     teams: [],
@@ -1872,12 +2104,223 @@
                     matches: [],
                     activeMatchId: null,
                     groupClauseCollapsed: false,
+                    collapsedKnockoutPhases: {},
                     settingsHistory: [],
-                    settings: { peringkat: 'Peringkat Kumpulan', format: 'Round Robin', maxScore: '', numGroups: '2', numQualify: '2', qualifyMethod: 'bye', adminPin: '1234' }
+                    settings: {
+                        tournamentName: savedTName,
+                        peringkat: 'Peringkat Kumpulan',
+                        format: 'Round Robin',
+                        maxScore: '',
+                        numGroups: '2',
+                        numQualify: '2',
+                        qualifyMethod: 'bye',
+                        thirdPlacePlayoff: 'joint',
+                        adminPin: savedAdminPin,
+                        umpirePin: savedUmpirePin
+                    }
                 };
                 window.saveData();
                 showModal('Set Semula', 'Sistem telah dikosongkan.', 'success');
             });
+        };
+
+        // --- Muat Turun Keputusan Penuh Kejohanan (Excel & Word) ---
+        window.downloadFullResultsExcel = function() {
+            const summary = window.getTournamentWinnersSummary();
+            if (!summary.isFinished) {
+                showModal('Belum Tamat', 'Muat turun keputusan penuh hanya dibenarkan selepas perlawanan Pusingan Akhir selesai.', 'error');
+                return;
+            }
+
+            if (typeof XLSX === 'undefined') {
+                showModal('Ralat', 'Pustaka Excel sedang dimuatkan. Sila cuba sebentar lagi.', 'error');
+                return;
+            }
+
+            const tName = window.state.settings.tournamentName || 'Kejohanan Badminton KPDN Pulau Pinang';
+            const wb = XLSX.utils.book_new();
+
+            // Sheet 1: Ringkasan Pemenang & Kedudukan Kumpulan
+            const winnerRows = [
+                [tName.toUpperCase()],
+                ["KEPUTUSAN RASMI KEJOHANAN"],
+                [],
+                ["KEDUDUKAN", "NAMA REGU / PASUKAN"],
+                ["JOHAN (TEMPAT PERTAMA)", summary.champion.name],
+                ["NAIB JOHAN (TEMPAT KEDUA)", summary.runnerUp.name]
+            ];
+
+            if (summary.isJointThird) {
+                const thirdNames = summary.thirdPlace.map(t => t.name).join(" & ");
+                winnerRows.push(["TEMPAT KETIGA BERSAMA", thirdNames || "-"]);
+            } else {
+                winnerRows.push(["TEMPAT KETIGA", summary.thirdPlace[0]?.name || "-"]);
+                winnerRows.push(["TEMPAT KEEMPAT", summary.fourthPlace?.name || "-"]);
+            }
+
+            winnerRows.push([]);
+            winnerRows.push(["KEDUDUKAN PERINGKAT KUMPULAN"]);
+
+            const groupKeys = Object.keys(window.state.groups).sort();
+            groupKeys.forEach(g => {
+                winnerRows.push([]);
+                winnerRows.push([`KUMPULAN ${g}`]);
+                winnerRows.push(["Kedudukan", "Nama Regu", "Main (P)", "Menang (M)", "Kalah (K)", "Skor Masuk", "Skor Bolos", "Beza (+/-)", "Mata (PTS)"]);
+                const st = window.calculateStandings(g);
+                st.forEach((item, idx) => {
+                    winnerRows.push([idx + 1, item.name, item.p, item.w, item.l, item.pf, item.pa, item.diff, item.pts]);
+                });
+            });
+
+            const wsSummary = XLSX.utils.aoa_to_sheet(winnerRows);
+            wsSummary['!cols'] = [{ wch: 28 }, { wch: 35 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }];
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Pemenang_&_Kumpulan");
+
+            // Sheet 2: Semua Keputusan Perlawanan (Dari Mula Hingga Akhir)
+            const matchRows = [
+                [tName.toUpperCase()],
+                ["SENARAI KEPUTUSAN KESELURUHAN PERLAWANAN (DARI MULA HINGGA TAMAT)"],
+                [],
+                ["Bil", "ID Perlawanan", "Peringkat / Kumpulan", "Regu 1", "Markah Regu 1", "Markah Regu 2", "Regu 2", "Pemenang", "Status"]
+            ];
+
+            window.state.matches.forEach((m, index) => {
+                const isGroup = groupKeys.includes(m.group);
+                const phaseLabel = isGroup ? `Kumpulan ${m.group}` : m.group;
+                let winnerName = "-";
+                if (m.status === 'completed') {
+                    winnerName = m.score1 > m.score2 ? m.team1.name : (m.score2 > m.score1 ? m.team2.name : "Seri");
+                }
+                matchRows.push([
+                    index + 1,
+                    `#${m.id.substring(0, 4)}`,
+                    phaseLabel,
+                    m.team1.name,
+                    m.score1,
+                    m.score2,
+                    m.team2.name,
+                    winnerName,
+                    m.status === 'completed' ? 'Selesai' : m.status
+                ]);
+            });
+
+            const wsMatches = XLSX.utils.aoa_to_sheet(matchRows);
+            wsMatches['!cols'] = [{ wch: 6 }, { wch: 14 }, { wch: 28 }, { wch: 28 }, { wch: 15 }, { wch: 15 }, { wch: 28 }, { wch: 28 }, { wch: 12 }];
+            XLSX.utils.book_append_sheet(wb, wsMatches, "Semua_Perlawanan");
+
+            const safeFilename = tName.replace(/[^a-zA-Z0-9]/g, '_');
+            XLSX.writeFile(wb, `Keputusan_Penuh_${safeFilename}.xlsx`);
+        };
+
+        window.downloadFullResultsWord = function() {
+            const summary = window.getTournamentWinnersSummary();
+            if (!summary.isFinished) {
+                showModal('Belum Tamat', 'Muat turun keputusan penuh hanya dibenarkan selepas perlawanan Pusingan Akhir selesai.', 'error');
+                return;
+            }
+
+            const tName = window.state.settings.tournamentName || 'Kejohanan Badminton KPDN Pulau Pinang';
+            const groupKeys = Object.keys(window.state.groups).sort();
+            const thirdRowHtml = summary.isJointThird
+                ? `<tr><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">TEMPAT KETIGA BERSAMA</td><td style="padding:8px;border:1px solid #ccc;">${summary.thirdPlace.map(t => t.name).join(' &amp; ') || '-'}</td></tr>`
+                : `<tr><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">TEMPAT KETIGA</td><td style="padding:8px;border:1px solid #ccc;">${summary.thirdPlace[0]?.name || '-'}</td></tr>
+                   <tr><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">TEMPAT KEEMPAT</td><td style="padding:8px;border:1px solid #ccc;">${summary.fourthPlace?.name || '-'}</td></tr>`;
+
+            let groupsHtml = '';
+            groupKeys.forEach(g => {
+                const st = window.calculateStandings(g);
+                groupsHtml += `
+                    <h3 style="color:#0f766e;margin-top:18px;">Kumpulan ${g}</h3>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px;">
+                        <thead>
+                            <tr style="background-color:#f3f4f6;">
+                                <th style="padding:6px;border:1px solid #ccc;">Ked</th>
+                                <th style="padding:6px;border:1px solid #ccc;text-align:left;">Nama Regu</th>
+                                <th style="padding:6px;border:1px solid #ccc;">P</th>
+                                <th style="padding:6px;border:1px solid #ccc;">M</th>
+                                <th style="padding:6px;border:1px solid #ccc;">K</th>
+                                <th style="padding:6px;border:1px solid #ccc;">+/-</th>
+                                <th style="padding:6px;border:1px solid #ccc;">PTS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${st.map((item, idx) => `
+                                <tr>
+                                    <td style="padding:6px;border:1px solid #ccc;text-align:center;">${idx + 1}</td>
+                                    <td style="padding:6px;border:1px solid #ccc;">${item.name}</td>
+                                    <td style="padding:6px;border:1px solid #ccc;text-align:center;">${item.p}</td>
+                                    <td style="padding:6px;border:1px solid #ccc;text-align:center;">${item.w}</td>
+                                    <td style="padding:6px;border:1px solid #ccc;text-align:center;">${item.l}</td>
+                                    <td style="padding:6px;border:1px solid #ccc;text-align:center;">${item.diff > 0 ? '+' + item.diff : item.diff}</td>
+                                    <td style="padding:6px;border:1px solid #ccc;text-align:center;font-weight:bold;">${item.pts}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            });
+
+            let matchesHtml = window.state.matches.map((m, idx) => {
+                const isGroup = groupKeys.includes(m.group);
+                const phaseLabel = isGroup ? `Kumpulan ${m.group}` : m.group;
+                const winnerName = m.score1 > m.score2 ? m.team1.name : (m.score2 > m.score1 ? m.team2.name : 'Seri');
+                return `
+                    <tr>
+                        <td style="padding:6px;border:1px solid #ccc;text-align:center;">${idx + 1}</td>
+                        <td style="padding:6px;border:1px solid #ccc;">${phaseLabel}</td>
+                        <td style="padding:6px;border:1px solid #ccc;text-align:right;font-weight:bold;">${m.team1.name}</td>
+                        <td style="padding:6px;border:1px solid #ccc;text-align:center;font-weight:bold;">${m.score1} - ${m.score2}</td>
+                        <td style="padding:6px;border:1px solid #ccc;font-weight:bold;">${m.team2.name}</td>
+                        <td style="padding:6px;border:1px solid #ccc;">${winnerName}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const docContent = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head><meta charset='utf-8'><title>Laporan Keputusan ${tName}</title></head>
+                <body style="font-family:Arial,sans-serif;color:#1f2937;">
+                    <h1 style="text-align:center;color:#0f766e;margin-bottom:4px;">${tName.toUpperCase()}</h1>
+                    <p style="text-align:center;font-size:12px;color:#6b7280;margin-top:0;">LAPORAN RASMI KEPUTUSAN KESELURUHAN KEJOHANAN</p>
+                    <hr/>
+                    <h2 style="color:#1e3a8a;">1. Senarai Pemenang Utama</h2>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px;">
+                        <tr style="background-color:#fef3c7;"><td style="padding:8px;border:1px solid #ccc;font-weight:bold;width:35%;">JOHAN (TEMPAT PERTAMA)</td><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">${summary.champion.name}</td></tr>
+                        <tr style="background-color:#f3f4f6;"><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">NAIB JOHAN (TEMPAT KEDUA)</td><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">${summary.runnerUp.name}</td></tr>
+                        ${thirdRowHtml}
+                    </table>
+
+                    <h2 style="color:#1e3a8a;">2. Kedudukan Akhir Peringkat Kumpulan</h2>
+                    ${groupsHtml}
+
+                    <h2 style="color:#1e3a8a;margin-top:24px;">3. Rekod Keputusan Semua Perlawanan (Mula Hingga Tamat)</h2>
+                    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                        <thead>
+                            <tr style="background-color:#e0e7ff;">
+                                <th style="padding:6px;border:1px solid #ccc;">Bil</th>
+                                <th style="padding:6px;border:1px solid #ccc;text-align:left;">Peringkat</th>
+                                <th style="padding:6px;border:1px solid #ccc;text-align:right;">Regu 1</th>
+                                <th style="padding:6px;border:1px solid #ccc;">Keputusan</th>
+                                <th style="padding:6px;border:1px solid #ccc;text-align:left;">Regu 2</th>
+                                <th style="padding:6px;border:1px solid #ccc;text-align:left;">Pemenang</th>
+                            </tr>
+                        </thead>
+                        <tbody>${matchesHtml}</tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob(['\ufeff', docContent], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const safeFilename = tName.replace(/[^a-zA-Z0-9]/g, '_');
+            a.href = url;
+            a.download = `Laporan_Keputusan_${safeFilename}.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         };
 
         // --- Rendering Engine ---
@@ -2027,7 +2470,7 @@
             }
 
             if (activeMatches.length === 0) {
-                listContainer.innerHTML = `<div class="text-center text-green-600 font-bold py-10 col-span-full bg-green-50 rounded-xl border border-green-200">Semua perlawanan semasa telah tamat! Sila jana perlawanan seterusnya.</div>`;
+                listContainer.innerHTML = `<div class="text-center text-green-600 font-bold py-10 col-span-full bg-green-50 rounded-xl border border-green-200">Semua perlawanan semasa telah tamat!</div>`;
                 return;
             }
 
@@ -2077,8 +2520,7 @@
             const matchesContainer = document.getElementById('public-matches-container');
             const groupClause = document.getElementById('public-group-clause');
             const knockoutContainer = document.getElementById('public-knockout-container');
-            const bracketContainer = document.getElementById('public-knockout-bracket');
-            const knockoutMatchesContainer = document.getElementById('public-knockout-matches');
+            const winnerPosterEl = document.getElementById('public-winner-poster');
             
             if (!standingsContainer || !matchesContainer) return;
 
@@ -2086,6 +2528,73 @@
             const knockoutMatches = window.state.matches.filter(m => !groupKeys.includes(m.group));
             const hasKnockout = knockoutMatches.length > 0;
 
+            // 1. Paparkan Poster Pemenang Rasmi jika Pusingan Akhir telah selesai
+            const winnerSummary = window.getTournamentWinnersSummary();
+            if (winnerPosterEl) {
+                if (winnerSummary.isFinished) {
+                    const tName = window.state.settings.tournamentName || 'Kejohanan Badminton KPDN Pulau Pinang';
+                    const thirdBlockHtml = winnerSummary.isJointThird
+                        ? `
+                            <div class="bg-amber-900/40 backdrop-blur-xs border border-amber-400/40 rounded-2xl p-4 text-center flex flex-col justify-center">
+                                <div class="text-amber-300 text-2xl mb-1"><i class="fa-solid fa-medal"></i></div>
+                                <div class="text-[11px] uppercase tracking-wider text-amber-200 font-bold">Tempat Ketiga Bersama</div>
+                                <div class="text-base sm:text-lg font-extrabold text-white mt-1">${winnerSummary.thirdPlace.map(t => t.name).join(' & ')}</div>
+                            </div>
+                        `
+                        : `
+                            <div class="bg-amber-900/40 backdrop-blur-xs border border-amber-400/40 rounded-2xl p-4 text-center flex flex-col justify-center">
+                                <div class="text-amber-300 text-2xl mb-1"><i class="fa-solid fa-medal"></i></div>
+                                <div class="text-[11px] uppercase tracking-wider text-amber-200 font-bold">Tempat Ketiga</div>
+                                <div class="text-base sm:text-lg font-extrabold text-white mt-1">${winnerSummary.thirdPlace[0]?.name || '-'}</div>
+                                <div class="text-[11px] text-amber-200/80 mt-2 pt-2 border-t border-amber-400/20">Tempat Ke-4: <strong>${winnerSummary.fourthPlace?.name || '-'}</strong></div>
+                            </div>
+                        `;
+
+                    winnerPosterEl.classList.remove('hidden');
+                    winnerPosterEl.innerHTML = `
+                        <div class="relative overflow-hidden rounded-2xl shadow-xl border-2 border-yellow-400 bg-gradient-to-br from-teal-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8">
+                            <div class="text-center max-w-3xl mx-auto">
+                                <span class="inline-flex items-center gap-1.5 bg-yellow-400 text-slate-900 text-xs font-black px-3.5 py-1 rounded-full uppercase tracking-wider shadow-sm mb-3">
+                                    <i class="fa-solid fa-star"></i> Keputusan Rasmi Kejohanan <i class="fa-solid fa-star"></i>
+                                </span>
+                                <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-300">
+                                    ${tName}
+                                </h2>
+                                <p class="text-xs sm:text-sm text-teal-200 mt-1">Tahniah kepada semua pemenang dan pasukan yang mengambil bahagian!</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-stretch">
+                                <!-- Naib Johan -->
+                                <div class="bg-slate-800/70 backdrop-blur-xs border border-slate-400/40 rounded-2xl p-4 text-center flex flex-col justify-center order-2 md:order-1">
+                                    <div class="text-slate-300 text-2xl mb-1"><i class="fa-solid fa-award"></i></div>
+                                    <div class="text-[11px] uppercase tracking-wider text-slate-300 font-bold">Naib Johan</div>
+                                    <div class="text-lg sm:text-xl font-extrabold text-white mt-1">${winnerSummary.runnerUp.name}</div>
+                                </div>
+
+                                <!-- Johan -->
+                                <div class="bg-gradient-to-b from-yellow-500/30 to-amber-600/20 backdrop-blur-xs border-2 border-yellow-400 rounded-2xl p-5 text-center flex flex-col justify-center shadow-lg transform md:-translate-y-2 order-1 md:order-2">
+                                    <div class="text-yellow-400 text-4xl mb-1 animate-bounce"><i class="fa-solid fa-trophy"></i></div>
+                                    <div class="text-xs uppercase tracking-widest text-yellow-300 font-black">Johan Kejohanan</div>
+                                    <div class="text-xl sm:text-2xl font-black text-white mt-1">${winnerSummary.champion.name}</div>
+                                    <div class="text-[11px] text-yellow-200 mt-2 font-mono bg-black/30 px-2.5 py-0.5 rounded-full self-center">
+                                        Skor Akhir: ${winnerSummary.finalMatch.score1} - ${winnerSummary.finalMatch.score2}
+                                    </div>
+                                </div>
+
+                                <!-- Tempat Ke-3 / Ke-4 -->
+                                <div class="order-3">
+                                    ${thirdBlockHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    winnerPosterEl.classList.add('hidden');
+                    winnerPosterEl.innerHTML = '';
+                }
+            }
+
+            // 2. Klausa Peringkat Kumpulan
             if (groupClause) {
                 if (window.state.groupClauseCollapsed) {
                     groupClause.removeAttribute('open');
@@ -2094,62 +2603,67 @@
                 }
             }
 
+            // 3. Senarai Semua Fasa Kalah Mati (Setiap Fasa Kekal Ada & Boleh Dibuka/Tutup)
             if (knockoutContainer) {
                 if (hasKnockout) {
                     knockoutContainer.classList.remove('hidden');
-                    
                     const phases = [...new Set(knockoutMatches.map(m => m.group))];
-                    const currentPhase = phases[phases.length - 1];
-                    const phaseBadge = document.getElementById('knockout-phase-badge');
-                    if (phaseBadge) phaseBadge.innerText = currentPhase;
+                    
+                    // Susun supaya fasa terkini berada di atas atau ikut urutan kronologi yang kemas
+                    knockoutContainer.innerHTML = phases.map((phaseName, idx) => {
+                        const phaseMatches = knockoutMatches.filter(m => m.group === phaseName);
+                        const completedCount = phaseMatches.filter(m => m.status === 'completed').length;
+                        const isAllDone = completedCount === phaseMatches.length;
+                        const isLatestPhase = idx === phases.length - 1;
 
-                    const currentPhaseMatches = knockoutMatches.filter(m => m.group === currentPhase);
-                    if (bracketContainer) {
-                        bracketContainer.innerHTML = currentPhaseMatches.map(m => {
-                            const isLive = m.status === 'in_progress';
-                            const isDone = m.status === 'completed';
-                            return `
-                                <div class="bg-white border ${isLive ? 'border-red-400 ring-2 ring-red-100' : 'border-indigo-200'} rounded-xl p-3 shadow-2xs flex flex-col justify-between">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wide">Match #${m.id.substring(0,4)}</span>
-                                        <span class="text-[10px] px-2 py-0.5 rounded font-bold ${isDone ? 'bg-green-100 text-green-800' : (isLive ? 'bg-red-500 text-white animate-pulse' : 'bg-amber-100 text-amber-800')}">${isDone ? 'Selesai' : (isLive ? 'LIVE' : 'Belum Mula')}</span>
+                        const isCollapsed = window.state.collapsedKnockoutPhases && window.state.collapsedKnockoutPhases[phaseName] !== undefined
+                            ? window.state.collapsedKnockoutPhases[phaseName]
+                            : (!isLatestPhase && isAllDone);
+
+                        return `
+                            <details ${isCollapsed ? '' : 'open'} class="bg-white rounded-xl shadow-md border-2 border-indigo-200 overflow-hidden transition-all">
+                                <summary onclick="toggleKnockoutPhaseClause('${phaseName}', this.parentElement)" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 px-4 py-3 flex justify-between items-center text-white cursor-pointer select-none">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fa-solid fa-sitemap"></i>
+                                        <span class="font-bold text-sm sm:text-base">${phaseName}</span>
+                                        <span class="bg-white/20 text-white text-[11px] px-2.5 py-0.5 rounded-full font-semibold">${completedCount}/${phaseMatches.length} Selesai</span>
                                     </div>
-                                    <div class="space-y-1.5 text-xs font-bold">
-                                        <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${m.score1 >= m.score2 && isDone ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
-                                            <span class="truncate pr-2">${m.team1.name}</span>
-                                            <span class="font-mono">${isDone || isLive ? m.score1 : '-'}</span>
-                                        </div>
-                                        <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${m.score2 > m.score1 && isDone ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
-                                            <span class="truncate pr-2">${m.team2.name}</span>
-                                            <span class="font-mono">${isDone || isLive ? m.score2 : '-'}</span>
-                                        </div>
+                                    <div class="flex items-center gap-2 text-xs font-semibold bg-white/15 px-3 py-1 rounded-lg border border-white/20">
+                                        <span>Buka / Tutup</span>
+                                        <i class="fa-solid fa-chevron-down"></i>
                                     </div>
+                                </summary>
+
+                                <div class="p-4 bg-indigo-50/40 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    ${phaseMatches.map(m => {
+                                        const isLive = m.status === 'in_progress';
+                                        const isDone = m.status === 'completed';
+                                        return `
+                                            <div class="bg-white border ${isLive ? 'border-red-400 ring-2 ring-red-100' : 'border-indigo-200'} rounded-xl p-3 shadow-2xs flex flex-col justify-between">
+                                                <div class="flex justify-between items-center mb-2">
+                                                    <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wide">Match #${m.id.substring(0,4)}</span>
+                                                    <span class="text-[10px] px-2 py-0.5 rounded font-bold ${isDone ? 'bg-green-100 text-green-800' : (isLive ? 'bg-red-500 text-white animate-pulse' : 'bg-amber-100 text-amber-800')}">${isDone ? 'Selesai' : (isLive ? 'LIVE' : 'Belum Mula')}</span>
+                                                </div>
+                                                <div class="space-y-1.5 text-xs font-bold">
+                                                    <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${m.score1 >= m.score2 && isDone ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
+                                                        <span class="truncate pr-2">${m.team1.name}</span>
+                                                        <span class="font-mono">${isDone || isLive ? m.score1 : '-'}</span>
+                                                    </div>
+                                                    <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${m.score2 > m.score1 && isDone ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
+                                                        <span class="truncate pr-2">${m.team2.name}</span>
+                                                        <span class="font-mono">${isDone || isLive ? m.score2 : '-'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
                                 </div>
-                            `;
-                        }).join('');
-                    }
-
-                    if (knockoutMatchesContainer) {
-                        knockoutMatchesContainer.innerHTML = currentPhaseMatches.map(m => {
-                            const isLive = m.status === 'in_progress';
-                            const isDone = m.status === 'completed';
-                            return `
-                                <div class="border rounded-xl p-3 bg-white shadow-2xs flex justify-between items-center text-xs">
-                                    <div class="flex-1 truncate pr-2">
-                                        <div class="font-bold text-gray-800 truncate">${m.team1.name}</div>
-                                        <div class="font-bold text-gray-800 truncate mt-1">${m.team2.name}</div>
-                                    </div>
-                                    <div class="px-3 py-1 ${isLive ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-gray-100'} rounded text-center font-mono font-bold">
-                                        <div>${isDone || isLive ? m.score1 : '-'}</div>
-                                        <div class="mt-1">${isDone || isLive ? m.score2 : '-'}</div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('');
-                    }
-
+                            </details>
+                        `;
+                    }).join('');
                 } else {
                     knockoutContainer.classList.add('hidden');
+                    knockoutContainer.innerHTML = '';
                 }
             }
 
@@ -2234,14 +2748,41 @@
             const statusInfo = document.getElementById('match-status-info');
             const qualifyLabel = document.getElementById('active-qualify-label');
             const methodLabel = document.getElementById('active-method-label');
+            const thirdPlaceLabel = document.getElementById('active-third-place-label');
             const quickMethodSelect = document.getElementById('quick-qualify-method');
+            const quickThirdSelect = document.getElementById('quick-third-place-method');
+
+            // Kemas kini butang muat turun laporan penuh di tab Ketetapan
+            const winnerSummary = window.getTournamentWinnersSummary();
+            const btnExportExcel = document.getElementById('btn-export-excel');
+            const btnExportWord = document.getElementById('btn-export-word');
+            const exportBadge = document.getElementById('export-status-badge');
+
+            if (btnExportExcel && btnExportWord && exportBadge) {
+                if (winnerSummary.isFinished) {
+                    btnExportExcel.disabled = false;
+                    btnExportWord.disabled = false;
+                    exportBadge.className = 'text-[10px] bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full font-bold';
+                    exportBadge.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Sedia Dimuat Turun';
+                } else {
+                    btnExportExcel.disabled = true;
+                    btnExportWord.disabled = true;
+                    exportBadge.className = 'text-[10px] bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-bold';
+                    exportBadge.innerText = 'Menunggu Akhir Tamat';
+                }
+            }
+
             if (!btnNext || !statusInfo) return;
 
             const numQualify = window.getQualifyCountPerGroup();
             const qualifyMethod = window.getQualifyMethod();
+            const thirdPlaceOpt = window.getThirdPlaceOption();
+
             if (qualifyLabel) qualifyLabel.innerText = `Top ${numQualify} Setiap Kumpulan`;
             if (methodLabel) methodLabel.innerText = qualifyMethod === 'best_third' ? 'Tempat Ke-3 Terbaik (Genap)' : 'Format Bye (Biasa)';
+            if (thirdPlaceLabel) thirdPlaceLabel.innerText = thirdPlaceOpt === 'playoff' ? 'Perlawanan Penentuan Ke-3/4' : 'Pemenang Bersama Ke-3';
             if (quickMethodSelect) quickMethodSelect.value = qualifyMethod;
+            if (quickThirdSelect) quickThirdSelect.value = thirdPlaceOpt;
             
             if (window.state.matches.length === 0) {
                 statusInfo.innerHTML = '<span>Belum ada jadual perlawanan dijana.</span>';
@@ -2260,9 +2801,13 @@
                 currentPhaseMatches = window.state.matches.filter(m => groupKeys.includes(m.group));
                 currentPhaseLabel = "Peringkat Kumpulan";
             } else {
-                const phases = [...new Set(knockoutMatches.map(m => m.group))];
+                const phases = [...new Set(knockoutMatches.map(m => m.group))].filter(p => p !== 'Penentuan Tempat Ke-3 & Ke-4');
                 currentPhaseLabel = phases[phases.length - 1];
-                currentPhaseMatches = knockoutMatches.filter(m => m.group === currentPhaseLabel);
+                if (currentPhaseLabel === 'Pusingan Akhir') {
+                    currentPhaseMatches = knockoutMatches.filter(m => m.group === 'Pusingan Akhir' || m.group === 'Penentuan Tempat Ke-3 & Ke-4');
+                } else {
+                    currentPhaseMatches = knockoutMatches.filter(m => m.group === currentPhaseLabel);
+                }
             }
                 
             const total = currentPhaseMatches.length;
@@ -2295,6 +2840,7 @@
                     window.state = { ...window.state, ...JSON.parse(local) };
                 } catch (e) {}
             }
+            ensureDefaultSettings();
             renderAll();
             connectToFirebase();
         };

@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Fail Konfigurasi Firebase Luaran (Kekal di GitHub tanpa perlu diedit setiap kali kemas kini index.html) -->
+    <script src="./firebase-config.js" onerror="console.info('Fail firebase-config.js belum diwujudkan, menggunakan konfigurasi sedia ada.')"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .tab-active { border-bottom: 4px solid #10b981; color: #10b981; font-weight: 600; }
@@ -568,13 +570,11 @@
                 <div id="fb-diagnostic-msg">Menyemak konfigurasi...</div>
             </div>
 
-            <div class="space-y-3 text-xs text-gray-600 mb-4">
-                <p class="font-semibold text-gray-700">Kenapa "Tidak Dapat Menghubungkan Awan" di Vercel / WhatsApp?</p>
-                <ol class="list-decimal pl-4 space-y-1">
-                    <li>Anda perlu menampal kod <code>firebaseConfig</code> daripada projek Firebase anda di ruangan di bawah (atau di dalam kod <code>index.html</code>).</li>
-                    <li>Di <strong>Firebase Console &rarr; Firestore Database &rarr; Rules</strong>, pastikan <em>Test Mode</em> diaktifkan: <code>allow read, write: if true;</code></li>
-                    <li>Di <strong>Firebase Console &rarr; Authentication &rarr; Sign-in method</strong>, pastikan <strong>Anonymous</strong> telah diaktifkan (Enable).</li>
-                </ol>
+            <div class="space-y-2 text-xs text-gray-600 mb-4 bg-teal-50/70 border border-teal-200 p-3 rounded-lg">
+                <p class="font-bold text-teal-900"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>Tips Kekalkan Config Di GitHub Tanpa Perlu Edit <code>index.html</code>:</p>
+                <p class="text-[11px] text-teal-800 leading-relaxed">
+                    Cipta satu fail bernama <strong><code>firebase-config.js</code></strong> di dalam repositori GitHub anda sekali sahaja. Anda juga boleh menekan butang <strong>"Muat Turun firebase-config.js"</strong> di bawah selepas menampal kod anda, kemudian muat naik fail tersebut ke GitHub!
+                </p>
             </div>
 
             <div class="mb-4">
@@ -588,13 +588,17 @@
   "messagingSenderId": "123456...",
   "appId": "1:123456:web:..."
 }' class="w-full border rounded-lg p-2.5 text-xs font-mono bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
-                <p class="text-[11px] text-gray-400 mt-1">Tips: Anda boleh tampal keseluruhan blok <code>const firebaseConfig = { ... };</code> terus dari Firebase Console.</p>
             </div>
 
-            <div class="flex flex-wrap gap-2 justify-end border-t pt-4">
-                <button type="button" onclick="clearCustomFirebaseConfig()" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg text-xs font-semibold transition">Reset Config</button>
-                <button type="button" onclick="closeFirebaseSetupModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-xs font-semibold transition">Tutup</button>
-                <button type="button" onclick="saveCustomFirebaseConfig()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition"><i class="fa-solid fa-plug mr-1"></i>Simpan & Hubungkan</button>
+            <div class="flex flex-wrap gap-2 justify-between items-center border-t pt-4">
+                <button type="button" onclick="downloadFirebaseConfigFile()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-file-code"></i> Muat Turun <code>firebase-config.js</code>
+                </button>
+                <div class="flex gap-2">
+                    <button type="button" onclick="clearCustomFirebaseConfig()" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg text-xs font-semibold transition">Reset</button>
+                    <button type="button" onclick="closeFirebaseSetupModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-xs font-semibold transition">Tutup</button>
+                    <button type="button" onclick="saveCustomFirebaseConfig()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition"><i class="fa-solid fa-plug mr-1"></i>Simpan</button>
+                </div>
             </div>
         </div>
     </div>
@@ -606,18 +610,18 @@
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ============================================================================
-        // PENTING UNTUK PENGGUNA GITHUB & VERCEL (shutterpower.vercel.app):
-        // Sila gantikan nilai di dalam MANUAL_FIREBASE_CONFIG di bawah dengan
-        // firebaseConfig daripada Firebase Console anda supaya semua peranti penonton
-        // & pengadil di WhatsApp bersambung secara automatik!
+        // CARA KEKALKAN FIREBASE CONFIG DI GITHUB TANPA PERLU EDIT INDEX.HTML LAGI:
+        // Cipta satu fail berasingan bernama "firebase-config.js" di GitHub anda dengan
+        // kandungan: window.FIREBASE_CONFIG = { apiKey: "...", projectId: "...", ... };
+        // Sistem akan membaca fail tersebut secara automatik!
         // ============================================================================
         const MANUAL_FIREBASE_CONFIG = {
-          apiKey: "AIzaSyASB40Gp73AINfOciNTwCEoNa1azx4ACZU",
-  authDomain: "shuttlepower-vextro.firebaseapp.com",
-  projectId: "shuttlepower-vextro",
-  storageBucket: "shuttlepower-vextro.firebasestorage.app",
-  messagingSenderId: "1089690272152",
-  appId: "1:1089690272152:web:af3f14a4877036d20babed"
+            apiKey: "MASUKKAN_API_KEY_ANDA_DI_SINI",
+            authDomain: "projek-anda.firebaseapp.com",
+            projectId: "projek-anda",
+            storageBucket: "projek-anda.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
         };
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'kpdn-badminton-penang';
@@ -652,14 +656,24 @@
         }
 
         function getActiveFirebaseConfig() {
+            // 1. Utamakan fail luaran firebase-config.js (window.FIREBASE_CONFIG atau window.firebaseConfig)
+            if (typeof window.FIREBASE_CONFIG === 'object' && window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey) {
+                return window.FIREBASE_CONFIG;
+            }
+            if (typeof window.firebaseConfig === 'object' && window.firebaseConfig && window.firebaseConfig.apiKey) {
+                return window.firebaseConfig;
+            }
+            // 2. Semak simpanan localStorage pada pelayar semasa
             const savedCustom = localStorage.getItem('customFirebaseConfigKPDN');
             if (savedCustom) {
                 const parsed = parseFirebaseConfigInput(savedCustom);
                 if (parsed && parsed.apiKey && parsed.projectId) return parsed;
             }
+            // 3. Semak pembolehubah MANUAL_FIREBASE_CONFIG di dalam fail ini
             if (MANUAL_FIREBASE_CONFIG.apiKey && !MANUAL_FIREBASE_CONFIG.apiKey.includes("MASUKKAN_")) {
                 return MANUAL_FIREBASE_CONFIG;
             }
+            // 4. Semak persekitaran kanvas
             if (typeof __firebase_config !== 'undefined') {
                 return JSON.parse(__firebase_config);
             }
@@ -712,7 +726,7 @@
             const activeConfig = getActiveFirebaseConfig();
 
             if (!activeConfig || !activeConfig.apiKey || activeConfig.apiKey.includes("DummyKey") || activeConfig.apiKey.includes("MASUKKAN_")) {
-                updateCloudIndicator('local', 'Mod Tempatan', 'Kunci firebaseConfig sebenar belum dimasukkan. Sila log masuk sebagai Urusetia dan klik "Tetapan Awan" untuk memasukkan firebaseConfig anda.');
+                updateCloudIndicator('local', 'Mod Tempatan', 'Fail firebase-config.js atau kunci firebaseConfig belum dimasukkan.');
                 return;
             }
 
@@ -871,7 +885,6 @@
                     roleBadge.className = 'bg-teal-900/60 text-teal-100 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-teal-400/30';
                     roleBadge.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Paparan Awam (Langsung)';
                 }
-                // Paksa kembali ke paparan awam sekiranya bukan admin
                 document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
                 document.getElementById('view-public')?.classList.remove('hidden');
             }
@@ -956,15 +969,13 @@
             window.open(waUrl, '_blank');
         };
 
-        // --- Fungsi Modal Tetapan Firebase ---
+        // --- Fungsi Modal Tetapan Firebase & Muat Turun Fail firebase-config.js ---
         window.openFirebaseSetupModal = function() {
             const overlay = document.getElementById('firebase-setup-overlay');
             const input = document.getElementById('fb-config-input');
-            const currentCustom = localStorage.getItem('customFirebaseConfigKPDN');
-            if (currentCustom) {
-                input.value = currentCustom;
-            } else if (MANUAL_FIREBASE_CONFIG.apiKey && !MANUAL_FIREBASE_CONFIG.apiKey.includes("MASUKKAN_")) {
-                input.value = JSON.stringify(MANUAL_FIREBASE_CONFIG, null, 2);
+            const activeCfg = getActiveFirebaseConfig();
+            if (activeCfg && activeCfg.apiKey && !activeCfg.apiKey.includes("MASUKKAN_")) {
+                input.value = JSON.stringify(activeCfg, null, 2);
             }
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
@@ -974,6 +985,25 @@
             const overlay = document.getElementById('firebase-setup-overlay');
             overlay.classList.add('hidden');
             overlay.classList.remove('flex');
+        };
+
+        window.downloadFirebaseConfigFile = function() {
+            const raw = document.getElementById('fb-config-input').value.trim();
+            const parsed = parseFirebaseConfigInput(raw) || getActiveFirebaseConfig();
+            if (!parsed || !parsed.apiKey || parsed.apiKey.includes("MASUKKAN_")) {
+                showModal('Konfigurasi Kosong', 'Sila tampal kod firebaseConfig anda di dalam ruangan teks terlebih dahulu sebelum memuat turun fail firebase-config.js.', 'error');
+                return;
+            }
+            const fileContent = `// Fail Konfigurasi Firebase Kekal untuk GitHub & Vercel\n// Muat naik fail ini sekali sahaja ke repositori GitHub anda.\nwindow.FIREBASE_CONFIG = ${JSON.stringify(parsed, null, 2)};\n`;
+            const blob = new Blob([fileContent], { type: 'application/javascript;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'firebase-config.js';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         };
 
         window.saveCustomFirebaseConfig = function() {

@@ -137,7 +137,7 @@
                             <div class="bg-gray-50 px-4 py-3 border-b">
                                 <h2 class="font-bold text-gray-700"><i class="fa-solid fa-bolt mr-2 text-orange-500"></i>Perlawanan Kumpulan (Live / Keputusan)</h2>
                             </div>
-                            <div id="public-matches-container" class="p-0 flex flex-col divide-y max-h-[500px] overflow-y-auto">
+                            <div id="public-matches-container" class="p-0 flex flex-col divide-y max-h-[550px] overflow-y-auto">
                                  <div class="text-center text-gray-400 py-10">Tiada perlawanan.</div>
                             </div>
                         </div>
@@ -239,7 +239,7 @@
                     <div class="border-t pt-4 flex justify-between items-center flex-wrap gap-2">
                         <span class="text-xs text-gray-500">Baki regu belum diagih: <strong id="unassigned-count">0</strong></span>
                         <button onclick="generateMatchesFromGroups()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 shadow-sm transition flex items-center font-semibold text-sm">
-                            <i class="fa-solid fa-calendar-check mr-2"></i> Jana Jadual Perlawanan Kumpulan
+                            <i class="fa-solid fa-calendar-check mr-2"></i> Jana Jadual Perlawanan Kumpulan (#P1, #P2...)
                         </button>
                     </div>
                 </div>
@@ -251,7 +251,7 @@
                 <div class="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <h2 class="font-bold text-lg text-gray-800"><i class="fa-solid fa-trophy mr-2 text-yellow-500"></i>Pusingan Seterusnya (Kalah Mati)</h2>
-                        <p class="text-xs text-gray-500">Jana jadual Pusingan Kalah Mati / Suku Akhir / Separuh Akhir / Penentuan Ke-3 & Akhir selepas pusingan semasa selesai.</p>
+                        <p class="text-xs text-gray-500">Jana jadual Suku Akhir (#S1, #S2) / Separuh Akhir (#SA1, #SA2) / Akhir (#A1) selepas pusingan semasa selesai.</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <button id="btn-next-round" onclick="generateNextRound()" class="bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition flex items-center">
@@ -265,11 +265,13 @@
                     </div>
                     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 text-xs text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-200">
                         <div class="flex flex-wrap items-center gap-y-1">
-                            <span>Rujukan Ketetapan: <strong id="active-qualify-label" class="text-teal-700">2 Pasukan Setiap Kumpulan</strong></span>
+                            <span>Kelayakan: <strong id="active-qualify-label" class="text-teal-700">2 Pasukan Setiap Kumpulan</strong></span>
                             <span class="mx-1.5 text-gray-300">|</span>
                             <span>Kaedah Pelengkap: <strong id="active-method-label" class="text-indigo-700">Format Bye (Biasa)</strong></span>
                             <span class="mx-1.5 text-gray-300">|</span>
                             <span>Tempat Ke-3/4: <strong id="active-third-place-label" class="text-amber-700">Pemenang Bersama</strong></span>
+                            <span class="mx-1.5 text-gray-300">|</span>
+                            <span>Format Set: <strong id="active-set-mode-label" class="text-rose-700">1 Set</strong></span>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
                             <select id="quick-qualify-method" onchange="changeQuickQualifyMethod(this.value)" class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
@@ -302,7 +304,10 @@
             
             <div id="umpire-selection" class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
-                    <h2 class="font-bold text-lg text-gray-800"><i class="fa-solid fa-whistle mr-2 text-red-500"></i>Pilih Perlawanan untuk Diadili (Kumpulan & Kalah Mati)</h2>
+                    <div>
+                        <h2 class="font-bold text-lg text-gray-800"><i class="fa-solid fa-whistle mr-2 text-red-500"></i>Pilih Perlawanan untuk Diadili</h2>
+                        <p class="text-xs text-gray-500">Pilih kod perlawanan (contoh: <strong>#P1, #S1, #SA1, #A1</strong>) dan masukkan nama pengadil sebelum mula.</p>
+                    </div>
                     <span id="umpire-phase-indicator" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-200"></span>
                 </div>
                 <div id="umpire-matches-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -311,20 +316,54 @@
             </div>
 
             <div id="umpire-scoring" class="hidden h-full flex flex-col">
-                <div class="bg-gray-800 text-white rounded-t-xl p-3 flex justify-between items-center shadow-lg">
-                    <button onclick="backToUmpireSelection()" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali</button>
-                    <div class="font-bold text-center flex-1 flex flex-col">
-                        <span><span id="active-group"></span> - Match #<span id="active-match-id"></span></span>
-                        <span id="umpire-max-score-display" class="text-[10px] text-yellow-400 font-normal"></span>
+                <!-- Bar Atas Papan Markah Pengadil -->
+                <div class="bg-gray-900 text-white rounded-t-xl p-3 flex flex-col gap-2 shadow-lg border-b border-gray-700">
+                    <div class="flex justify-between items-center gap-2">
+                        <button onclick="backToUmpireSelection()" class="bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition">
+                            <i class="fa-solid fa-arrow-left mr-1"></i> Kembali
+                        </button>
+                        <div class="font-bold text-center flex-1 flex flex-col items-center">
+                            <div class="flex items-center gap-2">
+                                <span id="active-match-code" class="bg-amber-400 text-gray-900 px-2.5 py-0.5 rounded font-black text-xs sm:text-sm">P1</span>
+                                <span id="active-group" class="text-sm sm:text-base font-extrabold text-white">Kumpulan A</span>
+                            </div>
+                            <div class="flex flex-wrap items-center justify-center gap-2 mt-0.5 text-[11px] text-gray-300">
+                                <span><i class="fa-solid fa-user-tie text-teal-400 mr-1"></i>Pengadil: <strong id="active-umpire-name" class="text-white">-</strong></span>
+                                <button onclick="promptChangeUmpireName()" class="text-[10px] bg-gray-700 hover:bg-gray-600 text-teal-300 px-1.5 py-0.5 rounded" title="Tukar Nama Pengadil"><i class="fa-solid fa-pen"></i></button>
+                                <span class="text-gray-600">|</span>
+                                <span id="umpire-max-score-display" class="text-yellow-400 font-semibold"></span>
+                            </div>
+                        </div>
+                        <button onclick="finishMatch()" class="bg-green-600 hover:bg-green-500 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold shadow-md transition">
+                            <i class="fa-solid fa-flag-checkered mr-1"></i> Tamat Perlawanan
+                        </button>
                     </div>
-                    <button onclick="finishMatch()" class="bg-green-600 hover:bg-green-500 px-3 py-1 rounded text-sm font-bold shadow-md"><i class="fa-solid fa-check mr-1"></i> Tamat</button>
+
+                    <!-- Bar Kawalan Set (Muncul apabila Format 2 Set / Best of 3 dipilih) -->
+                    <div id="umpire-sets-bar" class="hidden bg-gray-800/90 rounded-lg px-3 py-2 flex flex-wrap justify-between items-center gap-2 border border-gray-700">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[11px] font-bold text-gray-400 uppercase mr-1"><i class="fa-solid fa-layer-group mr-1 text-amber-400"></i>Pilih Set:</span>
+                            <button type="button" id="btn-set-0" onclick="switchUmpireSet(0)" class="px-3 py-1 rounded text-xs font-bold transition">Set 1</button>
+                            <button type="button" id="btn-set-1" onclick="switchUmpireSet(1)" class="px-3 py-1 rounded text-xs font-bold transition">Set 2</button>
+                            <button type="button" id="btn-set-2" onclick="switchUmpireSet(2)" class="px-3 py-1 rounded text-xs font-bold transition">Set 3 (Penentuan)</button>
+                        </div>
+                        <div class="flex items-center gap-3 text-xs">
+                            <div id="umpire-sets-summary" class="font-mono font-bold text-amber-300"></div>
+                            <button type="button" id="btn-next-set" onclick="proceedToNextSet()" class="bg-amber-500 hover:bg-amber-600 text-gray-900 px-2.5 py-1 rounded font-extrabold text-xs transition shadow-2xs">
+                                Selesai Set & Ke Set Seterusnya <i class="fa-solid fa-forward-step ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="flex-1 flex flex-col md:flex-row gap-2 bg-black p-2 rounded-b-xl shadow-2xl relative min-h-[380px]">
                     <div class="flex-1 bg-red-600 rounded-lg flex flex-col relative overflow-hidden select-none">
-                        <div class="bg-red-800 text-white text-center py-2 md:py-4 font-bold text-xl md:text-3xl z-10 shadow-md truncate px-2" id="score-team1-name">Regu 1</div>
+                        <div class="bg-red-800 text-white text-center py-2 md:py-3 px-2 z-10 shadow-md flex flex-col items-center">
+                            <span class="font-bold text-lg md:text-2xl truncate max-w-full" id="score-team1-name">Regu 1</span>
+                            <span id="score-team1-sets-badge" class="hidden text-[11px] bg-black/30 px-2.5 py-0.5 rounded-full text-yellow-300 font-bold mt-0.5">Menang Set: 0</span>
+                        </div>
                         <div class="flex-1 flex items-center justify-center relative">
-                            <button onclick="updateScore(1, 1)" class="score-btn absolute inset-0 w-full h-full text-[110px] md:text-[180px] font-bold text-white flex items-center justify-center hover:bg-white/10 active:bg-white/20 transition leading-none z-10 pb-10">
+                            <button onclick="updateScore(1, 1)" class="score-btn absolute inset-0 w-full h-full text-[110px] md:text-[170px] font-bold text-white flex items-center justify-center hover:bg-white/10 active:bg-white/20 transition leading-none z-10 pb-10">
                                 <span id="score-val-1" class="drop-shadow-lg">0</span>
                             </button>
                         </div>
@@ -333,14 +372,18 @@
                         </button>
                     </div>
 
-                    <div class="hidden md:flex flex-col justify-center items-center px-2 z-20">
+                    <div class="hidden md:flex flex-col justify-center items-center px-2 z-20 gap-2">
+                        <div id="active-set-badge" class="bg-amber-400 text-gray-900 font-black text-xs px-2.5 py-1 rounded-full uppercase tracking-wider shadow">SET 1</div>
                         <div class="bg-white text-black font-black italic rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-lg border-4 border-gray-300">VS</div>
                     </div>
 
                     <div class="flex-1 bg-blue-600 rounded-lg flex flex-col relative overflow-hidden select-none">
-                        <div class="bg-blue-800 text-white text-center py-2 md:py-4 font-bold text-xl md:text-3xl z-10 shadow-md truncate px-2" id="score-team2-name">Regu 2</div>
+                        <div class="bg-blue-800 text-white text-center py-2 md:py-3 px-2 z-10 shadow-md flex flex-col items-center">
+                            <span class="font-bold text-lg md:text-2xl truncate max-w-full" id="score-team2-name">Regu 2</span>
+                            <span id="score-team2-sets-badge" class="hidden text-[11px] bg-black/30 px-2.5 py-0.5 rounded-full text-yellow-300 font-bold mt-0.5">Menang Set: 0</span>
+                        </div>
                         <div class="flex-1 flex items-center justify-center relative">
-                            <button onclick="updateScore(2, 1)" class="score-btn absolute inset-0 w-full h-full text-[110px] md:text-[180px] font-bold text-white flex items-center justify-center hover:bg-white/10 active:bg-white/20 transition leading-none z-10 pb-10">
+                            <button onclick="updateScore(2, 1)" class="score-btn absolute inset-0 w-full h-full text-[110px] md:text-[170px] font-bold text-white flex items-center justify-center hover:bg-white/10 active:bg-white/20 transition leading-none z-10 pb-10">
                                 <span id="score-val-2" class="drop-shadow-lg">0</span>
                             </button>
                         </div>
@@ -360,7 +403,7 @@
                 <div class="flex-1">
                     <div class="border-b pb-3 mb-4">
                         <h2 class="font-bold text-gray-700 text-lg"><i class="fa-solid fa-gear mr-2 text-gray-500"></i>Ketetapan Sistem & Perlawanan</h2>
-                        <p class="text-xs text-gray-400 mt-0.5">Tetapkan nama kejohanan, format perlawanan, penentuan tempat ke-3/4, dan PIN akses.</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Tetapkan nama kejohanan, format set perlawanan (1 Set / 2 Set + Set Ke-3 Penentuan), penentuan tempat ke-3/4, dan PIN akses.</p>
                     </div>
                     <form id="settings-form" class="space-y-4" onsubmit="saveSettingsForm(event)">
                         <!-- Nama Kejohanan (Tajuk Besar Sistem) -->
@@ -383,7 +426,7 @@
                                 </datalist>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Format Perlawanan</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">Jenis Jadual Pusingan</label>
                                 <input type="text" id="set-format" list="list-format" placeholder="Contoh: Round Robin" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm" required>
                                 <datalist id="list-format">
                                     <option value="Round Robin"></option>
@@ -393,8 +436,18 @@
                             </div>
                         </div>
 
+                        <!-- Format Kiraan Set Perlawanan (1 Set vs 2 Set / Best of 3) -->
+                        <div class="bg-indigo-50/70 border border-indigo-200 rounded-lg p-3">
+                            <label class="block text-sm font-bold text-indigo-900 mb-1"><i class="fa-solid fa-layer-group mr-1.5 text-indigo-600"></i>Format Kiraan Set Perlawanan</label>
+                            <select id="set-match-set-mode" class="w-full border border-indigo-300 rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-indigo-500 bg-white text-sm font-semibold text-gray-800">
+                                <option value="1_set">1 Set Sahaja (Kiraan Mata Terus)</option>
+                                <option value="best_of_3">2 Set (Best of 3 - Jika Seri 1-1, Masuk Set Ke-3 Penentuan)</option>
+                            </select>
+                            <p class="text-[11px] text-indigo-700 mt-1">Jika memilih <strong>2 Set (Best of 3)</strong>, perlawanan mempunyai Set 1 & Set 2. Jika kedudukan set terikat 1-1, perlawanan akan diteruskan ke <strong>Set Ke-3 (Set Penentuan)</strong>.</p>
+                        </div>
+
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1">Mata Tamat Maksimum (Contoh: 15, 21, 30)</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Mata Tamat Maksimum Setiap Set (Contoh: 15, 21, 30)</label>
                             <input type="number" id="set-max-score" placeholder="Biarkan kosong jika tiada had mata" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm">
                         </div>
                         
@@ -460,7 +513,7 @@
                             <span id="export-status-badge" class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">Menunggu Akhir Tamat</span>
                         </div>
                         <p class="text-xs text-gray-600 mb-3 leading-relaxed">
-                            Muat turun laporan lengkap keseluruhan perlawanan (Senarai Pemenang, Kedudukan Kumpulan, Keputusan Peringkat Kumpulan hingga Pusingan Akhir). Butang ini hanya akan aktif sebaik sahaja <strong>Pusingan Akhir</strong> tamat.
+                            Muat turun laporan lengkap keseluruhan perlawanan (Senarai Pemenang, Kedudukan Kumpulan, Kod Perlawanan, Nama Pengadil & Keputusan Set dari Peringkat Kumpulan hingga Akhir). Butang ini aktif sebaik sahaja <strong>Pusingan Akhir</strong> tamat.
                         </p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                             <button type="button" id="btn-export-excel" onclick="downloadFullResultsExcel()" disabled class="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-lg text-xs font-bold shadow-xs transition flex items-center justify-center gap-2">
@@ -502,6 +555,38 @@
         </section>
 
     </main>
+
+    <!-- Modal Masukkan Nama Pengadil Sebelum Mula Mengadil -->
+    <div id="umpire-name-overlay" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-user-tie text-red-600"></i> Maklumat Pengadil Perlawanan
+                </h3>
+                <button type="button" onclick="closeUmpireNameModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <div id="umpire-modal-match-info" class="bg-gray-50 border rounded-lg p-3 mb-4 text-xs text-gray-700 space-y-1">
+                <!-- Diisi oleh JS -->
+            </div>
+
+            <form onsubmit="confirmStartUmpireMatch(event)">
+                <input type="hidden" id="pending-umpire-match-id">
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1.5">Nama Pengadil Bertugas <span class="text-red-500">*</span></label>
+                    <input type="text" id="umpire-name-input" placeholder="Masukkan nama penuh / panggilan pengadil" class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                    <p class="text-[11px] text-gray-500 mt-1">Nama pengadil akan dipaparkan pada jadual perlawanan dan laporan rasmi.</p>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeUmpireNameModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 rounded-lg font-semibold text-sm transition">Batal</button>
+                    <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg font-bold text-sm transition shadow flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-whistle"></i> Mula Mengadil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Modal Kongsi Pautan Awam (Penonton / Pemain) -->
     <div id="share-overlay" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
@@ -578,23 +663,45 @@
         </div>
     </div>
 
+    <!-- Modal Kemaskini Markah Manual (Menyokong 1 Set & Best of 3 Sets + Nama Pengadil) -->
     <div id="edit-score-overlay" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
-            <h3 class="text-lg font-bold mb-4 text-gray-800"><i class="fa-solid fa-pen-to-square mr-2 text-blue-500"></i>Kemaskini Markah Manual</h3>
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <h3 class="text-lg font-bold mb-3 text-gray-800"><i class="fa-solid fa-pen-to-square mr-2 text-blue-500"></i>Kemaskini Markah & Pengadil</h3>
             <form onsubmit="saveEditScore(event)">
                 <input type="hidden" id="edit-match-id">
-                <div class="flex justify-between items-center mb-4 gap-4">
-                    <div class="flex-1 text-center">
-                        <label id="edit-team1-name" class="block text-sm font-bold text-gray-700 mb-2 truncate">Regu 1</label>
-                        <input type="number" id="edit-score1" class="w-full text-center border rounded-lg px-2 py-3 text-2xl font-bold focus:ring-2 focus:ring-blue-500" required min="0">
+                <div class="mb-3">
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Nama Pengadil:</label>
+                    <input type="text" id="edit-umpire-name" placeholder="Nama Pengadil" class="w-full border rounded-lg px-3 py-1.5 text-sm font-semibold">
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-center items-center mb-2 pb-1 border-b text-xs font-bold text-gray-700">
+                    <span id="edit-team1-name" class="truncate">Regu 1</span>
+                    <span class="text-gray-400">SET</span>
+                    <span id="edit-team2-name" class="truncate">Regu 2</span>
+                </div>
+
+                <!-- Set 1 -->
+                <div class="grid grid-cols-3 gap-2 items-center mb-2">
+                    <input type="number" id="edit-s1-t1" class="w-full text-center border rounded-lg py-2 text-lg font-bold" required min="0">
+                    <span class="text-center text-xs font-bold text-gray-500">Set 1</span>
+                    <input type="number" id="edit-s1-t2" class="w-full text-center border rounded-lg py-2 text-lg font-bold" required min="0">
+                </div>
+
+                <!-- Set 2 & Set 3 (Hanya untuk Best of 3) -->
+                <div id="edit-multi-sets-wrapper" class="hidden space-y-2 mb-3">
+                    <div class="grid grid-cols-3 gap-2 items-center">
+                        <input type="number" id="edit-s2-t1" class="w-full text-center border rounded-lg py-2 text-lg font-bold" min="0">
+                        <span class="text-center text-xs font-bold text-gray-500">Set 2</span>
+                        <input type="number" id="edit-s2-t2" class="w-full text-center border rounded-lg py-2 text-lg font-bold" min="0">
                     </div>
-                    <div class="text-gray-400 font-black italic">VS</div>
-                    <div class="flex-1 text-center">
-                        <label id="edit-team2-name" class="block text-sm font-bold text-gray-700 mb-2 truncate">Regu 2</label>
-                        <input type="number" id="edit-score2" class="w-full text-center border rounded-lg px-2 py-3 text-2xl font-bold focus:ring-2 focus:ring-blue-500" required min="0">
+                    <div class="grid grid-cols-3 gap-2 items-center">
+                        <input type="number" id="edit-s3-t1" class="w-full text-center border rounded-lg py-2 text-lg font-bold" min="0">
+                        <span class="text-center text-xs font-bold text-amber-600">Set 3 (Jika Seri)</span>
+                        <input type="number" id="edit-s3-t2" class="w-full text-center border rounded-lg py-2 text-lg font-bold" min="0">
                     </div>
                 </div>
-                <div class="flex gap-2">
+
+                <div class="flex gap-2 mt-4">
                     <button type="button" onclick="closeEditScore()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-semibold transition">Batal</button>
                     <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition">Simpan</button>
                 </div>
@@ -656,12 +763,6 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ============================================================================
-        // CARA KEKALKAN FIREBASE CONFIG DI GITHUB TANPA PERLU EDIT INDEX.HTML LAGI:
-        // Cipta satu fail berasingan bernama "firebase-config.js" di GitHub anda dengan
-        // kandungan: window.FIREBASE_CONFIG = { apiKey: "...", projectId: "...", ... };
-        // Sistem akan membaca fail tersebut secara automatik!
-        // ============================================================================
         const MANUAL_FIREBASE_CONFIG = {
             apiKey: "MASUKKAN_API_KEY_ANDA_DI_SINI",
             authDomain: "projek-anda.firebaseapp.com",
@@ -812,11 +913,12 @@
                 tournamentName: 'Badminton KPDN P.Pinang',
                 peringkat: 'Peringkat Kumpulan',
                 format: 'Round Robin',
+                matchSetMode: '1_set', // '1_set' atau 'best_of_3' (2 Set + Set Ke-3 Penentuan)
                 maxScore: '',
                 numGroups: '2',
                 numQualify: '2',
                 qualifyMethod: 'bye',
-                thirdPlacePlayoff: 'joint', // 'joint' (Pemenang Bersama) atau 'playoff' (Perlawanan Penentuan)
+                thirdPlacePlayoff: 'joint',
                 adminPin: '1234',
                 umpirePin: '2222'
             }
@@ -829,15 +931,124 @@
             return doc(db, 'artifacts', appId, 'public', 'data', 'kpdn_state', 'main');
         }
 
+        // Pastikan setiap perlawanan mempunyai struktur Kod Berurutan (P1, S1, SA1, A1), Nama Pengadil & Data Set
+        function normalizeMatchesStructure() {
+            const groupKeys = Object.keys(window.state.groups || {});
+            let pCounter = 1;
+            let phaseCounters = {};
+
+            (window.state.matches || []).forEach(m => {
+                // 1. Kod Perlawanan Berurutan
+                if (!m.matchCode) {
+                    if (groupKeys.includes(m.group)) {
+                        m.matchCode = `P${pCounter++}`;
+                    } else {
+                        let prefix = 'KM';
+                        if (m.group === 'Suku Akhir') prefix = 'S';
+                        else if (m.group === 'Separuh Akhir') prefix = 'SA';
+                        else if (m.group === 'Pusingan Akhir') prefix = 'A';
+                        else if (m.group === 'Penentuan Tempat Ke-3 & Ke-4') prefix = 'P34-';
+                        phaseCounters[prefix] = (phaseCounters[prefix] || 0) + 1;
+                        m.matchCode = `${prefix}${phaseCounters[prefix]}`;
+                    }
+                }
+                // 2. Nama Pengadil
+                if (m.umpireName === undefined) m.umpireName = '';
+                // 3. Struktur Set (3 Set Maksimum)
+                if (!Array.isArray(m.sets) || m.sets.length < 3) {
+                    m.sets = [
+                        { s1: Number(m.score1) || 0, s2: Number(m.score2) || 0 },
+                        { s1: 0, s2: 0 },
+                        { s1: 0, s2: 0 }
+                    ];
+                }
+                if (typeof m.currentSet !== 'number') m.currentSet = 0;
+            });
+        }
+
         function ensureDefaultSettings() {
             if (!window.state.settings) window.state.settings = {};
             if (!window.state.settings.tournamentName) window.state.settings.tournamentName = 'Badminton KPDN P.Pinang';
+            if (!window.state.settings.matchSetMode) window.state.settings.matchSetMode = '1_set';
             if (!window.state.settings.adminPin) window.state.settings.adminPin = '1234';
             if (!window.state.settings.umpirePin) window.state.settings.umpirePin = '2222';
             if (!window.state.settings.thirdPlacePlayoff) window.state.settings.thirdPlacePlayoff = 'joint';
             if (!window.state.collapsedKnockoutPhases) window.state.collapsedKnockoutPhases = {};
             if (!window.state.settingsHistory) window.state.settingsHistory = [];
+            normalizeMatchesStructure();
         }
+
+        // --- Helper Pengiraan Set & Skor Perlawanan ---
+        window.isBestOf3Mode = function() {
+            return window.state.settings && window.state.settings.matchSetMode === 'best_of_3';
+        };
+
+        window.getMatchSetEvaluation = function(match) {
+            const bestOf3 = window.isBestOf3Mode();
+            if (!match.sets || match.sets.length < 3) {
+                match.sets = [
+                    { s1: Number(match.score1) || 0, s2: Number(match.score2) || 0 },
+                    { s1: 0, s2: 0 },
+                    { s1: 0, s2: 0 }
+                ];
+            }
+
+            if (!bestOf3 || (match.team2 && match.team2.id === 'bye')) {
+                const s1 = match.sets[0].s1;
+                const s2 = match.sets[0].s2;
+                match.score1 = s1;
+                match.score2 = s2;
+                const winner = s1 > s2 ? 1 : (s2 > s1 ? 2 : 0);
+                return {
+                    isBestOf3: false,
+                    setsWon1: winner === 1 ? 1 : 0,
+                    setsWon2: winner === 2 ? 1 : 0,
+                    totalPoints1: s1,
+                    totalPoints2: s2,
+                    winnerTeamNum: winner,
+                    playedSetsText: `${s1} - ${s2}`,
+                    shortSummaryText: `${s1} - ${s2}`
+                };
+            }
+
+            let setsWon1 = 0, setsWon2 = 0;
+            let totalPoints1 = 0, totalPoints2 = 0;
+            let playedTexts = [];
+
+            match.sets.forEach((st, idx) => {
+                // Set ke-3 hanya dikira jika dimainkan atau jika Set 1 & Set 2 terikat 1-1
+                if (idx === 2 && setsWon1 !== 1 && setsWon2 !== 1 && st.s1 === 0 && st.s2 === 0) return;
+                // Set 1 & 2 yang masih 0-0 dan belum disentuh
+                if (idx > 0 && idx > (match.currentSet || 0) && st.s1 === 0 && st.s2 === 0) return;
+
+                totalPoints1 += Number(st.s1) || 0;
+                totalPoints2 += Number(st.s2) || 0;
+
+                if (st.s1 > st.s2) setsWon1++;
+                else if (st.s2 > st.s1) setsWon2++;
+
+                if (st.s1 > 0 || st.s2 > 0 || idx <= (match.currentSet || 0)) {
+                    playedTexts.push(`${st.s1}-${st.s2}`);
+                }
+            });
+
+            let winnerTeamNum = 0;
+            if (setsWon1 > setsWon2) winnerTeamNum = 1;
+            else if (setsWon2 > setsWon1) winnerTeamNum = 2;
+            else if (totalPoints1 > totalPoints2) winnerTeamNum = 1;
+            else if (totalPoints2 > totalPoints1) winnerTeamNum = 2;
+
+            return {
+                isBestOf3: true,
+                setsWon1,
+                setsWon2,
+                totalPoints1,
+                totalPoints2,
+                winnerTeamNum,
+                playedSetsText: playedTexts.length > 0 ? playedTexts.join(', ') : '0-0',
+                shortSummaryText: `${setsWon1} - ${setsWon2} (${playedTexts.length > 0 ? playedTexts.join(', ') : '0-0'})`
+            };
+        };
 
         function setupCloudListener() {
             if (!db) return;
@@ -850,7 +1061,9 @@
                     if (cloudData && cloudData.statePayload) {
                         try {
                             const parsed = JSON.parse(cloudData.statePayload);
+                            const currentActiveMatch = window.state.activeMatchId;
                             window.state = { ...window.state, ...parsed };
+                            if (currentActiveMatch) window.state.activeMatchId = currentActiveMatch;
                             ensureDefaultSettings();
                             localStorage.setItem('badmintonKPDNState', JSON.stringify(window.state));
                             updateCloudIndicator('synced', 'Langsung (Live)');
@@ -920,25 +1133,24 @@
             const roleBadge = document.getElementById('role-badge');
             const adminBanner = document.getElementById('admin-link-banner');
 
-            // Kemas kini Tajuk Utama Kejohanan
             const titleEl = document.getElementById('main-tournament-title');
             const tName = window.state.settings.tournamentName || 'Badminton KPDN P.Pinang';
             if (titleEl) titleEl.innerText = tName;
             document.title = tName;
 
-            // Isi nilai dalam borang Ketetapan jika tidak sedang ditaip
             const pinAdminInput = document.getElementById('set-admin-pin');
             const pinUmpireInput = document.getElementById('set-umpire-pin');
             const tNameInput = document.getElementById('set-tournament-name');
             const thirdPlaceSelect = document.getElementById('set-third-place-playoff');
+            const setModeSelect = document.getElementById('set-match-set-mode');
 
             if (pinAdminInput && document.activeElement !== pinAdminInput) pinAdminInput.value = window.state.settings.adminPin || '1234';
             if (pinUmpireInput && document.activeElement !== pinUmpireInput) pinUmpireInput.value = window.state.settings.umpirePin || '2222';
             if (tNameInput && document.activeElement !== tNameInput && !tNameInput.value) tNameInput.value = tName;
             if (thirdPlaceSelect && document.activeElement !== thirdPlaceSelect) thirdPlaceSelect.value = window.state.settings.thirdPlacePlayoff || 'joint';
+            if (setModeSelect && document.activeElement !== setModeSelect) setModeSelect.value = window.state.settings.matchSetMode || '1_set';
 
             if (currentUserRole === 'superadmin') {
-                // Layer 1: Super Admin (Semua Menu)
                 navTabs?.classList.remove('hidden');
                 tabPublic?.classList.remove('hidden');
                 tabAdmin?.classList.remove('hidden');
@@ -956,7 +1168,6 @@
                     roleBadge.innerHTML = '<i class="fa-solid fa-crown mr-1"></i>Super Admin';
                 }
             } else if (currentUserRole === 'umpire') {
-                // Layer 2: Pengadil (Hanya Paparan Awam & Pengadil Skor)
                 navTabs?.classList.remove('hidden');
                 tabPublic?.classList.remove('hidden');
                 tabUmpire?.classList.remove('hidden');
@@ -974,14 +1185,12 @@
                     roleBadge.innerHTML = '<i class="fa-solid fa-whistle mr-1"></i>Mod Pengadil';
                 }
 
-                // Jika sedang berada di tab terlarang, alihkan ke tab Pengadil atau Awam
                 const activeAdminView = !document.getElementById('view-admin')?.classList.contains('hidden');
                 const activeSettingsView = !document.getElementById('view-settings')?.classList.contains('hidden');
                 if (activeAdminView || activeSettingsView) {
                     window.switchTab('umpire');
                 }
             } else {
-                // Layer 3: Orang Awam / Viewer (Hanya Paparan Awam)
                 navTabs?.classList.add('hidden');
                 btnCloud?.classList.add('hidden');
                 btnReset?.classList.add('hidden');
@@ -1044,7 +1253,7 @@
             }
         };
 
-        // --- Fungsi Kongsi Pautan Awam (Share Modal) ---
+        // --- Fungsi Kongsi Pautan Awam ---
         window.getPublicShareUrl = function() {
             const baseUrl = window.location.origin + window.location.pathname;
             return `${baseUrl}?view=public`;
@@ -1237,14 +1446,31 @@
             confirmActionCallback = null;
         };
 
+        // --- Edit Markah Manual (Menyokong 1 Set & Best of 3 Sets) ---
         window.openEditScore = function(matchId) {
             const match = window.state.matches.find(m => m.id === matchId);
             if (!match) return;
+            window.getMatchSetEvaluation(match);
+
             document.getElementById('edit-match-id').value = match.id;
+            document.getElementById('edit-umpire-name').value = match.umpireName || '';
             document.getElementById('edit-team1-name').innerText = match.team1.name;
             document.getElementById('edit-team2-name').innerText = match.team2.name;
-            document.getElementById('edit-score1').value = match.score1;
-            document.getElementById('edit-score2').value = match.score2;
+
+            document.getElementById('edit-s1-t1').value = match.sets[0].s1;
+            document.getElementById('edit-s1-t2').value = match.sets[0].s2;
+            document.getElementById('edit-s2-t1').value = match.sets[1].s1;
+            document.getElementById('edit-s2-t2').value = match.sets[1].s2;
+            document.getElementById('edit-s3-t1').value = match.sets[2].s1;
+            document.getElementById('edit-s3-t2').value = match.sets[2].s2;
+
+            const multiWrapper = document.getElementById('edit-multi-sets-wrapper');
+            if (window.isBestOf3Mode()) {
+                multiWrapper.classList.remove('hidden');
+            } else {
+                multiWrapper.classList.add('hidden');
+            }
+
             const overlay = document.getElementById('edit-score-overlay');
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
@@ -1259,16 +1485,33 @@
         window.saveEditScore = function(e) {
             e.preventDefault();
             const matchId = document.getElementById('edit-match-id').value;
-            const s1 = parseInt(document.getElementById('edit-score1').value) || 0;
-            const s2 = parseInt(document.getElementById('edit-score2').value) || 0;
             const match = window.state.matches.find(m => m.id === matchId);
             if (match) {
-                match.score1 = Math.max(0, s1);
-                match.score2 = Math.max(0, s2);
+                match.umpireName = document.getElementById('edit-umpire-name').value.trim();
+                const s1t1 = Math.max(0, parseInt(document.getElementById('edit-s1-t1').value) || 0);
+                const s1t2 = Math.max(0, parseInt(document.getElementById('edit-s1-t2').value) || 0);
+                const s2t1 = Math.max(0, parseInt(document.getElementById('edit-s2-t1').value) || 0);
+                const s2t2 = Math.max(0, parseInt(document.getElementById('edit-s2-t2').value) || 0);
+                const s3t1 = Math.max(0, parseInt(document.getElementById('edit-s3-t1').value) || 0);
+                const s3t2 = Math.max(0, parseInt(document.getElementById('edit-s3-t2').value) || 0);
+
+                match.sets = [
+                    { s1: s1t1, s2: s1t2 },
+                    { s1: s2t1, s2: s2t2 },
+                    { s1: s3t1, s2: s3t2 }
+                ];
+                if (s3t1 > 0 || s3t2 > 0) match.currentSet = 2;
+                else if (s2t1 > 0 || s2t2 > 0) match.currentSet = 1;
+                else match.currentSet = 0;
+
+                const evalRes = window.getMatchSetEvaluation(match);
+                match.score1 = evalRes.isBestOf3 ? evalRes.setsWon1 : s1t1;
+                match.score2 = evalRes.isBestOf3 ? evalRes.setsWon2 : s1t2;
+
                 window.saveData();
             }
             closeEditScore();
-            showModal('Berjaya Dikemaskini', 'Markah perlawanan telah dikemaskini.', 'success');
+            showModal('Berjaya Dikemaskini', 'Markah perlawanan dan maklumat pengadil telah dikemaskini.', 'success');
         };
 
         window.deleteSettingsRecord = function(id) {
@@ -1355,6 +1598,7 @@
             const tournamentName = document.getElementById('set-tournament-name').value.trim() || 'Badminton KPDN P.Pinang';
             const peringkat = document.getElementById('set-peringkat').value.trim() || 'Peringkat Kumpulan';
             const format = document.getElementById('set-format').value.trim() || 'Round Robin';
+            const matchSetMode = document.getElementById('set-match-set-mode')?.value || '1_set';
             const maxScore = document.getElementById('set-max-score').value.trim();
             const numQualify = document.getElementById('set-num-qualify').value.trim() || '2';
             const qualifyMethodEl = document.getElementById('set-qualify-method');
@@ -1368,6 +1612,7 @@
             window.state.settings.tournamentName = tournamentName;
             window.state.settings.peringkat = peringkat;
             window.state.settings.format = format;
+            window.state.settings.matchSetMode = matchSetMode;
             window.state.settings.maxScore = maxScore;
             window.state.settings.thirdPlacePlayoff = thirdPlacePlayoff;
             window.state.settings.adminPin = newAdminPin;
@@ -1382,6 +1627,7 @@
             const timeStr = date.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' });
             const dateStr = date.toLocaleDateString('ms-MY');
             
+            const setModeText = matchSetMode === 'best_of_3' ? '2 Set (Best of 3)' : '1 Set';
             const methodText = qualifyMethod === 'best_third' ? 'Tempat Ke-3 Terbaik' : 'Format Bye';
             const thirdPlaceText = thirdPlacePlayoff === 'playoff' ? 'Perlawanan Ke-3/4' : 'Ke-3 Bersama';
             const qualifyInfo = peringkat === 'Peringkat Kumpulan' ? ` | Layak: Top ${numQualify} (${methodText})` : '';
@@ -1392,16 +1638,17 @@
                 time: `${dateStr} ${timeStr}`,
                 peringkat: peringkat,
                 format: format,
+                matchSetMode: matchSetMode,
                 maxScore: maxScore,
                 numQualify: peringkat === 'Peringkat Kumpulan' ? numQualify : window.state.settings.numQualify,
                 qualifyMethod: peringkat === 'Peringkat Kumpulan' ? qualifyMethod : window.state.settings.qualifyMethod,
                 thirdPlacePlayoff: thirdPlacePlayoff,
-                details: `[${tournamentName}] ${peringkat} (${format})${maxScoreInfo}${qualifyInfo} | ${thirdPlaceText}`
+                details: `[${tournamentName}] ${peringkat} (${format} - ${setModeText})${maxScoreInfo}${qualifyInfo} | ${thirdPlaceText}`
             });
 
             window.saveData();
             window.handlePhaseSettings();
-            showModal('Rekod Ketetapan Disimpan', 'Nama kejohanan, ketetapan perlawanan & PIN sistem telah dikemas kini.', 'success');
+            showModal('Rekod Ketetapan Disimpan', 'Nama kejohanan, format set (1 Set / Best of 3), dan ketetapan perlawanan telah dikemas kini.', 'success');
         };
 
         window.handlePhaseSettings = function() {
@@ -1416,7 +1663,7 @@
             }
         };
 
-        // --- Standings & Group Calculation ---
+        // --- Standings & Group Calculation (Menyokong 1 Set & Best of 3 Sets) ---
         window.getBestThirdPlacedQualifiedIds = function() {
             if (window.getQualifyMethod() !== 'best_third') return [];
             const groupKeys = Object.keys(window.state.groups).sort();
@@ -1465,18 +1712,20 @@
                 let id2 = m.team2.id;
                 if (!stats[id1] || !stats[id2]) return;
 
+                const evalRes = window.getMatchSetEvaluation(m);
+
                 stats[id1].p++;
                 stats[id2].p++;
-                stats[id1].pf += m.score1;
-                stats[id1].pa += m.score2;
-                stats[id2].pf += m.score2;
-                stats[id2].pa += m.score1;
+                stats[id1].pf += evalRes.totalPoints1;
+                stats[id1].pa += evalRes.totalPoints2;
+                stats[id2].pf += evalRes.totalPoints2;
+                stats[id2].pa += evalRes.totalPoints1;
 
-                if (m.score1 > m.score2) {
+                if (evalRes.winnerTeamNum === 1) {
                     stats[id1].w++;
                     stats[id1].pts += 2;
                     stats[id2].l++;
-                } else if (m.score2 > m.score1) {
+                } else if (evalRes.winnerTeamNum === 2) {
                     stats[id2].w++;
                     stats[id2].pts += 2;
                     stats[id1].l++;
@@ -1504,14 +1753,14 @@
             const finalMatch = finalMatches[finalMatches.length - 1];
             if (finalMatch.status !== 'completed') return { isFinished: false };
 
-            // Jika wujud perlawanan Penentuan Tempat Ke-3 & Ke-4, pastikan ia juga selesai
             const thirdPlaceMatches = window.state.matches.filter(m => m.group === 'Penentuan Tempat Ke-3 & Ke-4');
             if (thirdPlaceMatches.length > 0 && thirdPlaceMatches.some(m => m.status !== 'completed')) {
                 return { isFinished: false };
             }
 
-            const champion = finalMatch.score1 >= finalMatch.score2 ? finalMatch.team1 : finalMatch.team2;
-            const runnerUp = finalMatch.score1 >= finalMatch.score2 ? finalMatch.team2 : finalMatch.team1;
+            const finalEval = window.getMatchSetEvaluation(finalMatch);
+            const champion = finalEval.winnerTeamNum !== 2 ? finalMatch.team1 : finalMatch.team2;
+            const runnerUp = finalEval.winnerTeamNum !== 2 ? finalMatch.team2 : finalMatch.team1;
 
             let thirdPlace = [];
             let fourthPlace = null;
@@ -1519,16 +1768,17 @@
 
             if (thirdPlaceMatches.length > 0) {
                 const tpMatch = thirdPlaceMatches[thirdPlaceMatches.length - 1];
-                const tpWinner = tpMatch.score1 >= tpMatch.score2 ? tpMatch.team1 : tpMatch.team2;
-                const tpLoser = tpMatch.score1 >= tpMatch.score2 ? tpMatch.team2 : tpMatch.team1;
+                const tpEval = window.getMatchSetEvaluation(tpMatch);
+                const tpWinner = tpEval.winnerTeamNum !== 2 ? tpMatch.team1 : tpMatch.team2;
+                const tpLoser = tpEval.winnerTeamNum !== 2 ? tpMatch.team2 : tpMatch.team1;
                 thirdPlace = [tpWinner];
                 fourthPlace = tpLoser;
                 isJointThird = false;
             } else {
-                // Ambil pasukan yang kalah di Separuh Akhir sebagai Pemenang Bersama Tempat Ke-3
                 const semiMatches = window.state.matches.filter(m => m.group === 'Separuh Akhir' && m.status === 'completed');
                 semiMatches.forEach(sm => {
-                    const loser = sm.score1 >= sm.score2 ? sm.team2 : sm.team1;
+                    const smEval = window.getMatchSetEvaluation(sm);
+                    const loser = smEval.winnerTeamNum !== 2 ? sm.team2 : sm.team1;
                     if (loser && loser.id !== 'bye') thirdPlace.push(loser);
                 });
                 isJointThird = true;
@@ -1542,6 +1792,7 @@
                 fourthPlace,
                 isJointThird,
                 finalMatch,
+                finalEval,
                 thirdPlaceMatch: thirdPlaceMatches.length > 0 ? thirdPlaceMatches[thirdPlaceMatches.length - 1] : null
             };
         };
@@ -1737,6 +1988,7 @@
             window.saveData();
         };
 
+        // --- Jana Jadual Kumpulan dengan Kod Turutan P1, P2, P3... ---
         window.generateMatchesFromGroups = function() {
             if (Object.keys(window.state.groups).length === 0) {
                 showModal('Ralat', 'Sila set kumpulan dahulu.', 'error');
@@ -1764,11 +2016,15 @@
                         for (let j = i + 1; j < teamsInGroup.length; j++) {
                             currentGroupMatches.push({
                                 id: window.generateId(),
+                                matchCode: '', // Akan dinomborkan P1, P2... selepas disusun
                                 group: groupName,
                                 team1: teamsInGroup[i],
                                 team2: teamsInGroup[j],
                                 score1: 0,
                                 score2: 0,
+                                sets: [{ s1: 0, s2: 0 }, { s1: 0, s2: 0 }, { s1: 0, s2: 0 }],
+                                currentSet: 0,
+                                umpireName: '',
                                 status: 'pending' 
                             });
                         }
@@ -1793,15 +2049,18 @@
                 }
                 
                 let maxLen = allGroupMatches.length > 0 ? Math.max(...allGroupMatches.map(g => g.length)) : 0;
+                let pCounter = 1;
                 for (let i = 0; i < maxLen; i++) {
                     for (let j = 0; j < allGroupMatches.length; j++) {
                         if (allGroupMatches[j][i]) {
-                            window.state.matches.push(allGroupMatches[j][i]);
+                            const matchObj = allGroupMatches[j][i];
+                            matchObj.matchCode = `P${pCounter++}`;
+                            window.state.matches.push(matchObj);
                         }
                     }
                 }
                 window.saveData();
-                showModal('Jadual Selesai', 'Jadual Perlawanan Peringkat Kumpulan telah berjaya dijana.', 'success');
+                showModal('Jadual Selesai', `Jadual Peringkat Kumpulan (#P1 hingga #P${pCounter - 1}) telah berjaya dijana.`, 'success');
             };
 
             if (window.state.matches.length > 0) {
@@ -1811,7 +2070,16 @@
             }
         };
 
-        // --- Next Round Generation (Termasuk Pilihan Penentuan Tempat Ke-3 & Ke-4) ---
+        // --- Helper Kod Perlawanan Mengikut Pusingan Kalah Mati (S1, SA1, A1) ---
+        function getKnockoutCodePrefix(phaseName) {
+            if (phaseName === 'Suku Akhir') return 'S';
+            if (phaseName === 'Separuh Akhir') return 'SA';
+            if (phaseName === 'Pusingan Akhir') return 'A';
+            if (phaseName === 'Penentuan Tempat Ke-3 & Ke-4') return 'P34-';
+            return 'KM';
+        }
+
+        // --- Next Round Generation (Dengan Kod S1/SA1/A1 & Sokongan Best of 3) ---
         window.generateNextRound = function() {
             let qualifiedTeams = [];
             let losingSemiTeams = [];
@@ -1896,7 +2164,8 @@
                 const currentMatches = knockoutMatches.filter(m => m.group === lastPhase);
                 
                 currentMatches.forEach(m => {
-                    if (m.score1 >= m.score2) {
+                    const evalRes = window.getMatchSetEvaluation(m);
+                    if (evalRes.winnerTeamNum !== 2) {
                         qualifiedTeams.push(m.team1);
                         if (m.team2 && m.team2.id !== 'bye') losingSemiTeams.push(m.team2);
                     } else {
@@ -1918,7 +2187,6 @@
                 else if (bracketSize === 2) nextPhaseName = 'Pusingan Akhir';
                 else nextPhaseName = `Kalah Mati (${t} Pasukan)`;
 
-                // Lipatkan fasa sebelum ini supaya fasa baharu lebih menonjol tetapi fasa lama masih boleh dibuka
                 if (!window.state.collapsedKnockoutPhases) window.state.collapsedKnockoutPhases = {};
                 window.state.collapsedKnockoutPhases[lastPhase] = true;
             }
@@ -1929,11 +2197,15 @@
             if (nextPhaseName === 'Pusingan Akhir' && thirdPlaceOption === 'playoff' && losingSemiTeams.length >= 2) {
                 window.state.matches.push({
                     id: window.generateId(),
+                    matchCode: 'P34-1',
                     group: 'Penentuan Tempat Ke-3 & Ke-4',
                     team1: losingSemiTeams[0],
                     team2: losingSemiTeams[1],
                     score1: 0,
                     score2: 0,
+                    sets: [{ s1: 0, s2: 0 }, { s1: 0, s2: 0 }, { s1: 0, s2: 0 }],
+                    currentSet: 0,
+                    umpireName: '',
                     status: 'pending'
                 });
                 window.state.collapsedKnockoutPhases['Penentuan Tempat Ke-3 & Ke-4'] = false;
@@ -1943,6 +2215,8 @@
             const totalTeams = qualifiedTeams.length;
             const targetBracket = window.getTargetBracketSize(totalTeams);
             const numByes = targetBracket - totalTeams;
+            const prefix = getKnockoutCodePrefix(nextPhaseName);
+            let phaseMatchCounter = 1;
 
             if (numByes > 0) {
                 const byeTeams = qualifiedTeams.slice(0, numByes);
@@ -1951,11 +2225,15 @@
                 byeTeams.forEach(t1 => {
                     window.state.matches.push({
                         id: window.generateId(),
+                        matchCode: `${prefix}${phaseMatchCounter++}`,
                         group: nextPhaseName,
                         team1: t1,
                         team2: { id: 'bye', name: 'BYE (Automasi)' },
                         score1: 21,
                         score2: 0,
+                        sets: [{ s1: 21, s2: 0 }, { s1: 0, s2: 0 }, { s1: 0, s2: 0 }],
+                        currentSet: 0,
+                        umpireName: 'Automasi Sistem',
                         status: 'completed'
                     });
                     newMatchesCreated++;
@@ -1965,11 +2243,15 @@
                 for (let i = 0; i < halfPlay; i++) {
                     window.state.matches.push({
                         id: window.generateId(),
+                        matchCode: `${prefix}${phaseMatchCounter++}`,
                         group: nextPhaseName,
                         team1: playingTeams[i],
                         team2: playingTeams[playingTeams.length - 1 - i],
                         score1: 0,
                         score2: 0,
+                        sets: [{ s1: 0, s2: 0 }, { s1: 0, s2: 0 }, { s1: 0, s2: 0 }],
+                        currentSet: 0,
+                        umpireName: '',
                         status: 'pending'
                     });
                     newMatchesCreated++;
@@ -1979,11 +2261,15 @@
                 for (let i = 0; i < half; i++) {
                     window.state.matches.push({
                         id: window.generateId(),
+                        matchCode: `${prefix}${phaseMatchCounter++}`,
                         group: nextPhaseName,
                         team1: qualifiedTeams[i],
                         team2: qualifiedTeams[totalTeams - 1 - i],
                         score1: 0,
                         score2: 0,
+                        sets: [{ s1: 0, s2: 0 }, { s1: 0, s2: 0 }, { s1: 0, s2: 0 }],
+                        currentSet: 0,
+                        umpireName: '',
                         status: 'pending'
                     });
                     newMatchesCreated++;
@@ -2001,15 +2287,16 @@
                 time: `${date.toLocaleDateString('ms-MY')} ${date.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' })}`,
                 peringkat: nextPhaseName,
                 format: 'Kalah Mati',
+                matchSetMode: window.state.settings.matchSetMode || '1_set',
                 maxScore: window.state.settings.maxScore || '',
                 numQualify: window.state.settings.numQualify || '2',
                 qualifyMethod: window.state.settings.qualifyMethod || 'bye',
-                details: `Janaan Automatik: ${nextPhaseName} (${newMatchesCreated} Perlawanan)`
+                details: `Janaan Automatik: ${nextPhaseName} (${newMatchesCreated} Perlawanan - Kod #${prefix}1..#${prefix}${phaseMatchCounter - 1})`
             });
 
             window.saveData();
             window.handlePhaseSettings();
-            showModal('Jadual Kalah Mati Dijana!', `Sebanyak ${newMatchesCreated} perlawanan telah dijana untuk fasa seterusnya.`, 'success');
+            showModal('Jadual Kalah Mati Dijana!', `Sebanyak ${newMatchesCreated} perlawanan telah dijana untuk ${nextPhaseName} (Kod #${prefix}1 hingga #${prefix}${phaseMatchCounter - 1}).`, 'success');
         };
 
         // --- Audio Umpire ---
@@ -2034,24 +2321,207 @@
             } catch (e) {}
         }
 
-        // --- Umpire Match Selection & Scoring ---
+        // --- Pendaftaran Nama Pengadil & Kawalan Skor / Set ---
         window.selectMatchForUmpire = function(matchId) {
+            const match = window.state.matches.find(m => m.id === matchId);
+            if (!match) return;
+
+            document.getElementById('pending-umpire-match-id').value = match.id;
+            const groupKeys = Object.keys(window.state.groups);
+            const isGroup = groupKeys.includes(match.group);
+            const phaseTitle = isGroup ? `Kumpulan ${match.group}` : match.group;
+
+            const infoEl = document.getElementById('umpire-modal-match-info');
+            if (infoEl) {
+                infoEl.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-indigo-700">${phaseTitle}</span>
+                        <span class="bg-amber-400 text-gray-900 font-black px-2 py-0.5 rounded">#${match.matchCode}</span>
+                    </div>
+                    <div class="text-sm font-extrabold text-gray-900 pt-1">${match.team1.name} <span class="text-gray-400 font-normal">vs</span> ${match.team2.name}</div>
+                `;
+            }
+
+            const nameInput = document.getElementById('umpire-name-input');
+            const lastSavedUmpire = sessionStorage.getItem('lastUmpireNameKPDN') || '';
+            if (nameInput) nameInput.value = match.umpireName || lastSavedUmpire;
+
+            const overlay = document.getElementById('umpire-name-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            setTimeout(() => nameInput?.focus(), 100);
+        };
+
+        window.closeUmpireNameModal = function() {
+            const overlay = document.getElementById('umpire-name-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        };
+
+        window.confirmStartUmpireMatch = function(e) {
+            e.preventDefault();
+            const matchId = document.getElementById('pending-umpire-match-id').value;
+            const umpireName = document.getElementById('umpire-name-input').value.trim();
+            if (!umpireName) {
+                showModal('Nama Pengadil Diperlukan', 'Sila masukkan nama pengadil sebelum memulakan perlawanan.', 'error');
+                return;
+            }
+
+            const match = window.state.matches.find(m => m.id === matchId);
+            if (!match) return;
+
+            match.umpireName = umpireName;
+            if (match.status === 'pending') match.status = 'in_progress';
+            sessionStorage.setItem('lastUmpireNameKPDN', umpireName);
+
+            closeUmpireNameModal();
+            window.openUmpireScoreboard(match.id);
+            window.saveData();
+        };
+
+        window.promptChangeUmpireName = function() {
+            if (!window.state.activeMatchId) return;
+            window.selectMatchForUmpire(window.state.activeMatchId);
+        };
+
+        window.openUmpireScoreboard = function(matchId) {
             const match = window.state.matches.find(m => m.id === matchId);
             if (!match) return;
             window.state.activeMatchId = matchId;
             document.getElementById('umpire-selection').classList.add('hidden');
             document.getElementById('umpire-scoring').classList.remove('hidden');
+            window.refreshUmpireScoreboardUI();
+        };
+
+        window.refreshUmpireScoreboardUI = function() {
+            if (!window.state.activeMatchId) return;
+            const match = window.state.matches.find(m => m.id === window.state.activeMatchId);
+            if (!match) return;
+
+            const evalRes = window.getMatchSetEvaluation(match);
+            const curSet = match.currentSet || 0;
+            const currentSetObj = match.sets[curSet] || { s1: 0, s2: 0 };
+
+            const groupKeys = Object.keys(window.state.groups);
+            const isGroup = groupKeys.includes(match.group);
+
+            document.getElementById('active-match-code').innerText = `#${match.matchCode}`;
+            document.getElementById('active-group').innerText = isGroup ? `Kumpulan ${match.group}` : match.group;
+            document.getElementById('active-umpire-name').innerText = match.umpireName || 'Belum Ditetapkan';
+
             document.getElementById('score-team1-name').innerText = match.team1.name;
             document.getElementById('score-team2-name').innerText = match.team2.name;
-            document.getElementById('score-val-1').innerText = match.score1;
-            document.getElementById('score-val-2').innerText = match.score2;
-            document.getElementById('active-group').innerText = match.group;
-            document.getElementById('active-match-id').innerText = match.id.substring(0, 4);
+            document.getElementById('score-val-1').innerText = currentSetObj.s1;
+            document.getElementById('score-val-2').innerText = currentSetObj.s2;
 
             const maxScore = window.state.settings.maxScore;
+            const modeText = evalRes.isBestOf3 ? 'Format: 2 Set (Best of 3)' : 'Format: 1 Set';
             const maxScoreDisplay = document.getElementById('umpire-max-score-display');
             if (maxScoreDisplay) {
-                maxScoreDisplay.innerText = maxScore ? `Mata Maks: ${maxScore}` : 'Mata: Bebas';
+                maxScoreDisplay.innerText = `${modeText} | ${maxScore ? `Mata Maks: ${maxScore}` : 'Mata: Bebas'}`;
+            }
+
+            const setsBar = document.getElementById('umpire-sets-bar');
+            const badge1 = document.getElementById('score-team1-sets-badge');
+            const badge2 = document.getElementById('score-team2-sets-badge');
+            const centerSetBadge = document.getElementById('active-set-badge');
+
+            if (centerSetBadge) {
+                centerSetBadge.innerText = curSet === 2 ? 'SET 3 (PENENTUAN)' : `SET ${curSet + 1}`;
+            }
+
+            if (evalRes.isBestOf3) {
+                setsBar?.classList.remove('hidden');
+                badge1?.classList.remove('hidden');
+                badge2?.classList.remove('hidden');
+                if (badge1) badge1.innerText = `Menang Set: ${evalRes.setsWon1}`;
+                if (badge2) badge2.innerText = `Menang Set: ${evalRes.setsWon2}`;
+
+                for (let i = 0; i < 3; i++) {
+                    const btn = document.getElementById(`btn-set-${i}`);
+                    if (!btn) continue;
+                    const st = match.sets[i];
+                    const label = i === 2 ? `Set 3 (${st.s1}-${st.s2})` : `Set ${i + 1} (${st.s1}-${st.s2})`;
+                    btn.innerText = label;
+                    if (i === curSet) {
+                        btn.className = 'px-3 py-1 rounded text-xs font-extrabold bg-amber-400 text-gray-900 shadow transition';
+                    } else {
+                        btn.className = 'px-3 py-1 rounded text-xs font-semibold bg-gray-700 text-gray-300 hover:bg-gray-600 transition';
+                    }
+                }
+
+                const summaryEl = document.getElementById('umpire-sets-summary');
+                if (summaryEl) {
+                    summaryEl.innerText = `Kedudukan Set: ${evalRes.setsWon1} - ${evalRes.setsWon2}`;
+                }
+
+                const btnNextSet = document.getElementById('btn-next-set');
+                if (btnNextSet) {
+                    if (curSet === 0) {
+                        btnNextSet.classList.remove('hidden');
+                        btnNextSet.innerHTML = `Ke Set 2 <i class="fa-solid fa-forward-step ml-1"></i>`;
+                    } else if (curSet === 1) {
+                        btnNextSet.classList.remove('hidden');
+                        btnNextSet.innerHTML = `Semak / Ke Set 3 (Penentuan) <i class="fa-solid fa-forward-step ml-1"></i>`;
+                    } else {
+                        btnNextSet.classList.add('hidden');
+                    }
+                }
+            } else {
+                setsBar?.classList.add('hidden');
+                badge1?.classList.add('hidden');
+                badge2?.classList.add('hidden');
+            }
+        };
+
+        window.switchUmpireSet = function(setIndex) {
+            if (!window.state.activeMatchId) return;
+            const match = window.state.matches.find(m => m.id === window.state.activeMatchId);
+            if (!match) return;
+
+            if (setIndex === 2) {
+                const s1Winner = match.sets[0].s1 > match.sets[0].s2 ? 1 : (match.sets[0].s2 > match.sets[0].s1 ? 2 : 0);
+                const s2Winner = match.sets[1].s1 > match.sets[1].s2 ? 1 : (match.sets[1].s2 > match.sets[1].s1 ? 2 : 0);
+                if (s1Winner !== 0 && s1Winner === s2Winner && match.sets[2].s1 === 0 && match.sets[2].s2 === 0) {
+                    showModal('Set Ke-3 Tidak Diperlukan', 'Salah satu regu telah memenangi 2 set berturut-turut (2-0). Anda boleh terus menekan "Tamat Perlawanan".', 'info');
+                    return;
+                }
+            }
+
+            match.currentSet = setIndex;
+            window.refreshUmpireScoreboardUI();
+            window.saveData();
+        };
+
+        window.proceedToNextSet = function() {
+            if (!window.state.activeMatchId) return;
+            const match = window.state.matches.find(m => m.id === window.state.activeMatchId);
+            if (!match) return;
+
+            const curSet = match.currentSet || 0;
+            const curScores = match.sets[curSet];
+            if (curScores.s1 === curScores.s2) {
+                showModal('Markah Set Seri', `Markah Set ${curSet + 1} masih seri (${curScores.s1}-${curScores.s2}). Sila pastikan ada pemenang bagi set ini dahulu.`, 'error');
+                return;
+            }
+
+            if (curSet === 0) {
+                match.currentSet = 1;
+                window.refreshUmpireScoreboardUI();
+                window.saveData();
+                showModal('Beralih Ke Set 2', `Set 1 selesai (${curScores.s1}-${curScores.s2}). Sila mulakan kiraan mata bagi Set 2.`, 'info');
+            } else if (curSet === 1) {
+                const w1 = match.sets[0].s1 > match.sets[0].s2 ? 1 : 2;
+                const w2 = match.sets[1].s1 > match.sets[1].s2 ? 1 : 2;
+                if (w1 !== w2) {
+                    match.currentSet = 2;
+                    window.refreshUmpireScoreboardUI();
+                    window.saveData();
+                    showModal('Set Ke-3 (Set Penentuan)', 'Kedudukan set kini terikat 1 - 1! Perlawanan diteruskan ke Set Ke-3 (Set Penentuan).', 'info');
+                } else {
+                    const winnerName = w1 === 1 ? match.team1.name : match.team2.name;
+                    showModal('Menang 2 Set Berturut-turut (2-0)', `${winnerName} telah memenangi kedua-dua Set 1 dan Set 2. Sila klik butang "Tamat Perlawanan" untuk mengesahkan keputusan.`, 'success');
+                }
             }
         };
 
@@ -2067,28 +2537,63 @@
             const match = window.state.matches.find(m => m.id === window.state.activeMatchId);
             if (!match) return;
 
-            if (teamNum === 1) {
-                match.score1 = Math.max(0, match.score1 + delta);
-                if (delta > 0) playSound(1);
-                document.getElementById('score-val-1').innerText = match.score1;
-            } else {
-                match.score2 = Math.max(0, match.score2 + delta);
-                if (delta > 0) playSound(2);
-                document.getElementById('score-val-2').innerText = match.score2;
+            const curSet = window.isBestOf3Mode() ? (match.currentSet || 0) : 0;
+            if (!match.sets || match.sets.length < 3) {
+                match.sets = [{ s1: 0, s2: 0 }, { s1: 0, s2: 0 }, { s1: 0, s2: 0 }];
             }
+
+            if (teamNum === 1) {
+                match.sets[curSet].s1 = Math.max(0, match.sets[curSet].s1 + delta);
+                if (delta > 0) playSound(1);
+            } else {
+                match.sets[curSet].s2 = Math.max(0, match.sets[curSet].s2 + delta);
+                if (delta > 0) playSound(2);
+            }
+
+            const evalRes = window.getMatchSetEvaluation(match);
+            match.score1 = evalRes.isBestOf3 ? evalRes.setsWon1 : match.sets[0].s1;
+            match.score2 = evalRes.isBestOf3 ? evalRes.setsWon2 : match.sets[0].s2;
             match.status = 'in_progress';
+
+            window.refreshUmpireScoreboardUI();
             window.saveData();
         };
 
         window.finishMatch = function() {
             if (!window.state.activeMatchId) return;
             const match = window.state.matches.find(m => m.id === window.state.activeMatchId);
-            if (match) {
-                match.status = 'completed';
-                window.saveData();
+            if (!match) return;
+
+            const evalRes = window.getMatchSetEvaluation(match);
+            if (evalRes.isBestOf3) {
+                if (evalRes.setsWon1 === 1 && evalRes.setsWon2 === 1 && match.sets[2].s1 === match.sets[2].s2) {
+                    showModal('Set Ke-3 Penentuan Belum Selesai', 'Kedudukan set terikat 1-1. Sila lengkapkan Set Ke-3 (Set Penentuan) sebelum menamatkan perlawanan.', 'error');
+                    match.currentSet = 2;
+                    window.refreshUmpireScoreboardUI();
+                    return;
+                }
+                if (evalRes.setsWon1 < 2 && evalRes.setsWon2 < 2) {
+                    showConfirm('Sahkan Tamat Perlawanan', `Kedudukan set semasa ialah ${evalRes.setsWon1} - ${evalRes.setsWon2}. Adakah anda pasti mahu menamatkan perlawanan ini sekarang?`, () => {
+                        match.score1 = evalRes.setsWon1;
+                        match.score2 = evalRes.setsWon2;
+                        match.status = 'completed';
+                        window.saveData();
+                        window.backToUmpireSelection();
+                        showModal('Perlawanan Tamat', `Keputusan perlawanan #${match.matchCode} telah direkodkan secara rasmi.`, 'success');
+                    });
+                    return;
+                }
+                match.score1 = evalRes.setsWon1;
+                match.score2 = evalRes.setsWon2;
+            } else {
+                match.score1 = match.sets[0].s1;
+                match.score2 = match.sets[0].s2;
             }
+
+            match.status = 'completed';
+            window.saveData();
             window.backToUmpireSelection();
-            showModal('Perlawanan Tamat', 'Markah telah direkodkan secara rasmi.', 'success');
+            showModal('Perlawanan Tamat', `Keputusan perlawanan #${match.matchCode} (Pengadil: ${match.umpireName || '-'}) telah direkodkan secara rasmi.`, 'success');
         };
 
         window.resetData = function() {
@@ -2097,6 +2602,7 @@
                 const savedTName = window.state.settings?.tournamentName || 'Badminton KPDN P.Pinang';
                 const savedAdminPin = window.state.settings?.adminPin || '1234';
                 const savedUmpirePin = window.state.settings?.umpirePin || '2222';
+                const savedSetMode = window.state.settings?.matchSetMode || '1_set';
                 localStorage.removeItem('badmintonKPDNState');
                 window.state = {
                     teams: [],
@@ -2110,6 +2616,7 @@
                         tournamentName: savedTName,
                         peringkat: 'Peringkat Kumpulan',
                         format: 'Round Robin',
+                        matchSetMode: savedSetMode,
                         maxScore: '',
                         numGroups: '2',
                         numQualify: '2',
@@ -2140,7 +2647,6 @@
             const tName = window.state.settings.tournamentName || 'Kejohanan Badminton KPDN Pulau Pinang';
             const wb = XLSX.utils.book_new();
 
-            // Sheet 1: Ringkasan Pemenang & Kedudukan Kumpulan
             const winnerRows = [
                 [tName.toUpperCase()],
                 ["KEPUTUSAN RASMI KEJOHANAN"],
@@ -2176,28 +2682,28 @@
             wsSummary['!cols'] = [{ wch: 28 }, { wch: 35 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }];
             XLSX.utils.book_append_sheet(wb, wsSummary, "Pemenang_&_Kumpulan");
 
-            // Sheet 2: Semua Keputusan Perlawanan (Dari Mula Hingga Akhir)
             const matchRows = [
                 [tName.toUpperCase()],
                 ["SENARAI KEPUTUSAN KESELURUHAN PERLAWANAN (DARI MULA HINGGA TAMAT)"],
                 [],
-                ["Bil", "ID Perlawanan", "Peringkat / Kumpulan", "Regu 1", "Markah Regu 1", "Markah Regu 2", "Regu 2", "Pemenang", "Status"]
+                ["Bil", "Kod Perlawanan", "Peringkat / Kumpulan", "Nama Pengadil", "Regu 1", "Keputusan / Skor Set", "Regu 2", "Pemenang", "Status"]
             ];
 
             window.state.matches.forEach((m, index) => {
                 const isGroup = groupKeys.includes(m.group);
                 const phaseLabel = isGroup ? `Kumpulan ${m.group}` : m.group;
+                const evalRes = window.getMatchSetEvaluation(m);
                 let winnerName = "-";
                 if (m.status === 'completed') {
-                    winnerName = m.score1 > m.score2 ? m.team1.name : (m.score2 > m.score1 ? m.team2.name : "Seri");
+                    winnerName = evalRes.winnerTeamNum === 1 ? m.team1.name : (evalRes.winnerTeamNum === 2 ? m.team2.name : "Seri");
                 }
                 matchRows.push([
                     index + 1,
-                    `#${m.id.substring(0, 4)}`,
+                    `#${m.matchCode}`,
                     phaseLabel,
+                    m.umpireName || "-",
                     m.team1.name,
-                    m.score1,
-                    m.score2,
+                    evalRes.shortSummaryText,
                     m.team2.name,
                     winnerName,
                     m.status === 'completed' ? 'Selesai' : m.status
@@ -2205,7 +2711,7 @@
             });
 
             const wsMatches = XLSX.utils.aoa_to_sheet(matchRows);
-            wsMatches['!cols'] = [{ wch: 6 }, { wch: 14 }, { wch: 28 }, { wch: 28 }, { wch: 15 }, { wch: 15 }, { wch: 28 }, { wch: 28 }, { wch: 12 }];
+            wsMatches['!cols'] = [{ wch: 6 }, { wch: 16 }, { wch: 26 }, { wch: 24 }, { wch: 28 }, { wch: 24 }, { wch: 28 }, { wch: 28 }, { wch: 12 }];
             XLSX.utils.book_append_sheet(wb, wsMatches, "Semua_Perlawanan");
 
             const safeFilename = tName.replace(/[^a-zA-Z0-9]/g, '_');
@@ -2263,13 +2769,15 @@
             let matchesHtml = window.state.matches.map((m, idx) => {
                 const isGroup = groupKeys.includes(m.group);
                 const phaseLabel = isGroup ? `Kumpulan ${m.group}` : m.group;
-                const winnerName = m.score1 > m.score2 ? m.team1.name : (m.score2 > m.score1 ? m.team2.name : 'Seri');
+                const evalRes = window.getMatchSetEvaluation(m);
+                const winnerName = evalRes.winnerTeamNum === 1 ? m.team1.name : (evalRes.winnerTeamNum === 2 ? m.team2.name : 'Seri');
                 return `
                     <tr>
-                        <td style="padding:6px;border:1px solid #ccc;text-align:center;">${idx + 1}</td>
+                        <td style="padding:6px;border:1px solid #ccc;text-align:center;font-weight:bold;">#${m.matchCode}</td>
                         <td style="padding:6px;border:1px solid #ccc;">${phaseLabel}</td>
+                        <td style="padding:6px;border:1px solid #ccc;">${m.umpireName || '-'}</td>
                         <td style="padding:6px;border:1px solid #ccc;text-align:right;font-weight:bold;">${m.team1.name}</td>
-                        <td style="padding:6px;border:1px solid #ccc;text-align:center;font-weight:bold;">${m.score1} - ${m.score2}</td>
+                        <td style="padding:6px;border:1px solid #ccc;text-align:center;font-weight:bold;">${evalRes.shortSummaryText}</td>
                         <td style="padding:6px;border:1px solid #ccc;font-weight:bold;">${m.team2.name}</td>
                         <td style="padding:6px;border:1px solid #ccc;">${winnerName}</td>
                     </tr>
@@ -2293,14 +2801,15 @@
                     <h2 style="color:#1e3a8a;">2. Kedudukan Akhir Peringkat Kumpulan</h2>
                     ${groupsHtml}
 
-                    <h2 style="color:#1e3a8a;margin-top:24px;">3. Rekod Keputusan Semua Perlawanan (Mula Hingga Tamat)</h2>
+                    <h2 style="color:#1e3a8a;margin-top:24px;">3. Rekod Keputusan Semua Perlawanan &amp; Pengadil Bertugas</h2>
                     <table style="width:100%;border-collapse:collapse;font-size:12px;">
                         <thead>
                             <tr style="background-color:#e0e7ff;">
-                                <th style="padding:6px;border:1px solid #ccc;">Bil</th>
+                                <th style="padding:6px;border:1px solid #ccc;">Kod</th>
                                 <th style="padding:6px;border:1px solid #ccc;text-align:left;">Peringkat</th>
+                                <th style="padding:6px;border:1px solid #ccc;text-align:left;">Pengadil</th>
                                 <th style="padding:6px;border:1px solid #ccc;text-align:right;">Regu 1</th>
-                                <th style="padding:6px;border:1px solid #ccc;">Keputusan</th>
+                                <th style="padding:6px;border:1px solid #ccc;">Keputusan Set</th>
                                 <th style="padding:6px;border:1px solid #ccc;text-align:left;">Regu 2</th>
                                 <th style="padding:6px;border:1px solid #ccc;text-align:left;">Pemenang</th>
                             </tr>
@@ -2330,6 +2839,7 @@
             renderGroupsManagement();
             renderAdminSchedule();
             renderUmpireSelection();
+            if (window.state.activeMatchId) window.refreshUmpireScoreboardUI();
             renderSettingsHistory();
             renderPublicView();
             updateMatchStatus();
@@ -2428,19 +2938,23 @@
                             ${mList.map(m => {
                                 const isCompleted = m.status === 'completed';
                                 const isInProgress = m.status === 'in_progress';
+                                const evalRes = window.getMatchSetEvaluation(m);
                                 const badgeClass = isCompleted ? 'bg-green-100 text-green-800' : (isInProgress ? 'bg-red-100 text-red-700 animate-pulse' : 'bg-amber-100 text-amber-800');
                                 const badgeText = isCompleted ? 'Selesai' : (isInProgress ? 'LIVE' : 'Belum Mula');
                                 return `
                                     <div class="p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 hover:bg-gray-50 text-sm">
-                                        <div class="flex items-center gap-2 flex-1">
-                                            <span class="text-xs font-semibold text-gray-400">#${m.id.substring(0,4)}</span>
+                                        <div class="flex items-center gap-2 flex-1 w-full">
+                                            <span class="text-xs font-black bg-gray-800 text-amber-300 px-2 py-0.5 rounded shrink-0">#${m.matchCode}</span>
                                             <span class="font-bold text-gray-800 text-right flex-1 truncate">${m.team1.name}</span>
-                                            <span class="bg-gray-200 px-2 py-1 rounded font-bold text-xs">${isCompleted || isInProgress ? `${m.score1} - ${m.score2}` : 'VS'}</span>
+                                            <div class="flex flex-col items-center px-2">
+                                                <span class="bg-gray-200 px-2.5 py-0.5 rounded font-bold text-xs">${isCompleted || isInProgress ? evalRes.shortSummaryText : 'VS'}</span>
+                                                ${m.umpireName ? `<span class="text-[10px] text-teal-700 font-semibold mt-0.5"><i class="fa-solid fa-user-tie mr-1"></i>${m.umpireName}</span>` : ''}
+                                            </div>
                                             <span class="font-bold text-gray-800 text-left flex-1 truncate">${m.team2.name}</span>
                                         </div>
-                                        <div class="flex items-center gap-2 self-end sm:self-center">
+                                        <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
                                             <span class="text-[10px] px-2 py-0.5 rounded font-bold ${badgeClass}">${badgeText}</span>
-                                            ${isCompleted ? `<button onclick="openEditScore('${m.id}')" class="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2.5 py-1 rounded hover:bg-blue-100 font-bold"><i class="fa-solid fa-pen mr-1"></i>Edit</button>` : ''}
+                                            <button onclick="openEditScore('${m.id}')" class="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2.5 py-1 rounded hover:bg-blue-100 font-bold"><i class="fa-solid fa-pen mr-1"></i>Edit</button>
                                         </div>
                                     </div>
                                 `;
@@ -2466,7 +2980,7 @@
             const activeMatches = window.state.matches.filter(m => m.status !== 'completed');
             
             if (phaseInd) {
-                phaseInd.innerText = `${activeMatches.length} Perlawanan Aktif Menunggu`;
+                phaseInd.innerText = `${activeMatches.length} Perlawanan Menunggu / Sedang Berlangsung`;
             }
 
             if (activeMatches.length === 0) {
@@ -2476,21 +2990,24 @@
 
             listContainer.innerHTML = activeMatches.map(m => {
                 const isGroup = groupKeys.includes(m.group);
+                const isLive = m.status === 'in_progress';
+                const evalRes = window.getMatchSetEvaluation(m);
                 return `
-                    <div class="border rounded-xl p-4 bg-white shadow-2xs hover:shadow-md transition flex flex-col justify-between border-l-4 ${isGroup ? 'border-l-teal-500' : 'border-l-indigo-500'}">
+                    <div class="border rounded-xl p-4 bg-white shadow-2xs hover:shadow-md transition flex flex-col justify-between border-l-4 ${isLive ? 'border-l-red-500 ring-2 ring-red-100' : (isGroup ? 'border-l-teal-500' : 'border-l-indigo-500')}">
                         <div>
                             <div class="flex justify-between items-center mb-3">
-                                <span class="text-xs font-bold ${isGroup ? 'text-teal-700 bg-teal-50' : 'text-indigo-700 bg-indigo-50'} px-2 py-0.5 rounded">${isGroup ? `Kumpulan ${m.group}` : m.group}</span>
-                                <span class="text-xs text-gray-400 font-mono">#${m.id.substring(0, 4)}</span>
+                                <span class="text-xs font-black bg-gray-900 text-amber-300 px-2.5 py-1 rounded shadow-2xs">#${m.matchCode}</span>
+                                <span class="text-xs font-bold ${isGroup ? 'text-teal-700 bg-teal-50' : 'text-indigo-700 bg-indigo-50'} px-2.5 py-0.5 rounded">${isGroup ? `Kumpulan ${m.group}` : m.group}</span>
                             </div>
-                            <div class="flex justify-between items-center mb-4 text-sm font-bold text-gray-800">
+                            <div class="flex justify-between items-center mb-3 text-sm font-bold text-gray-800">
                                 <span class="flex-1 text-right truncate pr-2">${m.team1.name}</span>
-                                <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">VS</span>
+                                <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-mono">${isLive ? evalRes.shortSummaryText : 'VS'}</span>
                                 <span class="flex-1 text-left truncate pl-2">${m.team2.name}</span>
                             </div>
+                            ${m.umpireName ? `<div class="text-[11px] text-center text-teal-700 bg-teal-50/70 rounded py-1 mb-3 font-semibold"><i class="fa-solid fa-user-tie mr-1"></i>Pengadil: ${m.umpireName}</div>` : ''}
                         </div>
-                        <button onclick="selectMatchForUmpire('${m.id}')" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-whistle"></i> Mula Mengadil / Skor
+                        <button onclick="selectMatchForUmpire('${m.id}')" class="w-full ${isLive ? 'bg-amber-500 hover:bg-amber-600 text-gray-900' : 'bg-red-600 hover:bg-red-700 text-white'} py-2.5 rounded-lg text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-whistle"></i> ${isLive ? `Sambung Mengadil (#${m.matchCode})` : `Pilih & Masukkan Nama Pengadil (#${m.matchCode})`}
                         </button>
                     </div>
                 `;
@@ -2528,7 +3045,7 @@
             const knockoutMatches = window.state.matches.filter(m => !groupKeys.includes(m.group));
             const hasKnockout = knockoutMatches.length > 0;
 
-            // 1. Paparkan Poster Pemenang Rasmi jika Pusingan Akhir telah selesai
+            // 1. Poster Pemenang Rasmi
             const winnerSummary = window.getTournamentWinnersSummary();
             if (winnerPosterEl) {
                 if (winnerSummary.isFinished) {
@@ -2564,24 +3081,21 @@
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-stretch">
-                                <!-- Naib Johan -->
                                 <div class="bg-slate-800/70 backdrop-blur-xs border border-slate-400/40 rounded-2xl p-4 text-center flex flex-col justify-center order-2 md:order-1">
                                     <div class="text-slate-300 text-2xl mb-1"><i class="fa-solid fa-award"></i></div>
                                     <div class="text-[11px] uppercase tracking-wider text-slate-300 font-bold">Naib Johan</div>
                                     <div class="text-lg sm:text-xl font-extrabold text-white mt-1">${winnerSummary.runnerUp.name}</div>
                                 </div>
 
-                                <!-- Johan -->
                                 <div class="bg-gradient-to-b from-yellow-500/30 to-amber-600/20 backdrop-blur-xs border-2 border-yellow-400 rounded-2xl p-5 text-center flex flex-col justify-center shadow-lg transform md:-translate-y-2 order-1 md:order-2">
                                     <div class="text-yellow-400 text-4xl mb-1 animate-bounce"><i class="fa-solid fa-trophy"></i></div>
                                     <div class="text-xs uppercase tracking-widest text-yellow-300 font-black">Johan Kejohanan</div>
                                     <div class="text-xl sm:text-2xl font-black text-white mt-1">${winnerSummary.champion.name}</div>
                                     <div class="text-[11px] text-yellow-200 mt-2 font-mono bg-black/30 px-2.5 py-0.5 rounded-full self-center">
-                                        Skor Akhir: ${winnerSummary.finalMatch.score1} - ${winnerSummary.finalMatch.score2}
+                                        Keputusan Akhir (#${winnerSummary.finalMatch.matchCode}): ${winnerSummary.finalEval.shortSummaryText}
                                     </div>
                                 </div>
 
-                                <!-- Tempat Ke-3 / Ke-4 -->
                                 <div class="order-3">
                                     ${thirdBlockHtml}
                                 </div>
@@ -2603,13 +3117,12 @@
                 }
             }
 
-            // 3. Senarai Semua Fasa Kalah Mati (Setiap Fasa Kekal Ada & Boleh Dibuka/Tutup)
+            // 3. Fasa Kalah Mati (Dengan Kod #S1, #SA1, #A1, Nama Pengadil & Keputusan Set)
             if (knockoutContainer) {
                 if (hasKnockout) {
                     knockoutContainer.classList.remove('hidden');
                     const phases = [...new Set(knockoutMatches.map(m => m.group))];
                     
-                    // Susun supaya fasa terkini berada di atas atau ikut urutan kronologi yang kemas
                     knockoutContainer.innerHTML = phases.map((phaseName, idx) => {
                         const phaseMatches = knockoutMatches.filter(m => m.group === phaseName);
                         const completedCount = phaseMatches.filter(m => m.status === 'completed').length;
@@ -2638,21 +3151,28 @@
                                     ${phaseMatches.map(m => {
                                         const isLive = m.status === 'in_progress';
                                         const isDone = m.status === 'completed';
+                                        const evalRes = window.getMatchSetEvaluation(m);
+                                        const disp1 = evalRes.isBestOf3 ? evalRes.setsWon1 : m.sets[0].s1;
+                                        const disp2 = evalRes.isBestOf3 ? evalRes.setsWon2 : m.sets[0].s2;
                                         return `
                                             <div class="bg-white border ${isLive ? 'border-red-400 ring-2 ring-red-100' : 'border-indigo-200'} rounded-xl p-3 shadow-2xs flex flex-col justify-between">
                                                 <div class="flex justify-between items-center mb-2">
-                                                    <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wide">Match #${m.id.substring(0,4)}</span>
+                                                    <span class="text-xs font-black bg-indigo-900 text-amber-300 px-2 py-0.5 rounded">#${m.matchCode}</span>
                                                     <span class="text-[10px] px-2 py-0.5 rounded font-bold ${isDone ? 'bg-green-100 text-green-800' : (isLive ? 'bg-red-500 text-white animate-pulse' : 'bg-amber-100 text-amber-800')}">${isDone ? 'Selesai' : (isLive ? 'LIVE' : 'Belum Mula')}</span>
                                                 </div>
                                                 <div class="space-y-1.5 text-xs font-bold">
-                                                    <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${m.score1 >= m.score2 && isDone ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
+                                                    <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${evalRes.winnerTeamNum === 1 && isDone ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
                                                         <span class="truncate pr-2">${m.team1.name}</span>
-                                                        <span class="font-mono">${isDone || isLive ? m.score1 : '-'}</span>
+                                                        <span class="font-mono">${isDone || isLive ? disp1 : '-'}</span>
                                                     </div>
-                                                    <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${m.score2 > m.score1 && isDone ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
+                                                    <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${evalRes.winnerTeamNum === 2 && isDone ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
                                                         <span class="truncate pr-2">${m.team2.name}</span>
-                                                        <span class="font-mono">${isDone || isLive ? m.score2 : '-'}</span>
+                                                        <span class="font-mono">${isDone || isLive ? disp2 : '-'}</span>
                                                     </div>
+                                                </div>
+                                                <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center text-[10px] text-gray-500">
+                                                    <span class="truncate"><i class="fa-solid fa-user-tie mr-1 text-teal-600"></i>${m.umpireName || 'Tiada Pengadil'}</span>
+                                                    ${evalRes.isBestOf3 && (isDone || isLive) ? `<span class="font-mono font-semibold text-indigo-700">${evalRes.playedSetsText}</span>` : ''}
                                                 </div>
                                             </div>
                                         `;
@@ -2729,15 +3249,20 @@
             matchesContainer.innerHTML = groupMatches.map(m => {
                 const isCompleted = m.status === 'completed';
                 const isLive = m.status === 'in_progress';
+                const evalRes = window.getMatchSetEvaluation(m);
                 return `
-                    <div class="p-3 hover:bg-gray-50 flex justify-between items-center text-xs border-b last:border-b-0">
-                        <div class="flex-1 truncate pr-2">
-                            <span class="font-bold text-teal-700 mr-1">[${m.group}]</span>
-                            <span class="text-gray-800 font-semibold truncate">${m.team1.name} vs ${m.team2.name}</span>
+                    <div class="p-3 hover:bg-gray-50 flex flex-col gap-1 text-xs border-b last:border-b-0">
+                        <div class="flex justify-between items-center gap-2">
+                            <div class="flex items-center gap-1.5 flex-1 min-w-0">
+                                <span class="font-black bg-gray-800 text-amber-300 text-[10px] px-1.5 py-0.5 rounded shrink-0">#${m.matchCode}</span>
+                                <span class="font-bold text-teal-700 shrink-0">[${m.group}]</span>
+                                <span class="text-gray-800 font-semibold truncate">${m.team1.name} vs ${m.team2.name}</span>
+                            </div>
+                            <div class="font-bold px-2 py-0.5 rounded shrink-0 ${isLive ? 'bg-red-500 text-white animate-pulse' : (isCompleted ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-gray-100 text-gray-700')} font-mono text-[11px]">
+                                ${isCompleted || isLive ? evalRes.shortSummaryText : 'B/M'}
+                            </div>
                         </div>
-                        <div class="font-bold px-2 py-1 rounded ${isLive ? 'bg-red-500 text-white animate-pulse' : (isCompleted ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-gray-100 text-gray-700')} font-mono">
-                            ${isCompleted || isLive ? `${m.score1} - ${m.score2}` : 'B/M'}
-                        </div>
+                        ${m.umpireName ? `<div class="text-[10px] text-gray-500"><i class="fa-solid fa-user-tie mr-1 text-teal-600"></i>Pengadil: <strong>${m.umpireName}</strong></div>` : ''}
                     </div>
                 `;
             }).join('');
@@ -2749,10 +3274,10 @@
             const qualifyLabel = document.getElementById('active-qualify-label');
             const methodLabel = document.getElementById('active-method-label');
             const thirdPlaceLabel = document.getElementById('active-third-place-label');
+            const setModeLabel = document.getElementById('active-set-mode-label');
             const quickMethodSelect = document.getElementById('quick-qualify-method');
             const quickThirdSelect = document.getElementById('quick-third-place-method');
 
-            // Kemas kini butang muat turun laporan penuh di tab Ketetapan
             const winnerSummary = window.getTournamentWinnersSummary();
             const btnExportExcel = document.getElementById('btn-export-excel');
             const btnExportWord = document.getElementById('btn-export-word');
@@ -2777,10 +3302,12 @@
             const numQualify = window.getQualifyCountPerGroup();
             const qualifyMethod = window.getQualifyMethod();
             const thirdPlaceOpt = window.getThirdPlaceOption();
+            const bestOf3 = window.isBestOf3Mode();
 
             if (qualifyLabel) qualifyLabel.innerText = `Top ${numQualify} Setiap Kumpulan`;
             if (methodLabel) methodLabel.innerText = qualifyMethod === 'best_third' ? 'Tempat Ke-3 Terbaik (Genap)' : 'Format Bye (Biasa)';
             if (thirdPlaceLabel) thirdPlaceLabel.innerText = thirdPlaceOpt === 'playoff' ? 'Perlawanan Penentuan Ke-3/4' : 'Pemenang Bersama Ke-3';
+            if (setModeLabel) setModeLabel.innerText = bestOf3 ? '2 Set (Best of 3)' : '1 Set Sahaja';
             if (quickMethodSelect) quickMethodSelect.value = qualifyMethod;
             if (quickThirdSelect) quickThirdSelect.value = thirdPlaceOpt;
             

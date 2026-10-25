@@ -3,42 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kejohanan Badminton KPDN Pulau Pinang</title>
+    <title>SHUTTLEPOWER - Sistem Kejohanan Badminton KPDN Pulau Pinang</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SheetJS for Excel / CSV Parsing & Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Fail Konfigurasi Firebase Luaran (Kekal di GitHub tanpa perlu diedit setiap kali kemas kini index.html) -->
     <script src="./firebase-config.js" onerror="console.info('Fail firebase-config.js belum diwujudkan, menggunakan konfigurasi sedia ada.')"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .tab-active { border-bottom: 4px solid #10b981; color: #10b981; font-weight: 700; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            position: relative;
+        }
+        .tab-active {
+            border-bottom: 4px solid #00d2ff;
+            color: #0369a1;
+            font-weight: 800;
+            background-color: #f0f9ff;
+        }
         .score-btn { user-select: none; touch-action: manipulation; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
+
+        /* Watermark Latar Belakang SHUTTLEPOWER */
+        .shuttlepower-watermark {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .shuttlepower-watermark-inner {
+            opacity: 0.065;
+            transform: scale(1.05);
+            max-width: 680px;
+            width: 82vw;
+            filter: drop-shadow(0 10px 25px rgba(0, 140, 255, 0.15));
+            user-select: none;
+        }
+        /* Corak Grid Halus Sukan di Latar Belakang */
+        .bg-court-grid {
+            background-image: radial-gradient(rgba(14, 165, 233, 0.10) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
     </style>
 </head>
-<body class="text-gray-800 h-screen flex flex-col overflow-hidden">
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden bg-court-grid">
 
-    <!-- Header -->
-    <header class="bg-gradient-to-r from-teal-700 via-teal-600 to-green-600 text-white shadow-md z-10">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center gap-2">
+    <!-- WATERMARK LATAR BELAKANG RASMI SHUTTLEPOWER -->
+    <div class="shuttlepower-watermark" aria-hidden="true">
+        <div id="watermark-logo-container" class="shuttlepower-watermark-inner flex flex-col items-center justify-center">
+            <!-- Diisi secara automatik dengan imej SHUTTLEPOWER.jpg atau Vektor SVG SHUTTLEPOWER -->
+        </div>
+    </div>
+
+    <!-- Header Rasmi Bertema SHUTTLEPOWER (Navy Blue, Neon Cyan & Lime Green) -->
+    <header class="bg-gradient-to-r from-[#06152d] via-[#0a2246] to-[#071936] text-white shadow-xl z-20 border-b border-cyan-500/30 relative overflow-hidden">
+        <!-- Jalur Cahaya Neon Atas -->
+        <div class="h-1 w-full bg-gradient-to-r from-cyan-400 via-lime-400 to-blue-500"></div>
+
+        <div class="container mx-auto px-4 py-2.5 flex justify-between items-center gap-2 relative z-10">
             <div class="flex items-center gap-3 min-w-0">
-                <div class="bg-white p-2 rounded-full text-teal-600 shadow-xs shrink-0">
-                    <i class="fa-solid fa-trophy text-xl"></i>
+                <!-- Logo Rasmi SHUTTLEPOWER pada Header -->
+                <div id="header-logo-box" class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-[#07162c] border-2 border-cyan-400/50 shadow-md shadow-cyan-500/10 flex items-center justify-center overflow-hidden shrink-0 p-0.5">
+                    <!-- Dijana secara automatik (SHUTTLEPOWER.jpg atau SVG Rasmi) -->
                 </div>
                 <div class="min-w-0">
-                    <h1 id="main-tournament-title" class="text-base sm:text-xl font-extrabold leading-tight truncate">Badminton KPDN P.Pinang</h1>
-                    <p class="text-xs text-teal-100 flex flex-wrap items-center gap-2 mt-0.5">
-                        <span id="role-badge" class="bg-teal-900/60 text-teal-100 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-teal-400/30">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] sm:text-xs font-black tracking-widest uppercase italic">
+                            <span class="text-white">SHUTTLE</span><span class="text-cyan-400">POWER</span>
+                        </span>
+                        <span class="hidden sm:inline-block text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 px-1.5 py-0.2 rounded font-semibold">OFFICIAL SYSTEM</span>
+                    </div>
+                    <h1 id="main-tournament-title" class="text-sm sm:text-xl font-extrabold leading-tight truncate text-white drop-shadow-xs">Badminton KPDN P.Pinang</h1>
+                    <p class="text-xs text-cyan-100 flex flex-wrap items-center gap-2 mt-0.5">
+                        <span id="role-badge" class="bg-cyan-950/80 text-cyan-200 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-cyan-400/30">
                             <i class="fa-solid fa-eye mr-1"></i>Paparan Awam (Viewer)
                         </span>
                         <button onclick="handleCloudStatusClick()" id="cloud-status" class="bg-amber-500 hover:opacity-90 text-[10px] px-2.5 py-0.5 rounded-full text-white font-semibold transition cursor-pointer shadow-xs" title="Status penyelarasan data langsung">
@@ -50,50 +101,61 @@
 
             <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <!-- Butang Kongsi Link Penonton (Sentiasa Ada) -->
-                <button onclick="openShareModal()" class="text-xs bg-white/15 hover:bg-white/25 border border-white/30 px-2.5 py-1.5 rounded-lg shadow-xs text-white transition font-semibold flex items-center gap-1.5" title="Kongsi Pautan Paparan Awam ke WhatsApp">
-                    <i class="fa-solid fa-share-nodes"></i><span class="hidden md:inline">Kongsi Link Awam</span>
+                <button onclick="openShareModal()" class="text-xs bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 px-2.5 py-1.5 rounded-lg shadow-xs text-cyan-100 transition font-semibold flex items-center gap-1.5" title="Kongsi Pautan Paparan Awam ke WhatsApp">
+                    <i class="fa-solid fa-share-nodes text-cyan-300"></i><span class="hidden md:inline">Kongsi Link Awam</span>
                 </button>
 
                 <!-- Butang Super Admin Sahaja -->
-                <button id="btn-cloud-setup" onclick="openFirebaseSetupModal()" class="hidden text-xs bg-teal-800/70 hover:bg-teal-900 px-2.5 py-1.5 rounded-lg shadow-xs text-white transition font-semibold" title="Konfigurasi Firebase Awan">
-                    <i class="fa-solid fa-cloud-bolt mr-1"></i><span class="hidden lg:inline">Tetapan Awan</span>
+                <button id="btn-cloud-setup" onclick="openFirebaseSetupModal()" class="hidden text-xs bg-slate-800 hover:bg-slate-700 border border-slate-600 px-2.5 py-1.5 rounded-lg shadow-xs text-white transition font-semibold" title="Konfigurasi Firebase Awan">
+                    <i class="fa-solid fa-cloud-bolt mr-1 text-cyan-400"></i><span class="hidden lg:inline">Tetapan Awan</span>
                 </button>
-                <button id="btn-reset-system" onclick="resetData()" class="hidden text-xs bg-red-500 hover:bg-red-600 px-2.5 py-1.5 rounded-lg shadow-xs text-white transition font-semibold" title="Reset Keseluruhan Sistem">
+                <button id="btn-reset-system" onclick="resetData()" class="hidden text-xs bg-red-600 hover:bg-red-700 px-2.5 py-1.5 rounded-lg shadow-xs text-white transition font-semibold" title="Reset Keseluruhan Sistem">
                     <i class="fa-solid fa-rotate-right mr-1"></i><span class="hidden lg:inline">Reset Sistem</span>
                 </button>
 
                 <!-- Butang Log Masuk / Log Keluar (Super Admin / Pengadil) -->
-                <button id="btn-admin-toggle" onclick="toggleAdminAuth()" class="text-xs bg-teal-900/50 hover:bg-teal-900 border border-teal-400/30 px-2.5 py-1.5 rounded-lg text-teal-100 transition font-semibold flex items-center gap-1" title="Log Masuk Super Admin / Pengadil">
-                    <i id="admin-lock-icon" class="fa-solid fa-lock"></i>
+                <button id="btn-admin-toggle" onclick="toggleAdminAuth()" class="text-xs bg-slate-900/80 hover:bg-slate-800 border border-cyan-400/40 px-2.5 py-1.5 rounded-lg text-cyan-100 transition font-semibold flex items-center gap-1" title="Log Masuk Super Admin / Pengadil">
+                    <i id="admin-lock-icon" class="fa-solid fa-lock text-cyan-400"></i>
                     <span id="admin-lock-text" class="hidden sm:inline">Log Masuk</span>
                 </button>
             </div>
         </div>
         
         <!-- Navigation Tabs (Dikawal Mengikut Layer: Awam / Pengadil / Super Admin) -->
-        <nav id="main-nav-tabs" class="hidden flex overflow-x-auto bg-white text-gray-500 shadow-inner border-t">
-            <button onclick="switchTab('public')" id="tab-public" class="tab-btn tab-active px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-tv mr-2"></i>Paparan Awam</button>
-            <button onclick="switchTab('admin')" id="tab-admin" class="tab-btn px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-users-gear mr-2"></i>Pendaftaran</button>
-            <button onclick="switchTab('umpire')" id="tab-umpire" class="tab-btn px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-gavel mr-2"></i>Pengadil / Skor</button>
-            <button onclick="switchTab('settings')" id="tab-settings" class="tab-btn px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-gear mr-2"></i>Ketetapan</button>
+        <nav id="main-nav-tabs" class="hidden flex overflow-x-auto bg-white/95 backdrop-blur-xs text-gray-600 shadow-inner border-t border-gray-200 relative z-10">
+            <button onclick="switchTab('public')" id="tab-public" class="tab-btn tab-active px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-sky-50 transition"><i class="fa-solid fa-tv mr-2"></i>Paparan Awam</button>
+            <button onclick="switchTab('admin')" id="tab-admin" class="tab-btn px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-sky-50 transition"><i class="fa-solid fa-users-gear mr-2"></i>Pendaftaran</button>
+            <button onclick="switchTab('umpire')" id="tab-umpire" class="tab-btn px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-sky-50 transition"><i class="fa-solid fa-gavel mr-2"></i>Pengadil / Skor</button>
+            <button onclick="switchTab('settings')" id="tab-settings" class="tab-btn px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-sky-50 transition"><i class="fa-solid fa-gear mr-2"></i>Ketetapan</button>
         </nav>
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex-1 overflow-y-auto p-4 container mx-auto pb-20">
+    <main class="flex-1 overflow-y-auto p-4 container mx-auto pb-20 relative z-10">
 
         <!-- 1. TAB: PAPARAN AWAM -->
         <section id="view-public" class="view-section animate-fade-in space-y-6">
             
-            <!-- Banner Makluman Mod Penonton (Hanya Kelihatan Kepada Super Admin) -->
-            <div id="admin-link-banner" class="hidden bg-teal-50 border border-teal-200 rounded-xl p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs text-teal-900">
-                <div class="flex items-center gap-2">
-                    <i class="fa-brands fa-whatsapp text-lg text-green-600"></i>
-                    <span><strong>Tips Super Admin:</strong> Kongsikan pautan awam kepada penonton (terus memaparkan Paparan Awam). Gunakan PIN Pengadil untuk pengadil gelanggang.</span>
+            <!-- Banner Hero SHUTTLEPOWER pada Paparan Awam -->
+            <div class="bg-gradient-to-r from-[#07162c] via-[#0b2548] to-[#07162c] rounded-2xl p-4 sm:p-5 text-white shadow-lg border border-cyan-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden">
+                <div class="flex items-center gap-4 z-10">
+                    <div id="public-banner-logo" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#051020] border border-cyan-400/40 p-1.5 flex items-center justify-center shrink-0 shadow-inner">
+                        <!-- Logo SHUTTLEPOWER -->
+                    </div>
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-1">
+                            <i class="fa-solid fa-bolt text-lime-400"></i> Papan Keputusan Rasmi Langsung
+                        </div>
+                        <h2 id="public-banner-title" class="text-lg sm:text-2xl font-black tracking-tight text-white">Badminton KPDN P.Pinang</h2>
+                        <p class="text-xs text-cyan-200/80 mt-0.5">Dikuasakan oleh <strong class="text-white italic">SHUTTLE<span class="text-cyan-400">POWER</span></strong> Tournament Management System</p>
+                    </div>
                 </div>
-                <button onclick="openShareModal()" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded-lg font-bold whitespace-nowrap transition shadow-2xs">
-                    <i class="fa-solid fa-copy mr-1"></i> Dapatkan Link Penonton
-                </button>
+                <div id="admin-link-banner" class="hidden z-10 bg-white/10 backdrop-blur-xs border border-white/15 rounded-xl p-3 flex flex-col items-end gap-2 text-xs text-cyan-100 shrink-0">
+                    <span class="text-[11px]"><i class="fa-brands fa-whatsapp text-green-400 mr-1"></i>Kongsi pautan rasmi kepada pemain & penonton:</span>
+                    <button onclick="openShareModal()" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-3.5 py-1.5 rounded-lg font-bold whitespace-nowrap transition shadow-sm">
+                        <i class="fa-solid fa-copy mr-1"></i> Dapatkan Link Penonton
+                    </button>
+                </div>
             </div>
 
             <!-- POSTER PEMENANG KEJOHANAN (Muncul Secara Automatik Selepas Perlawanan Akhir Tamat) -->
@@ -107,12 +169,12 @@
             </div>
 
             <!-- KLAUSA (COLLAPSIBLE) PERINGKAT KUMPULAN -->
-            <details id="public-group-clause" open class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all">
-                <summary onclick="toggleGroupClauseManual(event)" class="bg-gray-100 hover:bg-gray-200/70 px-4 py-3.5 cursor-pointer flex justify-between items-center select-none transition border-b">
+            <details id="public-group-clause" open class="bg-white/90 backdrop-blur-xs rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all">
+                <summary onclick="toggleGroupClauseManual(event)" class="bg-gray-100/90 hover:bg-gray-200/70 px-4 py-3.5 cursor-pointer flex justify-between items-center select-none transition border-b">
                     <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-layer-group text-teal-600"></i>
+                        <i class="fa-solid fa-layer-group text-sky-600"></i>
                         <span class="font-bold text-gray-800">Peringkat Kumpulan (Kedudukan & Keputusan Perlawanan)</span>
-                        <span id="group-clause-status-badge" class="text-[11px] bg-teal-100 text-teal-800 px-2 py-0.5 rounded font-semibold">Aktif</span>
+                        <span id="group-clause-status-badge" class="text-[11px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-semibold">Aktif</span>
                     </div>
                     <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 bg-white px-3 py-1 rounded-lg border shadow-sm">
                         <span>Buka / Tutup Klausa</span>
@@ -123,7 +185,7 @@
                 <div class="p-4 bg-gray-50/50">
                     <div class="flex flex-col md:flex-row gap-6">
                         <!-- Kedudukan Kumpulan (Standings) -->
-                        <div class="w-full md:w-2/3 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="w-full md:w-2/3 bg-white/95 rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                             <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
                                 <h2 class="font-bold text-gray-700"><i class="fa-solid fa-ranking-star mr-2 text-yellow-500"></i>Kedudukan Kumpulan</h2>
                             </div>
@@ -133,7 +195,7 @@
                         </div>
 
                         <!-- Perlawanan Kumpulan Semasa / Terkini -->
-                        <div class="w-full md:w-1/3 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-fit">
+                        <div class="w-full md:w-1/3 bg-white/95 rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-fit">
                             <div class="bg-gray-50 px-4 py-3 border-b">
                                 <h2 class="font-bold text-gray-700"><i class="fa-solid fa-bolt mr-2 text-orange-500"></i>Perlawanan Kumpulan (Live / Keputusan)</h2>
                             </div>
@@ -152,22 +214,22 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 
                 <!-- Borang Daftar Regu (Manual & Pukal Excel) -->
-                <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 lg:col-span-1 h-fit">
-                    <h2 class="font-bold text-lg mb-3 text-gray-800"><i class="fa-solid fa-user-plus mr-2 text-teal-500"></i>Daftar Regu / Pasukan</h2>
+                <div class="bg-white/95 backdrop-blur-xs rounded-xl shadow-sm p-5 border border-gray-100 lg:col-span-1 h-fit">
+                    <h2 class="font-bold text-lg mb-3 text-gray-800"><i class="fa-solid fa-user-plus mr-2 text-sky-600"></i>Daftar Regu / Pasukan</h2>
                     
                     <!-- Pendaftaran Manual -->
                     <form id="team-form" class="flex gap-2 mb-3" onsubmit="addTeam(event)">
-                        <input type="text" id="team-name" placeholder="Nama Regu (Contoh: KPDN A)" class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" required>
-                        <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition shadow-sm" title="Tambah Regu"><i class="fa-solid fa-plus"></i></button>
+                        <input type="text" id="team-name" placeholder="Nama Regu (Contoh: KPDN A)" class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" required>
+                        <button type="submit" class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition shadow-sm" title="Tambah Regu"><i class="fa-solid fa-plus"></i></button>
                     </form>
 
                     <!-- Muat Turun & Muat Naik Templat Excel Pukal -->
-                    <div class="bg-teal-50/70 border border-teal-200 rounded-lg p-3 mb-4">
-                        <div class="text-xs font-bold text-teal-800 mb-2 flex items-center justify-between">
+                    <div class="bg-sky-50/70 border border-sky-200 rounded-lg p-3 mb-4">
+                        <div class="text-xs font-bold text-sky-900 mb-2 flex items-center justify-between">
                             <span><i class="fa-solid fa-file-excel mr-1.5 text-green-600"></i>Pendaftaran Pukal (Bundle)</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="downloadTemplate()" class="bg-white hover:bg-gray-50 text-teal-700 border border-teal-300 px-2.5 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5">
+                            <button type="button" onclick="downloadTemplate()" class="bg-white hover:bg-gray-50 text-sky-700 border border-sky-300 px-2.5 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-download"></i> Download Template
                             </button>
                             <label class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer text-center">
@@ -189,13 +251,13 @@
                 </div>
 
                 <!-- Pengurusan Kumpulan (1 - 10 Kumpulan atau Kosongkan) -->
-                <div id="group-management-section" class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 lg:col-span-2 relative transition-all duration-300">
+                <div id="group-management-section" class="bg-white/95 backdrop-blur-xs rounded-xl shadow-sm p-5 border border-gray-100 lg:col-span-2 relative transition-all duration-300">
                     <div id="group-management-overlay" class="hidden absolute inset-0 bg-white/80 z-10 flex items-center justify-center rounded-xl backdrop-blur-sm">
                         <div class="bg-gray-800 text-white px-5 py-4 rounded-xl text-sm font-semibold shadow-lg text-center max-w-xs">
                             <i class="fa-solid fa-ban text-red-400 mb-2 block text-2xl"></i>
                             Pengurusan Kumpulan Dinyahaktifkan<br>
                             <span class="text-xs font-normal text-gray-300 block mt-1">Kumpulan tidak digunakan bagi peringkat kalah mati.</span>
-                            <button onclick="unlockGroupManagement()" class="mt-3 bg-teal-500 hover:bg-teal-600 text-white text-xs px-3 py-1.5 rounded font-bold transition">Aktifkan Semula Kumpulan</button>
+                            <button onclick="unlockGroupManagement()" class="mt-3 bg-sky-500 hover:bg-sky-600 text-white text-xs px-3 py-1.5 rounded font-bold transition">Aktifkan Semula Kumpulan</button>
                         </div>
                     </div>
 
@@ -247,7 +309,7 @@
             </div>
 
             <!-- Pusingan Kalah Mati (Suku/Separuh/Akhir) -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+            <div class="bg-white/95 backdrop-blur-xs rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
                 <div class="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <h2 class="font-bold text-lg text-gray-800"><i class="fa-solid fa-trophy mr-2 text-yellow-500"></i>Pusingan Seterusnya (Kalah Mati)</h2>
@@ -265,7 +327,7 @@
                     </div>
                     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 text-xs text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-200">
                         <div class="flex flex-wrap items-center gap-y-1">
-                            <span>Kelayakan: <strong id="active-qualify-label" class="text-teal-700">2 Pasukan Setiap Kumpulan</strong></span>
+                            <span>Kelayakan: <strong id="active-qualify-label" class="text-sky-700">2 Pasukan Setiap Kumpulan</strong></span>
                             <span class="mx-1.5 text-gray-300">|</span>
                             <span>Kaedah Pelengkap: <strong id="active-method-label" class="text-indigo-700">Format Bye (Biasa)</strong></span>
                             <span class="mx-1.5 text-gray-300">|</span>
@@ -274,11 +336,11 @@
                             <span>Format Set: <strong id="active-set-mode-label" class="text-rose-700">1 Set</strong></span>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-                            <select id="quick-qualify-method" onchange="changeQuickQualifyMethod(this.value)" class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <select id="quick-qualify-method" onchange="changeQuickQualifyMethod(this.value)" class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
                                 <option value="bye">Kuota Ganjil: Format Bye (Biasa)</option>
                                 <option value="best_third">Kuota Ganjil: Pilih Ke-3 Terbaik</option>
                             </select>
-                            <select id="quick-third-place-method" onchange="changeQuickThirdPlaceOption(this.value)" class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <select id="quick-third-place-method" onchange="changeQuickThirdPlaceOption(this.value)" class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
                                 <option value="joint">Ke-3/4: Pemenang Bersama Ke-3</option>
                                 <option value="playoff">Ke-3/4: Buat Perlawanan Penentuan</option>
                             </select>
@@ -288,7 +350,7 @@
             </div>
 
             <!-- Senarai Kumpulan & Perlawanan -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-white/95 backdrop-blur-xs rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="bg-gray-50 p-4 border-b flex justify-between items-center">
                     <h2 class="font-bold text-lg text-gray-800"><i class="fa-solid fa-calendar-days mr-2 text-indigo-500"></i>Senarai Jadual Perlawanan Keseluruhan</h2>
                 </div>
@@ -302,7 +364,7 @@
         <!-- 3. TAB: PENGADIL (Papan Markah) -->
         <section id="view-umpire" class="view-section hidden animate-fade-in h-full">
             
-            <div id="umpire-selection" class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+            <div id="umpire-selection" class="bg-white/95 backdrop-blur-xs rounded-xl shadow-sm p-5 border border-gray-100">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                     <div>
                         <h2 class="font-bold text-lg text-gray-800"><i class="fa-solid fa-whistle mr-2 text-red-500"></i>Pilih Perlawanan untuk Diadili</h2>
@@ -316,22 +378,23 @@
             </div>
 
             <div id="umpire-scoring" class="hidden h-full flex flex-col">
-                <!-- Bar Atas Papan Markah Pengadil -->
-                <div class="bg-gray-900 text-white rounded-t-xl p-3 flex flex-col gap-2 shadow-lg border-b border-gray-700">
+                <!-- Bar Atas Papan Markah Pengadil Bertema SHUTTLEPOWER -->
+                <div class="bg-[#06152d] text-white rounded-t-xl p-3 flex flex-col gap-2 shadow-lg border-b border-cyan-500/30">
                     <div class="flex justify-between items-center gap-2">
-                        <button onclick="backToUmpireSelection()" class="bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition">
+                        <button onclick="backToUmpireSelection()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition">
                             <i class="fa-solid fa-arrow-left mr-1"></i> Kembali
                         </button>
                         <div class="font-bold text-center flex-1 flex flex-col items-center">
                             <div class="flex items-center gap-2">
+                                <span class="hidden sm:inline-block text-[10px] font-black italic tracking-wider text-cyan-400">SHUTTLEPOWER</span>
                                 <span id="active-match-code" class="bg-amber-400 text-gray-900 px-2.5 py-0.5 rounded font-black text-xs sm:text-sm">P1</span>
                                 <span id="active-group" class="text-sm sm:text-base font-extrabold text-white">Kumpulan A</span>
                             </div>
                             <div class="flex flex-wrap items-center justify-center gap-2 mt-0.5 text-[11px] text-gray-300">
-                                <span><i class="fa-solid fa-user-tie text-teal-400 mr-1"></i>Pengadil: <strong id="active-umpire-name" class="text-white">-</strong></span>
-                                <button onclick="promptChangeUmpireName()" class="text-[10px] bg-gray-700 hover:bg-gray-600 text-teal-300 px-1.5 py-0.5 rounded" title="Tukar Nama Pengadil"><i class="fa-solid fa-pen"></i></button>
+                                <span><i class="fa-solid fa-user-tie text-cyan-400 mr-1"></i>Pengadil: <strong id="active-umpire-name" class="text-white">-</strong></span>
+                                <button onclick="promptChangeUmpireName()" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-cyan-300 px-1.5 py-0.5 rounded" title="Tukar Nama Pengadil"><i class="fa-solid fa-pen"></i></button>
                                 <span class="text-gray-600">|</span>
-                                <span id="umpire-max-score-display" class="text-yellow-400 font-semibold"></span>
+                                <span id="umpire-max-score-display" class="text-lime-400 font-semibold"></span>
                             </div>
                         </div>
                         <button onclick="finishMatch()" class="bg-green-600 hover:bg-green-500 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold shadow-md transition">
@@ -340,23 +403,23 @@
                     </div>
 
                     <!-- Bar Kawalan Set (Muncul apabila Format 2 Set / Best of 3 dipilih) -->
-                    <div id="umpire-sets-bar" class="hidden bg-gray-800/90 rounded-lg px-3 py-2 flex flex-wrap justify-between items-center gap-2 border border-gray-700">
+                    <div id="umpire-sets-bar" class="hidden bg-slate-900/90 rounded-lg px-3 py-2 flex flex-wrap justify-between items-center gap-2 border border-cyan-500/20">
                         <div class="flex items-center gap-1.5">
-                            <span class="text-[11px] font-bold text-gray-400 uppercase mr-1"><i class="fa-solid fa-layer-group mr-1 text-amber-400"></i>Pilih Set:</span>
+                            <span class="text-[11px] font-bold text-gray-400 uppercase mr-1"><i class="fa-solid fa-layer-group mr-1 text-cyan-400"></i>Pilih Set:</span>
                             <button type="button" id="btn-set-0" onclick="switchUmpireSet(0)" class="px-3 py-1 rounded text-xs font-bold transition">Set 1</button>
                             <button type="button" id="btn-set-1" onclick="switchUmpireSet(1)" class="px-3 py-1 rounded text-xs font-bold transition">Set 2</button>
                             <button type="button" id="btn-set-2" onclick="switchUmpireSet(2)" class="px-3 py-1 rounded text-xs font-bold transition">Set 3 (Penentuan)</button>
                         </div>
                         <div class="flex items-center gap-3 text-xs">
                             <div id="umpire-sets-summary" class="font-mono font-bold text-amber-300"></div>
-                            <button type="button" id="btn-next-set" onclick="proceedToNextSet()" class="bg-amber-500 hover:bg-amber-600 text-gray-900 px-2.5 py-1 rounded font-extrabold text-xs transition shadow-2xs">
+                            <button type="button" id="btn-next-set" onclick="proceedToNextSet()" class="bg-cyan-400 hover:bg-cyan-300 text-slate-950 px-2.5 py-1 rounded font-extrabold text-xs transition shadow-2xs">
                                 Selesai Set & Ke Set Seterusnya <i class="fa-solid fa-forward-step ml-1"></i>
                             </button>
                         </div>
                     </div>
                 </div>
                 
-                <div class="flex-1 flex flex-col md:flex-row gap-2 bg-black p-2 rounded-b-xl shadow-2xl relative min-h-[380px]">
+                <div class="flex-1 flex flex-col md:flex-row gap-2 bg-[#040d1d] p-2 rounded-b-xl shadow-2xl relative min-h-[380px]">
                     <div class="flex-1 bg-red-600 rounded-lg flex flex-col relative overflow-hidden select-none">
                         <div class="bg-red-800 text-white text-center py-2 md:py-3 px-2 z-10 shadow-md flex flex-col items-center">
                             <span class="font-bold text-lg md:text-2xl truncate max-w-full" id="score-team1-name">Regu 1</span>
@@ -373,8 +436,8 @@
                     </div>
 
                     <div class="hidden md:flex flex-col justify-center items-center px-2 z-20 gap-2">
-                        <div id="active-set-badge" class="bg-amber-400 text-gray-900 font-black text-xs px-2.5 py-1 rounded-full uppercase tracking-wider shadow">SET 1</div>
-                        <div class="bg-white text-black font-black italic rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-lg border-4 border-gray-300">VS</div>
+                        <div id="active-set-badge" class="bg-cyan-400 text-slate-950 font-black text-xs px-2.5 py-1 rounded-full uppercase tracking-wider shadow">SET 1</div>
+                        <div class="bg-white text-black font-black italic rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-lg border-4 border-cyan-400">VS</div>
                     </div>
 
                     <div class="flex-1 bg-blue-600 rounded-lg flex flex-col relative overflow-hidden select-none">
@@ -398,25 +461,45 @@
 
         <!-- 4. TAB: KETETAPAN (SETTINGS - SUPER ADMIN SAHAJA) -->
         <section id="view-settings" class="view-section hidden animate-fade-in h-full space-y-6">
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-6xl mx-auto flex flex-col lg:flex-row p-6 gap-6">
+            <div class="bg-white/95 backdrop-blur-xs rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-6xl mx-auto flex flex-col lg:flex-row p-6 gap-6">
                 
                 <div class="flex-1">
                     <div class="border-b pb-3 mb-4">
-                        <h2 class="font-bold text-gray-700 text-lg"><i class="fa-solid fa-gear mr-2 text-gray-500"></i>Ketetapan Sistem & Perlawanan</h2>
-                        <p class="text-xs text-gray-400 mt-0.5">Tetapkan nama kejohanan, format set perlawanan (1 Set / 2 Set + Set Ke-3 Penentuan), penentuan tempat ke-3/4, dan PIN akses.</p>
+                        <h2 class="font-bold text-gray-700 text-lg"><i class="fa-solid fa-gear mr-2 text-sky-600"></i>Ketetapan Sistem & Perlawanan</h2>
+                        <p class="text-xs text-gray-400 mt-0.5">Tetapkan nama kejohanan, logo & watermark SHUTTLEPOWER, format set perlawanan, penentuan tempat ke-3/4, dan PIN akses.</p>
                     </div>
                     <form id="settings-form" class="space-y-4" onsubmit="saveSettingsForm(event)">
                         <!-- Nama Kejohanan (Tajuk Besar Sistem) -->
-                        <div class="bg-teal-50/60 border border-teal-200 rounded-lg p-3">
-                            <label class="block text-sm font-bold text-teal-900 mb-1"><i class="fa-solid fa-heading mr-1.5 text-teal-600"></i>Nama Kejohanan (Tajuk Utama Sistem)</label>
-                            <input type="text" id="set-tournament-name" placeholder="Contoh: Kejohanan Piala CEO KPDN 2026" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm font-semibold" required>
-                            <p class="text-[11px] text-teal-700 mt-1">Tajuk ini akan dipaparkan di bahagian paling atas sistem, poster pemenang, dan laporan rasmi.</p>
+                        <div class="bg-sky-50/60 border border-sky-200 rounded-lg p-3">
+                            <label class="block text-sm font-bold text-sky-900 mb-1"><i class="fa-solid fa-heading mr-1.5 text-sky-600"></i>Nama Kejohanan (Tajuk Utama Sistem)</label>
+                            <input type="text" id="set-tournament-name" placeholder="Contoh: Kejohanan Piala CEO KPDN 2026" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-sky-500 bg-white text-sm font-semibold" required>
+                            <p class="text-[11px] text-sky-700 mt-1">Tajuk ini akan dipaparkan di bahagian paling atas sistem, poster pemenang, dan laporan rasmi.</p>
+                        </div>
+
+                        <!-- Muat Naik / Tetapkan Imej Logo Rasmi SHUTTLEPOWER (Pilihan) -->
+                        <div class="bg-slate-900 text-white border border-cyan-500/30 rounded-lg p-3">
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-cyan-300 uppercase tracking-wider"><i class="fa-solid fa-image mr-1.5"></i>Logo & Watermark Rasmi SHUTTLEPOWER</label>
+                                    <p class="text-[11px] text-slate-300 mt-0.5">Sistem membaca fail <code>SHUTTLEPOWER.jpg</code> atau Grafik Vektor Rasmi secara automatik. Anda juga boleh memuat naik fail imej logo terus di sini:</p>
+                                </div>
+                                <div id="settings-logo-preview" class="w-12 h-12 rounded-lg bg-[#051020] border border-cyan-400/40 flex items-center justify-center overflow-hidden shrink-0 p-0.5"></div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 mt-2">
+                                <label class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-extrabold cursor-pointer transition shadow-xs flex items-center gap-1.5">
+                                    <i class="fa-solid fa-upload"></i> Pilih Fail Logo (JPG/PNG)
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleCustomLogoUpload(event)">
+                                </label>
+                                <button type="button" onclick="resetCustomLogo()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                                    Guna Logo Lalai SHUTTLEPOWER
+                                </button>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Peringkat / Kategori</label>
-                                <input type="text" id="set-peringkat" list="list-peringkat" oninput="handlePhaseSettings()" placeholder="Contoh: Peringkat Kumpulan" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm" required>
+                                <input type="text" id="set-peringkat" list="list-peringkat" oninput="handlePhaseSettings()" placeholder="Contoh: Peringkat Kumpulan" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-sky-500 bg-white text-sm" required>
                                 <datalist id="list-peringkat">
                                     <option value="Peringkat Kumpulan"></option>
                                     <option value="Pusingan Kalah Mati"></option>
@@ -427,7 +510,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Jenis Jadual Pusingan</label>
-                                <input type="text" id="set-format" list="list-format" placeholder="Contoh: Round Robin" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm" required>
+                                <input type="text" id="set-format" list="list-format" placeholder="Contoh: Round Robin" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-sky-500 bg-white text-sm" required>
                                 <datalist id="list-format">
                                     <option value="Round Robin"></option>
                                     <option value="Kalah Mati (Knockout)"></option>
@@ -448,13 +531,13 @@
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Mata Tamat Maksimum Setiap Set (Contoh: 15, 21, 30)</label>
-                            <input type="number" id="set-max-score" placeholder="Biarkan kosong jika tiada had mata" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm">
+                            <input type="number" id="set-max-score" placeholder="Biarkan kosong jika tiada had mata" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-sky-500 bg-white text-sm">
                         </div>
                         
                         <div class="pt-2 space-y-3" id="setting-qualify-wrapper">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Pasukan Layak Ke Pusingan Seterusnya (Dari Setiap Kumpulan)</label>
-                                <select id="set-num-qualify" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm" onchange="updatePhaseIndicator()">
+                                <select id="set-num-qualify" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-sky-500 bg-white text-sm" onchange="updatePhaseIndicator()">
                                     <option value="2">2 Pasukan (Setiap Kump.)</option>
                                     <option value="4">4 Pasukan (Setiap Kump.)</option>
                                     <option value="8">8 Pasukan (Setiap Kump.)</option>
@@ -464,7 +547,7 @@
                             
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1">Pilihan Jika Kuota Pasukan Tidak Genap (Bukan Kuasa 2)</label>
-                                <select id="set-qualify-method" onchange="updatePhaseIndicator()" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm">
+                                <select id="set-qualify-method" onchange="updatePhaseIndicator()" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-sky-500 bg-white text-sm">
                                     <option value="bye">Format Bye (Beri Bye kepada pasukan terbaik seperti biasa)</option>
                                     <option value="best_third">Pilih Tempat Ke-3 Terbaik Automatik (Mata > Beza Mata > Markah Terkumpul)</option>
                                 </select>
@@ -475,7 +558,7 @@
                         <!-- Pilihan Penentuan Tempat Ke-3 dan Ke-4 -->
                         <div class="pt-2 border-t">
                             <label class="block text-sm font-semibold text-gray-700 mb-1"><i class="fa-solid fa-medal mr-1 text-amber-500"></i>Penentuan Tempat Ke-3 & Ke-4 (Selepas Separuh Akhir)</label>
-                            <select id="set-third-place-playoff" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm">
+                            <select id="set-third-place-playoff" class="w-full border rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-sky-500 bg-white text-sm">
                                 <option value="joint">Tiada Perlawanan (Kedua-dua Pasukan Kalah Separuh Akhir adalah Pemenang Bersama Tempat Ke-3)</option>
                                 <option value="playoff">Buat Perlawanan Penentuan Tempat Ke-3 & Ke-4</option>
                             </select>
@@ -484,8 +567,8 @@
                         <!-- Tetapan PIN 3-Layer (Super Admin & Pengadil) -->
                         <div class="pt-3 border-t grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1"><i class="fa-solid fa-user-shield mr-1 text-teal-600"></i>Kod PIN Super Admin (Semua Menu)</label>
-                                <input type="text" id="set-admin-pin" placeholder="Lalai: 1234" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm font-mono">
+                                <label class="block text-xs font-bold text-gray-700 mb-1"><i class="fa-solid fa-user-shield mr-1 text-sky-600"></i>Kod PIN Super Admin (Semua Menu)</label>
+                                <input type="text" id="set-admin-pin" placeholder="Lalai: 1234" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 bg-white text-sm font-mono">
                                 <p class="text-[10px] text-gray-400 mt-1">Boleh melihat kesemua menu sistem.</p>
                             </div>
                             <div>
@@ -496,7 +579,7 @@
                         </div>
 
                         <div class="pt-3 border-t">
-                            <button type="submit" class="bg-teal-600 text-white px-6 py-2.5 rounded-lg hover:bg-teal-700 shadow transition w-full font-bold text-sm"><i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Ke Rekod Ketetapan</button>
+                            <button type="submit" class="bg-sky-600 text-white px-6 py-2.5 rounded-lg hover:bg-sky-700 shadow transition w-full font-bold text-sm"><i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Ke Rekod Ketetapan</button>
                         </div>
                     </form>
                 </div>
@@ -505,7 +588,7 @@
                 <div class="flex-1 lg:border-l lg:pl-6 mt-6 lg:mt-0 flex flex-col justify-between gap-6">
                     
                     <!-- Kotak Muat Turun Keputusan Penuh (Aktif Selepas Perlawanan Akhir Tamat) -->
-                    <div class="bg-gradient-to-br from-indigo-50 to-teal-50 border border-indigo-200 rounded-xl p-4 shadow-2xs">
+                    <div class="bg-gradient-to-br from-indigo-50 to-sky-50 border border-indigo-200 rounded-xl p-4 shadow-2xs">
                         <div class="flex items-center justify-between mb-2">
                             <h3 class="font-bold text-gray-800 text-sm flex items-center gap-2">
                                 <i class="fa-solid fa-file-arrow-down text-indigo-600 text-base"></i> Muat Turun Keputusan Penuh Kejohanan
@@ -529,7 +612,7 @@
                     <div class="flex-1 flex flex-col">
                         <div class="border-b pb-2 mb-3 flex justify-between items-center">
                             <div>
-                                <h2 class="font-bold text-gray-700 text-base"><i class="fa-solid fa-clock-rotate-left mr-2 text-teal-600"></i>Rekod Ketetapan (Rujukan Sistem)</h2>
+                                <h2 class="font-bold text-gray-700 text-base"><i class="fa-solid fa-clock-rotate-left mr-2 text-sky-600"></i>Rekod Ketetapan (Rujukan Sistem)</h2>
                                 <p class="text-xs text-gray-400">Sistem merujuk kepada rekod ketetapan di bawah.</p>
                             </div>
                         </div>
@@ -593,7 +676,7 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
             <div class="flex justify-between items-center border-b pb-3 mb-4">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fa-solid fa-share-nodes text-teal-600"></i> Pautan Khas Penonton & Pemain
+                    <i class="fa-solid fa-share-nodes text-sky-600"></i> Pautan Khas Penonton & Pemain
                 </h3>
                 <button onclick="closeShareModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
@@ -606,7 +689,7 @@
                 <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Pautan Paparan Awam (Viewer):</label>
                 <div class="flex gap-2">
                     <input type="text" id="public-share-url" readonly class="flex-1 bg-white border rounded px-2.5 py-1.5 text-xs font-mono text-gray-700 focus:outline-none">
-                    <button onclick="copyPublicLink()" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded text-xs font-bold transition whitespace-nowrap">
+                    <button onclick="copyPublicLink()" class="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded text-xs font-bold transition whitespace-nowrap">
                         <i class="fa-solid fa-copy mr-1"></i> Salin
                     </button>
                 </div>
@@ -626,16 +709,16 @@
     <!-- Modal Log Masuk PIN 3-Layer (Super Admin / Pengadil) -->
     <div id="admin-login-overlay" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center">
-            <div class="w-12 h-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center mx-auto mb-3 text-xl">
-                <i class="fa-solid fa-user-lock"></i>
+            <div class="w-14 h-14 rounded-2xl bg-[#07162c] border border-cyan-400/50 flex items-center justify-center mx-auto mb-3 p-1 shadow-md" id="login-modal-logo">
+                <i class="fa-solid fa-user-lock text-cyan-400 text-xl"></i>
             </div>
             <h3 class="text-lg font-bold text-gray-800 mb-1">Log Masuk Sistem</h3>
             <p class="text-xs text-gray-500 mb-4">Masukkan <strong>PIN Super Admin</strong> (semua menu) atau <strong>PIN Pengadil</strong> (Paparan Awam & Pengadil Skor sahaja).</p>
             <form onsubmit="verifyAdminPin(event)">
-                <input type="password" id="admin-pin-input" placeholder="Masukkan Kod PIN" class="w-full text-center border rounded-lg px-4 py-2.5 text-lg font-bold tracking-widest mb-4 focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                <input type="password" id="admin-pin-input" placeholder="Masukkan Kod PIN" class="w-full text-center border rounded-lg px-4 py-2.5 text-lg font-bold tracking-widest mb-4 focus:outline-none focus:ring-2 focus:ring-sky-500" required>
                 <div class="flex gap-2">
                     <button type="button" onclick="closeAdminLoginModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 rounded-lg font-semibold text-sm transition">Batal</button>
-                    <button type="submit" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg font-bold text-sm transition shadow">Masuk</button>
+                    <button type="submit" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white py-2.5 rounded-lg font-bold text-sm transition shadow">Masuk</button>
                 </div>
             </form>
         </div>
@@ -647,7 +730,7 @@
             <div id="modal-icon" class="text-4xl mb-4"></div>
             <h3 id="modal-title" class="text-xl font-bold mb-2">Makluman</h3>
             <p id="modal-message" class="text-gray-600 mb-6 text-sm">Mesej</p>
-            <button onclick="closeModal()" class="w-full bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg font-semibold transition">OK</button>
+            <button onclick="closeModal()" class="w-full bg-sky-600 hover:bg-sky-700 text-white py-2.5 rounded-lg font-semibold transition">OK</button>
         </div>
     </div>
 
@@ -658,7 +741,7 @@
             <p id="confirm-message" class="text-gray-600 mb-6 text-sm">Adakah anda pasti?</p>
             <div class="flex gap-2">
                 <button onclick="closeConfirmModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 rounded-lg font-semibold transition text-sm">Batal</button>
-                <button id="confirm-yes-btn" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg font-semibold transition text-sm">Teruskan</button>
+                <button id="confirm-yes-btn" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white py-2.5 rounded-lg font-semibold transition text-sm">Teruskan</button>
             </div>
         </div>
     </div>
@@ -714,7 +797,7 @@
         <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 my-8">
             <div class="flex justify-between items-center border-b pb-3 mb-4">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fa-solid fa-cloud-bolt text-teal-600"></i> Diagnostik & Konfigurasi Awan (Firebase)
+                    <i class="fa-solid fa-cloud-bolt text-sky-600"></i> Diagnostik & Konfigurasi Awan (Firebase)
                 </h3>
                 <button onclick="closeFirebaseSetupModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
@@ -724,9 +807,9 @@
                 <div id="fb-diagnostic-msg">Menyemak konfigurasi...</div>
             </div>
 
-            <div class="space-y-2 text-xs text-gray-600 mb-4 bg-teal-50/70 border border-teal-200 p-3 rounded-lg">
-                <p class="font-bold text-teal-900"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>Tips Kekalkan Config Di GitHub Tanpa Perlu Edit <code>index.html</code>:</p>
-                <p class="text-[11px] text-teal-800 leading-relaxed">
+            <div class="space-y-2 text-xs text-gray-600 mb-4 bg-sky-50/70 border border-sky-200 p-3 rounded-lg">
+                <p class="font-bold text-sky-900"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>Tips Kekalkan Config Di GitHub Tanpa Perlu Edit <code>index.html</code>:</p>
+                <p class="text-[11px] text-sky-800 leading-relaxed">
                     Cipta satu fail bernama <strong><code>firebase-config.js</code></strong> di dalam repositori GitHub anda sekali sahaja. Anda juga boleh menekan butang <strong>"Muat Turun firebase-config.js"</strong> di bawah selepas menampal kod anda, kemudian muat naik fail tersebut ke GitHub!
                 </p>
             </div>
@@ -741,7 +824,7 @@
   "storageBucket": "projek-anda.appspot.com",
   "messagingSenderId": "123456...",
   "appId": "1:123456:web:..."
-}' class="w-full border rounded-lg p-2.5 text-xs font-mono bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+}' class="w-full border rounded-lg p-2.5 text-xs font-mono bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-500"></textarea>
             </div>
 
             <div class="flex flex-wrap gap-2 justify-between items-center border-t pt-4">
@@ -751,7 +834,7 @@
                 <div class="flex gap-2">
                     <button type="button" onclick="clearCustomFirebaseConfig()" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg text-xs font-semibold transition">Reset</button>
                     <button type="button" onclick="closeFirebaseSetupModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-xs font-semibold transition">Tutup</button>
-                    <button type="button" onclick="saveCustomFirebaseConfig()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition"><i class="fa-solid fa-plug mr-1"></i>Simpan</button>
+                    <button type="button" onclick="saveCustomFirebaseConfig()" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition"><i class="fa-solid fa-plug mr-1"></i>Simpan</button>
                 </div>
             </div>
         </div>
@@ -780,6 +863,144 @@
         const urlParams = new URLSearchParams(window.location.search);
         const isForcedPublicLink = urlParams.get('view') === 'public' || urlParams.get('mode') === 'public';
         let currentUserRole = isForcedPublicLink ? 'public' : (sessionStorage.getItem('kpdnUserRole') || 'public');
+
+        // --- GRAFIK VEKTOR RASMI SHUTTLEPOWER (Built-in SVG & Sokongan Fail SHUTTLEPOWER.jpg) ---
+        window.getShuttlePowerSvgMarkup = function(includeWordmark = true) {
+            return `
+            <svg viewBox="${includeWordmark ? '0 0 500 360' : '90 15 320 225'}" class="w-full h-full select-none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="spCyanBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00f2fe"/>
+                        <stop offset="100%" stop-color="#0284c7"/>
+                    </linearGradient>
+                    <linearGradient id="spLimeGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#a3e635"/>
+                        <stop offset="100%" stop-color="#10b981"/>
+                    </linearGradient>
+                </defs>
+                <!-- Garisan Bracket Kiri (Biru Sian) -->
+                <path d="M125 140 H165 V112 H210 M140 165 H165 V140" stroke="url(#spCyanBlue)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <!-- Garisan Bracket Kanan (Hijau Limau) -->
+                <path d="M280 185 H325 V145 H365 M235 205 H285 V185" stroke="url(#spLimeGreen)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <!-- Jalur Kelajuan Neon -->
+                <line x1="190" y1="95" x2="265" y2="55" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+                <line x1="155" y1="195" x2="215" y2="145" stroke="#a3e635" stroke-width="5" stroke-linecap="round"/>
+                <line x1="180" y1="212" x2="230" y2="165" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>
+                <!-- Bulu Tangkis (Shuttlecock) Dinamik 45 Darjah -->
+                <g transform="translate(275, 105) rotate(42)">
+                    <!-- Kepala Gabus (Cork) -->
+                    <path d="M-24 -52 C-24 -76, 24 -76, 24 -52 Z" fill="url(#spCyanBlue)"/>
+                    <rect x="-24" y="-52" width="48" height="9" rx="3" fill="#a3e635"/>
+                    <!-- Batang Rangka Dalam -->
+                    <line x1="-15" y1="-42" x2="-26" y2="20" stroke="#e0f2fe" stroke-width="4"/>
+                    <line x1="-5" y1="-42" x2="-9" y2="24" stroke="#e0f2fe" stroke-width="4"/>
+                    <line x1="5" y1="-42" x2="9" y2="24" stroke="#e0f2fe" stroke-width="4"/>
+                    <line x1="15" y1="-42" x2="26" y2="20" stroke="#e0f2fe" stroke-width="4"/>
+                    <!-- Bilah Bulu (Feathers) Biru & Hijau -->
+                    <path d="M-24 -22 L-42 35 L-20 55 L-11 -22 Z" fill="url(#spLimeGreen)"/>
+                    <path d="M-11 -22 L-20 62 L0 76 L0 -22 Z" fill="url(#spCyanBlue)"/>
+                    <path d="M0 -22 L0 76 L20 62 L11 -22 Z" fill="url(#spLimeGreen)"/>
+                    <path d="M11 -22 L20 55 L42 35 L24 -22 Z" fill="url(#spCyanBlue)"/>
+                </g>
+                ${includeWordmark ? `
+                <!-- Tipografi Rasmi SHUTTLEPOWER -->
+                <text x="250" y="295" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="900" font-style="italic" font-size="48" letter-spacing="1">
+                    <tspan fill="#ffffff">SHUTTLE</tspan><tspan fill="#38bdf8">POWER</tspan>
+                </text>
+                ` : ''}
+            </svg>`;
+        };
+
+        window.renderShuttlePowerBranding = function() {
+            const customLogo = window.state?.settings?.customLogoDataUrl || localStorage.getItem('shuttlePowerCustomLogo') || '';
+            const defaultImgPath = './SHUTTLEPOWER.jpg';
+
+            // 1. Header Logo Box
+            const headerBox = document.getElementById('header-logo-box');
+            if (headerBox) {
+                if (customLogo) {
+                    headerBox.innerHTML = `<img src="${customLogo}" alt="SHUTTLEPOWER" class="w-full h-full object-contain rounded-lg">`;
+                } else {
+                    headerBox.innerHTML = `<img src="${defaultImgPath}" alt="SHUTTLEPOWER" class="w-full h-full object-cover rounded-lg" onerror="this.outerHTML = window.getShuttlePowerSvgMarkup(false)">`;
+                }
+            }
+
+            // 2. Public Banner Logo
+            const publicBannerBox = document.getElementById('public-banner-logo');
+            if (publicBannerBox) {
+                if (customLogo) {
+                    publicBannerBox.innerHTML = `<img src="${customLogo}" alt="SHUTTLEPOWER" class="w-full h-full object-contain rounded-xl">`;
+                } else {
+                    publicBannerBox.innerHTML = `<img src="${defaultImgPath}" alt="SHUTTLEPOWER" class="w-full h-full object-cover rounded-xl" onerror="this.outerHTML = window.getShuttlePowerSvgMarkup(false)">`;
+                }
+            }
+
+            // 3. Settings Preview Box
+            const settingsPreview = document.getElementById('settings-logo-preview');
+            if (settingsPreview) {
+                if (customLogo) {
+                    settingsPreview.innerHTML = `<img src="${customLogo}" alt="SHUTTLEPOWER" class="w-full h-full object-contain rounded">`;
+                } else {
+                    settingsPreview.innerHTML = `<img src="${defaultImgPath}" alt="SHUTTLEPOWER" class="w-full h-full object-cover rounded" onerror="this.outerHTML = window.getShuttlePowerSvgMarkup(false)">`;
+                }
+            }
+
+            // 4. Watermark Latar Belakang
+            const watermarkContainer = document.getElementById('watermark-logo-container');
+            if (watermarkContainer) {
+                if (customLogo) {
+                    watermarkContainer.innerHTML = `<img src="${customLogo}" alt="Watermark SHUTTLEPOWER" class="max-h-[420px] w-auto object-contain rounded-3xl">`;
+                } else {
+                    watermarkContainer.innerHTML = `<img src="${defaultImgPath}" alt="Watermark SHUTTLEPOWER" class="max-h-[420px] w-auto object-contain rounded-3xl" onerror="this.outerHTML = window.getShuttlePowerSvgMarkup(true)">`;
+                }
+            }
+        };
+
+        window.handleCustomLogoUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 360;
+                    let w = img.width, h = img.height;
+                    if (w > h && w > maxDim) {
+                        h = Math.round((h * maxDim) / w);
+                        w = maxDim;
+                    } else if (h > maxDim) {
+                        w = Math.round((w * maxDim) / h);
+                        h = maxDim;
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+                    localStorage.setItem('shuttlePowerCustomLogo', compressedDataUrl);
+                    if (window.state && window.state.settings) {
+                        window.state.settings.customLogoDataUrl = compressedDataUrl;
+                    }
+                    window.renderShuttlePowerBranding();
+                    window.saveData();
+                    showModal('Logo Rasmi Dikemas Kini', 'Logo dan Watermark SHUTTLEPOWER telah diterapkan pada sistem!', 'success');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.resetCustomLogo = function() {
+            localStorage.removeItem('shuttlePowerCustomLogo');
+            if (window.state && window.state.settings) {
+                delete window.state.settings.customLogoDataUrl;
+            }
+            window.renderShuttlePowerBranding();
+            window.saveData();
+            showModal('Logo Lalai Diaktifkan', 'Sistem kini menggunakan logo lalai SHUTTLEPOWER.', 'info');
+        };
 
         function parseFirebaseConfigInput(rawStr) {
             if (!rawStr) return null;
@@ -861,7 +1082,7 @@
             if (currentUserRole === 'superadmin') {
                 window.openFirebaseSetupModal();
             } else {
-                showModal('Status Sambungan Langsung', 'Paparan ini disambungkan terus ke pangkalan data awan kejohanan. Markah dan kedudukan akan dikemas kini secara automatik.', 'info');
+                showModal('Status Sambungan Langsung', 'Paparan ini disambungkan terus ke pangkalan data awan SHUTTLEPOWER. Markah dan kedudukan akan dikemas kini secara automatik.', 'info');
             }
         };
 
@@ -913,7 +1134,7 @@
                 tournamentName: 'Badminton KPDN P.Pinang',
                 peringkat: 'Peringkat Kumpulan',
                 format: 'Round Robin',
-                matchSetMode: '1_set', // '1_set' atau 'best_of_3' (2 Set + Set Ke-3 Penentuan)
+                matchSetMode: '1_set',
                 maxScore: '',
                 numGroups: '2',
                 numQualify: '2',
@@ -931,14 +1152,12 @@
             return doc(db, 'artifacts', appId, 'public', 'data', 'kpdn_state', 'main');
         }
 
-        // Pastikan setiap perlawanan mempunyai struktur Kod Berurutan (P1, S1, SA1, A1), Nama Pengadil & Data Set
         function normalizeMatchesStructure() {
             const groupKeys = Object.keys(window.state.groups || {});
             let pCounter = 1;
             let phaseCounters = {};
 
             (window.state.matches || []).forEach(m => {
-                // 1. Kod Perlawanan Berurutan
                 if (!m.matchCode) {
                     if (groupKeys.includes(m.group)) {
                         m.matchCode = `P${pCounter++}`;
@@ -952,9 +1171,7 @@
                         m.matchCode = `${prefix}${phaseCounters[prefix]}`;
                     }
                 }
-                // 2. Nama Pengadil
                 if (m.umpireName === undefined) m.umpireName = '';
-                // 3. Struktur Set (3 Set Maksimum)
                 if (!Array.isArray(m.sets) || m.sets.length < 3) {
                     m.sets = [
                         { s1: Number(m.score1) || 0, s2: Number(m.score2) || 0 },
@@ -978,7 +1195,6 @@
             normalizeMatchesStructure();
         }
 
-        // --- Helper Pengiraan Set & Skor Perlawanan ---
         window.isBestOf3Mode = function() {
             return window.state.settings && window.state.settings.matchSetMode === 'best_of_3';
         };
@@ -1016,9 +1232,7 @@
             let playedTexts = [];
 
             match.sets.forEach((st, idx) => {
-                // Set ke-3 hanya dikira jika dimainkan atau jika Set 1 & Set 2 terikat 1-1
                 if (idx === 2 && setsWon1 !== 1 && setsWon2 !== 1 && st.s1 === 0 && st.s2 === 0) return;
-                // Set 1 & 2 yang masih 0-0 dan belum disentuh
                 if (idx > 0 && idx > (match.currentSet || 0) && st.s1 === 0 && st.s2 === 0) return;
 
                 totalPoints1 += Number(st.s1) || 0;
@@ -1120,6 +1334,8 @@
         // --- Kawalan 3 Layer Akses: Public (Awam) vs Umpire (Pengadil) vs Super Admin ---
         function applyAccessControlUI() {
             ensureDefaultSettings();
+            window.renderShuttlePowerBranding();
+
             const navTabs = document.getElementById('main-nav-tabs');
             const tabPublic = document.getElementById('tab-public');
             const tabAdmin = document.getElementById('tab-admin');
@@ -1134,9 +1350,11 @@
             const adminBanner = document.getElementById('admin-link-banner');
 
             const titleEl = document.getElementById('main-tournament-title');
+            const publicBannerTitle = document.getElementById('public-banner-title');
             const tName = window.state.settings.tournamentName || 'Badminton KPDN P.Pinang';
             if (titleEl) titleEl.innerText = tName;
-            document.title = tName;
+            if (publicBannerTitle) publicBannerTitle.innerText = tName;
+            document.title = `SHUTTLEPOWER - ${tName}`;
 
             const pinAdminInput = document.getElementById('set-admin-pin');
             const pinUmpireInput = document.getElementById('set-umpire-pin');
@@ -1178,7 +1396,7 @@
                 btnReset?.classList.add('hidden');
                 adminBanner?.classList.add('hidden');
 
-                if (lockIcon) lockIcon.className = 'fa-solid fa-gavel text-indigo-200';
+                if (lockIcon) lockIcon.className = 'fa-solid fa-gavel text-cyan-300';
                 if (lockText) lockText.innerText = 'Log Keluar';
                 if (roleBadge) {
                     roleBadge.className = 'bg-indigo-600 text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-2xs';
@@ -1196,10 +1414,10 @@
                 btnReset?.classList.add('hidden');
                 adminBanner?.classList.add('hidden');
 
-                if (lockIcon) lockIcon.className = 'fa-solid fa-lock';
+                if (lockIcon) lockIcon.className = 'fa-solid fa-lock text-cyan-400';
                 if (lockText) lockText.innerText = 'Log Masuk';
                 if (roleBadge) {
-                    roleBadge.className = 'bg-teal-900/60 text-teal-100 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-teal-400/30';
+                    roleBadge.className = 'bg-cyan-950/80 text-cyan-200 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-cyan-400/30';
                     roleBadge.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Paparan Awam (Viewer)';
                 }
                 document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
@@ -1290,7 +1508,7 @@
         window.shareToWhatsApp = function() {
             const url = window.getPublicShareUrl();
             const tName = window.state.settings.tournamentName || 'Kejohanan Badminton KPDN Pulau Pinang';
-            const text = `🏸 *KEPUTUSAN & JADUAL LANGSUNG: ${tName.toUpperCase()}*\n\nSila klik pautan di bawah untuk melihat kedudukan kumpulan, carta kalah mati dan keputusan perlawanan secara langsung:\n👉 ${url}`;
+            const text = `🏸 *SHUTTLEPOWER LIVE: ${tName.toUpperCase()}*\n\nSila klik pautan di bawah untuk melihat kedudukan kumpulan, carta kalah mati dan keputusan perlawanan secara langsung:\n👉 ${url}`;
             const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
             window.open(waUrl, '_blank');
         };
@@ -1446,7 +1664,7 @@
             confirmActionCallback = null;
         };
 
-        // --- Edit Markah Manual (Menyokong 1 Set & Best of 3 Sets) ---
+        // --- Edit Markah Manual ---
         window.openEditScore = function(matchId) {
             const match = window.state.matches.find(m => m.id === matchId);
             if (!match) return;
@@ -1663,7 +1881,7 @@
             }
         };
 
-        // --- Standings & Group Calculation (Menyokong 1 Set & Best of 3 Sets) ---
+        // --- Standings & Group Calculation ---
         window.getBestThirdPlacedQualifiedIds = function() {
             if (window.getQualifyMethod() !== 'best_third') return [];
             const groupKeys = Object.keys(window.state.groups).sort();
@@ -2016,7 +2234,7 @@
                         for (let j = i + 1; j < teamsInGroup.length; j++) {
                             currentGroupMatches.push({
                                 id: window.generateId(),
-                                matchCode: '', // Akan dinomborkan P1, P2... selepas disusun
+                                matchCode: '',
                                 group: groupName,
                                 team1: teamsInGroup[i],
                                 team2: teamsInGroup[j],
@@ -2070,7 +2288,6 @@
             }
         };
 
-        // --- Helper Kod Perlawanan Mengikut Pusingan Kalah Mati (S1, SA1, A1) ---
         function getKnockoutCodePrefix(phaseName) {
             if (phaseName === 'Suku Akhir') return 'S';
             if (phaseName === 'Separuh Akhir') return 'SA';
@@ -2079,7 +2296,7 @@
             return 'KM';
         }
 
-        // --- Next Round Generation (Dengan Kod S1/SA1/A1 & Sokongan Best of 3) ---
+        // --- Next Round Generation ---
         window.generateNextRound = function() {
             let qualifiedTeams = [];
             let losingSemiTeams = [];
@@ -2193,7 +2410,6 @@
 
             let newMatchesCreated = 0;
 
-            // Jika melangkah ke Pusingan Akhir dan pilihan Penentuan Tempat Ke-3 & Ke-4 diaktifkan
             if (nextPhaseName === 'Pusingan Akhir' && thirdPlaceOption === 'playoff' && losingSemiTeams.length >= 2) {
                 window.state.matches.push({
                     id: window.generateId(),
@@ -2444,9 +2660,9 @@
                     const label = i === 2 ? `Set 3 (${st.s1}-${st.s2})` : `Set ${i + 1} (${st.s1}-${st.s2})`;
                     btn.innerText = label;
                     if (i === curSet) {
-                        btn.className = 'px-3 py-1 rounded text-xs font-extrabold bg-amber-400 text-gray-900 shadow transition';
+                        btn.className = 'px-3 py-1 rounded text-xs font-extrabold bg-cyan-400 text-slate-950 shadow transition';
                     } else {
-                        btn.className = 'px-3 py-1 rounded text-xs font-semibold bg-gray-700 text-gray-300 hover:bg-gray-600 transition';
+                        btn.className = 'px-3 py-1 rounded text-xs font-semibold bg-slate-800 text-gray-300 hover:bg-slate-700 transition';
                     }
                 }
 
@@ -2603,6 +2819,7 @@
                 const savedAdminPin = window.state.settings?.adminPin || '1234';
                 const savedUmpirePin = window.state.settings?.umpirePin || '2222';
                 const savedSetMode = window.state.settings?.matchSetMode || '1_set';
+                const savedLogo = window.state.settings?.customLogoDataUrl;
                 localStorage.removeItem('badmintonKPDNState');
                 window.state = {
                     teams: [],
@@ -2623,7 +2840,8 @@
                         qualifyMethod: 'bye',
                         thirdPlacePlayoff: 'joint',
                         adminPin: savedAdminPin,
-                        umpirePin: savedUmpirePin
+                        umpirePin: savedUmpirePin,
+                        customLogoDataUrl: savedLogo
                     }
                 };
                 window.saveData();
@@ -2648,7 +2866,7 @@
             const wb = XLSX.utils.book_new();
 
             const winnerRows = [
-                [tName.toUpperCase()],
+                [`SHUTTLEPOWER - ${tName.toUpperCase()}`],
                 ["KEPUTUSAN RASMI KEJOHANAN"],
                 [],
                 ["KEDUDUKAN", "NAMA REGU / PASUKAN"],
@@ -2683,7 +2901,7 @@
             XLSX.utils.book_append_sheet(wb, wsSummary, "Pemenang_&_Kumpulan");
 
             const matchRows = [
-                [tName.toUpperCase()],
+                [`SHUTTLEPOWER - ${tName.toUpperCase()}`],
                 ["SENARAI KEPUTUSAN KESELURUHAN PERLAWANAN (DARI MULA HINGGA TAMAT)"],
                 [],
                 ["Bil", "Kod Perlawanan", "Peringkat / Kumpulan", "Nama Pengadil", "Regu 1", "Keputusan / Skor Set", "Regu 2", "Pemenang", "Status"]
@@ -2736,7 +2954,7 @@
             groupKeys.forEach(g => {
                 const st = window.calculateStandings(g);
                 groupsHtml += `
-                    <h3 style="color:#0f766e;margin-top:18px;">Kumpulan ${g}</h3>
+                    <h3 style="color:#0369a1;margin-top:18px;">Kumpulan ${g}</h3>
                     <table style="width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px;">
                         <thead>
                             <tr style="background-color:#f3f4f6;">
@@ -2788,7 +3006,8 @@
                 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
                 <head><meta charset='utf-8'><title>Laporan Keputusan ${tName}</title></head>
                 <body style="font-family:Arial,sans-serif;color:#1f2937;">
-                    <h1 style="text-align:center;color:#0f766e;margin-bottom:4px;">${tName.toUpperCase()}</h1>
+                    <p style="text-align:center;font-size:11px;font-weight:bold;color:#0284c7;letter-spacing:2px;margin-bottom:2px;">SHUTTLEPOWER OFFICIAL TOURNAMENT REPORT</p>
+                    <h1 style="text-align:center;color:#06152d;margin-top:0;margin-bottom:4px;">${tName.toUpperCase()}</h1>
                     <p style="text-align:center;font-size:12px;color:#6b7280;margin-top:0;">LAPORAN RASMI KEPUTUSAN KESELURUHAN KEJOHANAN</p>
                     <hr/>
                     <h2 style="color:#1e3a8a;">1. Senarai Pemenang Utama</h2>
@@ -2885,8 +3104,8 @@
                     <div class="border rounded-xl p-3 bg-gray-50 flex flex-col justify-between shadow-xs">
                         <div>
                             <div class="flex justify-between items-center mb-2 pb-2 border-b">
-                                <span class="font-bold text-teal-700 text-sm"><i class="fa-solid fa-layer-group mr-1"></i> Kumpulan ${g}</span>
-                                <span class="text-[11px] bg-teal-100 text-teal-800 px-2 py-0.5 rounded font-bold">${teamsInG.length} Regu</span>
+                                <span class="font-bold text-sky-700 text-sm"><i class="fa-solid fa-layer-group mr-1"></i> Kumpulan ${g}</span>
+                                <span class="text-[11px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-bold">${teamsInG.length} Regu</span>
                             </div>
                             <ul class="space-y-1 mb-3 max-h-32 overflow-y-auto">
                                 ${teamsInG.length === 0 ? '<li class="text-gray-400 text-xs italic py-1">Kosong</li>' : teamsInG.map(t => `
@@ -2902,7 +3121,7 @@
                                 <option value="">-- Pilih Regu --</option>
                                 ${options}
                             </select>
-                            <button onclick="assignToGroup('${g}')" class="bg-teal-600 text-white px-2.5 py-1 rounded text-xs hover:bg-teal-700 font-bold"><i class="fa-solid fa-plus"></i></button>
+                            <button onclick="assignToGroup('${g}')" class="bg-sky-600 text-white px-2.5 py-1 rounded text-xs hover:bg-sky-700 font-bold"><i class="fa-solid fa-plus"></i></button>
                         </div>
                     </div>
                 `;
@@ -2930,8 +3149,8 @@
                 const titleHeading = isGroup ? `Kumpulan ${groupName}` : groupName;
                 return `
                     <div class="mb-6 border rounded-xl overflow-hidden shadow-2xs bg-white">
-                        <div class="bg-gradient-to-r ${isGroup ? 'from-teal-600 to-green-600' : 'from-indigo-600 to-purple-600'} text-white px-4 py-2 font-bold text-sm flex justify-between items-center">
-                            <span><i class="fa-solid fa-trophy mr-1.5"></i> ${titleHeading}</span>
+                        <div class="bg-gradient-to-r ${isGroup ? 'from-[#07162c] to-sky-700' : 'from-indigo-700 to-purple-700'} text-white px-4 py-2 font-bold text-sm flex justify-between items-center">
+                            <span><i class="fa-solid fa-trophy mr-1.5 text-cyan-300"></i> ${titleHeading}</span>
                             <span class="text-xs bg-white/20 px-2 py-0.5 rounded">${mList.length} Perlawanan</span>
                         </div>
                         <div class="divide-y">
@@ -2948,7 +3167,7 @@
                                             <span class="font-bold text-gray-800 text-right flex-1 truncate">${m.team1.name}</span>
                                             <div class="flex flex-col items-center px-2">
                                                 <span class="bg-gray-200 px-2.5 py-0.5 rounded font-bold text-xs">${isCompleted || isInProgress ? evalRes.shortSummaryText : 'VS'}</span>
-                                                ${m.umpireName ? `<span class="text-[10px] text-teal-700 font-semibold mt-0.5"><i class="fa-solid fa-user-tie mr-1"></i>${m.umpireName}</span>` : ''}
+                                                ${m.umpireName ? `<span class="text-[10px] text-sky-700 font-semibold mt-0.5"><i class="fa-solid fa-user-tie mr-1"></i>${m.umpireName}</span>` : ''}
                                             </div>
                                             <span class="font-bold text-gray-800 text-left flex-1 truncate">${m.team2.name}</span>
                                         </div>
@@ -2993,18 +3212,18 @@
                 const isLive = m.status === 'in_progress';
                 const evalRes = window.getMatchSetEvaluation(m);
                 return `
-                    <div class="border rounded-xl p-4 bg-white shadow-2xs hover:shadow-md transition flex flex-col justify-between border-l-4 ${isLive ? 'border-l-red-500 ring-2 ring-red-100' : (isGroup ? 'border-l-teal-500' : 'border-l-indigo-500')}">
+                    <div class="border rounded-xl p-4 bg-white shadow-2xs hover:shadow-md transition flex flex-col justify-between border-l-4 ${isLive ? 'border-l-red-500 ring-2 ring-red-100' : (isGroup ? 'border-l-sky-500' : 'border-l-indigo-500')}">
                         <div>
                             <div class="flex justify-between items-center mb-3">
-                                <span class="text-xs font-black bg-gray-900 text-amber-300 px-2.5 py-1 rounded shadow-2xs">#${m.matchCode}</span>
-                                <span class="text-xs font-bold ${isGroup ? 'text-teal-700 bg-teal-50' : 'text-indigo-700 bg-indigo-50'} px-2.5 py-0.5 rounded">${isGroup ? `Kumpulan ${m.group}` : m.group}</span>
+                                <span class="text-xs font-black bg-[#07162c] text-cyan-300 px-2.5 py-1 rounded shadow-2xs">#${m.matchCode}</span>
+                                <span class="text-xs font-bold ${isGroup ? 'text-sky-700 bg-sky-50' : 'text-indigo-700 bg-indigo-50'} px-2.5 py-0.5 rounded">${isGroup ? `Kumpulan ${m.group}` : m.group}</span>
                             </div>
                             <div class="flex justify-between items-center mb-3 text-sm font-bold text-gray-800">
                                 <span class="flex-1 text-right truncate pr-2">${m.team1.name}</span>
                                 <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-mono">${isLive ? evalRes.shortSummaryText : 'VS'}</span>
                                 <span class="flex-1 text-left truncate pl-2">${m.team2.name}</span>
                             </div>
-                            ${m.umpireName ? `<div class="text-[11px] text-center text-teal-700 bg-teal-50/70 rounded py-1 mb-3 font-semibold"><i class="fa-solid fa-user-tie mr-1"></i>Pengadil: ${m.umpireName}</div>` : ''}
+                            ${m.umpireName ? `<div class="text-[11px] text-center text-sky-700 bg-sky-50/70 rounded py-1 mb-3 font-semibold"><i class="fa-solid fa-user-tie mr-1"></i>Pengadil: ${m.umpireName}</div>` : ''}
                         </div>
                         <button onclick="selectMatchForUmpire('${m.id}')" class="w-full ${isLive ? 'bg-amber-500 hover:bg-amber-600 text-gray-900' : 'bg-red-600 hover:bg-red-700 text-white'} py-2.5 rounded-lg text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-whistle"></i> ${isLive ? `Sambung Mengadil (#${m.matchCode})` : `Pilih & Masukkan Nama Pengadil (#${m.matchCode})`}
@@ -3045,11 +3264,16 @@
             const knockoutMatches = window.state.matches.filter(m => !groupKeys.includes(m.group));
             const hasKnockout = knockoutMatches.length > 0;
 
-            // 1. Poster Pemenang Rasmi
+            // 1. Poster Pemenang Rasmi Bertema SHUTTLEPOWER
             const winnerSummary = window.getTournamentWinnersSummary();
             if (winnerPosterEl) {
                 if (winnerSummary.isFinished) {
                     const tName = window.state.settings.tournamentName || 'Kejohanan Badminton KPDN Pulau Pinang';
+                    const customLogo = window.state?.settings?.customLogoDataUrl || localStorage.getItem('shuttlePowerCustomLogo') || '';
+                    const posterLogoHtml = customLogo
+                        ? `<img src="${customLogo}" alt="SHUTTLEPOWER" class="w-20 h-20 object-contain mx-auto mb-2 rounded-2xl border border-cyan-400/40 bg-[#051020] p-1">`
+                        : `<div class="w-20 h-20 mx-auto mb-2 rounded-2xl border border-cyan-400/40 bg-[#051020] p-1 flex items-center justify-center overflow-hidden"><img src="./SHUTTLEPOWER.jpg" alt="SHUTTLEPOWER" class="w-full h-full object-cover rounded-xl" onerror="this.outerHTML = window.getShuttlePowerSvgMarkup(false)"></div>`;
+
                     const thirdBlockHtml = winnerSummary.isJointThird
                         ? `
                             <div class="bg-amber-900/40 backdrop-blur-xs border border-amber-400/40 rounded-2xl p-4 text-center flex flex-col justify-center">
@@ -3069,15 +3293,19 @@
 
                     winnerPosterEl.classList.remove('hidden');
                     winnerPosterEl.innerHTML = `
-                        <div class="relative overflow-hidden rounded-2xl shadow-xl border-2 border-yellow-400 bg-gradient-to-br from-teal-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8">
+                        <div class="relative overflow-hidden rounded-2xl shadow-2xl border-2 border-cyan-400 bg-gradient-to-br from-[#06152d] via-[#0c264e] to-[#051020] text-white p-6 sm:p-8">
                             <div class="text-center max-w-3xl mx-auto">
-                                <span class="inline-flex items-center gap-1.5 bg-yellow-400 text-slate-900 text-xs font-black px-3.5 py-1 rounded-full uppercase tracking-wider shadow-sm mb-3">
+                                ${posterLogoHtml}
+                                <div class="text-xs font-black tracking-widest uppercase italic mb-2">
+                                    <span class="text-white">SHUTTLE</span><span class="text-cyan-400">POWER</span> <span class="text-lime-400 not-italic">CHAMPIONSHIP</span>
+                                </div>
+                                <span class="inline-flex items-center gap-1.5 bg-gradient-to-r from-yellow-400 to-amber-300 text-slate-900 text-xs font-black px-3.5 py-1 rounded-full uppercase tracking-wider shadow-sm mb-3">
                                     <i class="fa-solid fa-star"></i> Keputusan Rasmi Kejohanan <i class="fa-solid fa-star"></i>
                                 </span>
-                                <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-300">
+                                <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-lime-300">
                                     ${tName}
                                 </h2>
-                                <p class="text-xs sm:text-sm text-teal-200 mt-1">Tahniah kepada semua pemenang dan pasukan yang mengambil bahagian!</p>
+                                <p class="text-xs sm:text-sm text-cyan-200 mt-1">Tahniah kepada semua pemenang dan pasukan yang mengambil bahagian!</p>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-stretch">
@@ -3117,7 +3345,7 @@
                 }
             }
 
-            // 3. Fasa Kalah Mati (Dengan Kod #S1, #SA1, #A1, Nama Pengadil & Keputusan Set)
+            // 3. Fasa Kalah Mati
             if (knockoutContainer) {
                 if (hasKnockout) {
                     knockoutContainer.classList.remove('hidden');
@@ -3134,12 +3362,12 @@
                             : (!isLatestPhase && isAllDone);
 
                         return `
-                            <details ${isCollapsed ? '' : 'open'} class="bg-white rounded-xl shadow-md border-2 border-indigo-200 overflow-hidden transition-all">
-                                <summary onclick="toggleKnockoutPhaseClause('${phaseName}', this.parentElement)" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 px-4 py-3 flex justify-between items-center text-white cursor-pointer select-none">
+                            <details ${isCollapsed ? '' : 'open'} class="bg-white/95 backdrop-blur-xs rounded-xl shadow-md border-2 border-cyan-500/30 overflow-hidden transition-all">
+                                <summary onclick="toggleKnockoutPhaseClause('${phaseName}', this.parentElement)" class="bg-gradient-to-r from-[#07162c] via-[#0c274e] to-sky-800 hover:opacity-95 px-4 py-3 flex justify-between items-center text-white cursor-pointer select-none">
                                     <div class="flex items-center gap-2">
-                                        <i class="fa-solid fa-sitemap"></i>
+                                        <i class="fa-solid fa-sitemap text-cyan-400"></i>
                                         <span class="font-bold text-sm sm:text-base">${phaseName}</span>
-                                        <span class="bg-white/20 text-white text-[11px] px-2.5 py-0.5 rounded-full font-semibold">${completedCount}/${phaseMatches.length} Selesai</span>
+                                        <span class="bg-cyan-400/20 text-cyan-200 border border-cyan-400/30 text-[11px] px-2.5 py-0.5 rounded-full font-semibold">${completedCount}/${phaseMatches.length} Selesai</span>
                                     </div>
                                     <div class="flex items-center gap-2 text-xs font-semibold bg-white/15 px-3 py-1 rounded-lg border border-white/20">
                                         <span>Buka / Tutup</span>
@@ -3147,7 +3375,7 @@
                                     </div>
                                 </summary>
 
-                                <div class="p-4 bg-indigo-50/40 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div class="p-4 bg-sky-50/40 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                     ${phaseMatches.map(m => {
                                         const isLive = m.status === 'in_progress';
                                         const isDone = m.status === 'completed';
@@ -3155,9 +3383,9 @@
                                         const disp1 = evalRes.isBestOf3 ? evalRes.setsWon1 : m.sets[0].s1;
                                         const disp2 = evalRes.isBestOf3 ? evalRes.setsWon2 : m.sets[0].s2;
                                         return `
-                                            <div class="bg-white border ${isLive ? 'border-red-400 ring-2 ring-red-100' : 'border-indigo-200'} rounded-xl p-3 shadow-2xs flex flex-col justify-between">
+                                            <div class="bg-white border ${isLive ? 'border-red-400 ring-2 ring-red-100' : 'border-sky-200'} rounded-xl p-3 shadow-2xs flex flex-col justify-between">
                                                 <div class="flex justify-between items-center mb-2">
-                                                    <span class="text-xs font-black bg-indigo-900 text-amber-300 px-2 py-0.5 rounded">#${m.matchCode}</span>
+                                                    <span class="text-xs font-black bg-[#07162c] text-cyan-300 px-2 py-0.5 rounded">#${m.matchCode}</span>
                                                     <span class="text-[10px] px-2 py-0.5 rounded font-bold ${isDone ? 'bg-green-100 text-green-800' : (isLive ? 'bg-red-500 text-white animate-pulse' : 'bg-amber-100 text-amber-800')}">${isDone ? 'Selesai' : (isLive ? 'LIVE' : 'Belum Mula')}</span>
                                                 </div>
                                                 <div class="space-y-1.5 text-xs font-bold">
@@ -3171,7 +3399,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center text-[10px] text-gray-500">
-                                                    <span class="truncate"><i class="fa-solid fa-user-tie mr-1 text-teal-600"></i>${m.umpireName || 'Tiada Pengadil'}</span>
+                                                    <span class="truncate"><i class="fa-solid fa-user-tie mr-1 text-sky-600"></i>${m.umpireName || 'Tiada Pengadil'}</span>
                                                     ${evalRes.isBestOf3 && (isDone || isLive) ? `<span class="font-mono font-semibold text-indigo-700">${evalRes.playedSetsText}</span>` : ''}
                                                 </div>
                                             </div>
@@ -3200,9 +3428,9 @@
                 let st = window.calculateStandings(g);
                 return `
                     <div class="border rounded-xl overflow-hidden shadow-2xs bg-white">
-                        <div class="bg-gray-100 px-3 py-2 font-bold text-xs text-gray-700 border-b flex justify-between items-center">
-                            <span>Kumpulan ${g}</span>
-                            <span class="text-[10px] text-gray-500">P / M / K / PTS</span>
+                        <div class="bg-[#07162c] px-3 py-2 font-bold text-xs text-white border-b flex justify-between items-center">
+                            <span><i class="fa-solid fa-shield-halved text-cyan-400 mr-1.5"></i>Kumpulan ${g}</span>
+                            <span class="text-[10px] text-cyan-200">P / M / K / PTS</span>
                         </div>
                         <table class="w-full text-left text-xs">
                             <thead class="bg-gray-50 text-gray-500 border-b">
@@ -3230,7 +3458,7 @@
                                             <td class="p-2 text-center font-mono">${item.w}</td>
                                             <td class="p-2 text-center font-mono">${item.l}</td>
                                             <td class="p-2 text-center font-mono">${item.diff > 0 ? '+' + item.diff : item.diff}</td>
-                                            <td class="p-2 text-center font-bold font-mono text-teal-700">${item.pts}</td>
+                                            <td class="p-2 text-center font-bold font-mono text-sky-700">${item.pts}</td>
                                         </tr>
                                     `;
                                 }).join('')}
@@ -3254,15 +3482,15 @@
                     <div class="p-3 hover:bg-gray-50 flex flex-col gap-1 text-xs border-b last:border-b-0">
                         <div class="flex justify-between items-center gap-2">
                             <div class="flex items-center gap-1.5 flex-1 min-w-0">
-                                <span class="font-black bg-gray-800 text-amber-300 text-[10px] px-1.5 py-0.5 rounded shrink-0">#${m.matchCode}</span>
-                                <span class="font-bold text-teal-700 shrink-0">[${m.group}]</span>
+                                <span class="font-black bg-[#07162c] text-cyan-300 text-[10px] px-1.5 py-0.5 rounded shrink-0">#${m.matchCode}</span>
+                                <span class="font-bold text-sky-700 shrink-0">[${m.group}]</span>
                                 <span class="text-gray-800 font-semibold truncate">${m.team1.name} vs ${m.team2.name}</span>
                             </div>
                             <div class="font-bold px-2 py-0.5 rounded shrink-0 ${isLive ? 'bg-red-500 text-white animate-pulse' : (isCompleted ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-gray-100 text-gray-700')} font-mono text-[11px]">
                                 ${isCompleted || isLive ? evalRes.shortSummaryText : 'B/M'}
                             </div>
                         </div>
-                        ${m.umpireName ? `<div class="text-[10px] text-gray-500"><i class="fa-solid fa-user-tie mr-1 text-teal-600"></i>Pengadil: <strong>${m.umpireName}</strong></div>` : ''}
+                        ${m.umpireName ? `<div class="text-[10px] text-gray-500"><i class="fa-solid fa-user-tie mr-1 text-sky-600"></i>Pengadil: <strong>${m.umpireName}</strong></div>` : ''}
                     </div>
                 `;
             }).join('');
@@ -3368,6 +3596,7 @@
                 } catch (e) {}
             }
             ensureDefaultSettings();
+            window.renderShuttlePowerBranding();
             renderAll();
             connectToFirebase();
         };

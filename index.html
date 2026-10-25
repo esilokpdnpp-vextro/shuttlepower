@@ -135,28 +135,6 @@
 
         <!-- 1. TAB: PAPARAN AWAM -->
         <section id="view-public" class="view-section animate-fade-in space-y-6">
-            
-            <!-- Banner Hero SHUTTLEPOWER pada Paparan Awam -->
-            <div class="bg-gradient-to-r from-[#07162c] via-[#0b2548] to-[#07162c] rounded-2xl p-4 sm:p-5 text-white shadow-lg border border-cyan-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden">
-                <div class="flex items-center gap-4 z-10">
-                    <div id="public-banner-logo" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#051020] border border-cyan-400/40 p-1.5 flex items-center justify-center shrink-0 shadow-inner">
-                        <!-- Logo SHUTTLEPOWER -->
-                    </div>
-                    <div>
-                        <div class="inline-flex items-center gap-1.5 bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-1">
-                            <i class="fa-solid fa-bolt text-lime-400"></i> Papan Keputusan Rasmi Langsung
-                        </div>
-                        <h2 id="public-banner-title" class="text-lg sm:text-2xl font-black tracking-tight text-white">Badminton KPDN P.Pinang</h2>
-                        <p class="text-xs text-cyan-200/80 mt-0.5">Dikuasakan oleh <strong class="text-white italic">SHUTTLE<span class="text-cyan-400">POWER</span></strong> Tournament Management System</p>
-                    </div>
-                </div>
-                <div id="admin-link-banner" class="hidden z-10 bg-white/10 backdrop-blur-xs border border-white/15 rounded-xl p-3 flex flex-col items-end gap-2 text-xs text-cyan-100 shrink-0">
-                    <span class="text-[11px]"><i class="fa-brands fa-whatsapp text-green-400 mr-1"></i>Kongsi pautan rasmi kepada pemain & penonton:</span>
-                    <button onclick="openShareModal()" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white px-3.5 py-1.5 rounded-lg font-bold whitespace-nowrap transition shadow-sm">
-                        <i class="fa-solid fa-copy mr-1"></i> Dapatkan Link Penonton
-                    </button>
-                </div>
-            </div>
 
             <!-- POSTER PEMENANG KEJOHANAN (Muncul Secara Automatik Selepas Perlawanan Akhir Tamat) -->
             <div id="public-winner-poster" class="hidden">
@@ -833,7 +811,7 @@
                 </button>
                 <div class="flex gap-2">
                     <button type="button" onclick="clearCustomFirebaseConfig()" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg text-xs font-semibold transition">Reset</button>
-                    <button type="button" onclick="closeFirebaseSetupModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-xs font-semibold transition">Tutup</button>
+                    <button type="button" onclick="closeFirebaseSetupModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg font-semibold transition">Tutup</button>
                     <button type="button" onclick="saveCustomFirebaseConfig()" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition"><i class="fa-solid fa-plug mr-1"></i>Simpan</button>
                 </div>
             </div>
@@ -925,17 +903,7 @@
                 }
             }
 
-            // 2. Public Banner Logo
-            const publicBannerBox = document.getElementById('public-banner-logo');
-            if (publicBannerBox) {
-                if (customLogo) {
-                    publicBannerBox.innerHTML = `<img src="${customLogo}" alt="SHUTTLEPOWER" class="w-full h-full object-contain rounded-xl">`;
-                } else {
-                    publicBannerBox.innerHTML = `<img src="${defaultImgPath}" alt="SHUTTLEPOWER" class="w-full h-full object-cover rounded-xl" onerror="this.outerHTML = window.getShuttlePowerSvgMarkup(false)">`;
-                }
-            }
-
-            // 3. Settings Preview Box
+            // 2. Settings Preview Box
             const settingsPreview = document.getElementById('settings-logo-preview');
             if (settingsPreview) {
                 if (customLogo) {
@@ -945,7 +913,7 @@
                 }
             }
 
-            // 4. Watermark Latar Belakang
+            // 3. Watermark Latar Belakang
             const watermarkContainer = document.getElementById('watermark-logo-container');
             if (watermarkContainer) {
                 if (customLogo) {
@@ -1347,13 +1315,10 @@
             const lockIcon = document.getElementById('admin-lock-icon');
             const lockText = document.getElementById('admin-lock-text');
             const roleBadge = document.getElementById('role-badge');
-            const adminBanner = document.getElementById('admin-link-banner');
 
             const titleEl = document.getElementById('main-tournament-title');
-            const publicBannerTitle = document.getElementById('public-banner-title');
             const tName = window.state.settings.tournamentName || 'Badminton KPDN P.Pinang';
             if (titleEl) titleEl.innerText = tName;
-            if (publicBannerTitle) publicBannerTitle.innerText = tName;
             document.title = `SHUTTLEPOWER - ${tName}`;
 
             const pinAdminInput = document.getElementById('set-admin-pin');
@@ -1377,7 +1342,6 @@
 
                 btnCloud?.classList.remove('hidden');
                 btnReset?.classList.remove('hidden');
-                adminBanner?.classList.remove('hidden');
 
                 if (lockIcon) lockIcon.className = 'fa-solid fa-user-shield text-amber-300';
                 if (lockText) lockText.innerText = 'Log Keluar';
@@ -1394,7 +1358,6 @@
 
                 btnCloud?.classList.add('hidden');
                 btnReset?.classList.add('hidden');
-                adminBanner?.classList.add('hidden');
 
                 if (lockIcon) lockIcon.className = 'fa-solid fa-gavel text-cyan-300';
                 if (lockText) lockText.innerText = 'Log Keluar';
@@ -1412,7 +1375,6 @@
                 navTabs?.classList.add('hidden');
                 btnCloud?.classList.add('hidden');
                 btnReset?.classList.add('hidden');
-                adminBanner?.classList.add('hidden');
 
                 if (lockIcon) lockIcon.className = 'fa-solid fa-lock text-cyan-400';
                 if (lockText) lockText.innerText = 'Log Masuk';

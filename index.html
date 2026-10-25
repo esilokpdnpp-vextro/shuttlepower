@@ -1,1 +1,1399 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Kejohanan Badminton KPDN Pulau Pinang</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS for Excel / CSV Parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .tab-active { border-bottom: 4px solid #10b981; color: #10b981; font-weight: 600; }
+        .score-btn { user-select: none; touch-action: manipulation; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden">
 
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-teal-600 to-green-600 text-white shadow-md z-10">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-white p-2 rounded-full text-teal-600">
+                    <i class="fa-solid fa-trophy text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold leading-tight">Badminton KPDN P.Pinang</h1>
+                    <p class="text-xs text-teal-100 flex items-center gap-2">
+                        <span>Sistem Kejohanan Tertutup</span>
+                        <span id="cloud-status" class="bg-teal-500 text-[10px] px-2 py-0.5 rounded-full text-white"><i class="fa-solid fa-cloud mr-1"></i>Menghubungkan Awan...</span>
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="resetData()" class="text-xs bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded shadow text-white transition font-semibold">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Reset Sistem
+                </button>
+            </div>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <nav class="flex overflow-x-auto bg-white text-gray-500 shadow-inner">
+            <button onclick="switchTab('public')" id="tab-public" class="tab-btn tab-active px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-tv mr-2"></i>Paparan Awam</button>
+            <button onclick="switchTab('admin')" id="tab-admin" class="tab-btn px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-users-gear mr-2"></i>Pendaftaran</button>
+            <button onclick="switchTab('umpire')" id="tab-umpire" class="tab-btn px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-gavel mr-2"></i>Pengadil / Skor</button>
+            <button onclick="switchTab('settings')" id="tab-settings" class="tab-btn px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-gear mr-2"></i>Ketetapan</button>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto p-4 container mx-auto pb-20">
+
+        <!-- 1. TAB: PAPARAN AWAM -->
+        <section id="view-public" class="view-section animate-fade-in space-y-6">
+            
+            <!-- BAHAGIAN PUSINGAN KALAH MATI (Muncul apabila dijana) -->
+            <div id="public-knockout-container" class="hidden space-y-6">
+                <div class="bg-white rounded-xl shadow-md border-2 border-indigo-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 flex justify-between items-center text-white">
+                        <h2 class="font-bold flex items-center text-base md:text-lg">
+                            <i class="fa-solid fa-sitemap mr-2"></i>Carta & Jadual Pusingan Kalah Mati
+                        </h2>
+                        <span id="knockout-phase-badge" class="bg-white text-indigo-700 text-xs px-3 py-1 rounded-full font-extrabold shadow-sm"></span>
+                    </div>
+                    
+                    <!-- Visual Bracket Mengikut Fasa -->
+                    <div id="public-knockout-bracket" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-indigo-50/40">
+                        <!-- Generated via JS -->
+                    </div>
+
+                    <!-- Senarai Perlawanan Kalah Mati Terperinci -->
+                    <div class="border-t border-indigo-100 p-4 bg-white">
+                        <h3 class="text-sm font-bold text-gray-700 mb-3"><i class="fa-solid fa-fire text-orange-500 mr-1"></i>Keputusan & Perlawanan Semasa (Pusingan Kalah Mati)</h3>
+                        <div id="public-knockout-matches" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <!-- Generated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KLAUSA (COLLAPSIBLE) PERINGKAT KUMPULAN -->
+            <details id="public-group-clause" open class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all">
+                <summary onclick="toggleGroupClauseManual(event)" class="bg-gray-100 hover:bg-gray-200/70 px-4 py-3.5 cursor-pointer flex justify-between items-center select-none transition border-b">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-teal-600"></i>
+                        <span class="font-bold text-gray-800">Peringkat Kumpulan (Kedudukan & Keputusan Perlawanan)</span>
+                        <span id="group-clause-status-badge" class="text-[11px] bg-teal-100 text-teal-800 px-2 py-0.5 rounded font-semibold">Aktif</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-semibold text-gray-600 bg-white px-3 py-1 rounded-lg border shadow-sm">
+                        <span>Buka / Tutup Klausa</span>
+                        <i class="fa-solid fa-chevron-down text-gray-500"></i>
+                    </div>
+                </summary>
+
+                <div class="p-4 bg-gray-50/50">
+                    <div class="flex flex-col md:flex-row gap-6">
+                        <!-- Kedudukan Kumpulan (Standings) -->
+                        <div class="w-full md:w-2/3 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
+                                <h2 class="font-bold text-gray-700"><i class="fa-solid fa-ranking-star mr-2 text-yellow-500"></i>Kedudukan Kumpulan</h2>
+                            </div>
+                            <div id="standings-container" class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="text-center text-gray-400 py-10 w-full col-span-full">Sila jana jadual di bahagian pendaftaran dahulu.</div>
+                            </div>
+                        </div>
+
+                        <!-- Perlawanan Kumpulan Semasa / Terkini -->
+                        <div class="w-full md:w-1/3 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-fit">
+                            <div class="bg-gray-50 px-4 py-3 border-b">
+                                <h2 class="font-bold text-gray-700"><i class="fa-solid fa-bolt mr-2 text-orange-500"></i>Perlawanan Kumpulan (Live / Keputusan)</h2>
+                            </div>
+                            <div id="public-matches-container" class="p-0 flex flex-col divide-y max-h-[500px] overflow-y-auto">
+                                 <div class="text-center text-gray-400 py-10">Tiada perlawanan.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+        </section>
+
+        <!-- 2. TAB: PENDAFTARAN & JADUAL (ADMIN) -->
+        <section id="view-admin" class="view-section hidden animate-fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                
+                <!-- Borang Daftar Regu (Manual & Pukal Excel) -->
+                <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 lg:col-span-1 h-fit">
+                    <h2 class="font-bold text-lg mb-3 text-gray-800"><i class="fa-solid fa-user-plus mr-2 text-teal-500"></i>Daftar Regu / Pasukan</h2>
+                    
+                    <!-- Pendaftaran Manual -->
+                    <form id="team-form" class="flex gap-2 mb-3" onsubmit="addTeam(event)">
+                        <input type="text" id="team-name" placeholder="Nama Regu (Contoh: KPDN A)" class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                        <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition shadow-sm" title="Tambah Regu"><i class="fa-solid fa-plus"></i></button>
+                    </form>
+
+                    <!-- Muat Turun & Muat Naik Templat Excel Pukal -->
+                    <div class="bg-teal-50/70 border border-teal-200 rounded-lg p-3 mb-4">
+                        <div class="text-xs font-bold text-teal-800 mb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-file-excel mr-1.5 text-green-600"></i>Pendaftaran Pukal (Bundle)</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="downloadTemplate()" class="bg-white hover:bg-gray-50 text-teal-700 border border-teal-300 px-2.5 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-download"></i> Download Template
+                            </button>
+                            <label class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-2 rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer text-center">
+                                <i class="fa-solid fa-upload"></i> Upload Template
+                                <input type="file" id="bulk-file-input" accept=".xlsx,.xls,.csv,.txt" class="hidden" onchange="handleBulkUpload(event)">
+                            </label>
+                        </div>
+                        <p class="text-[11px] text-gray-500 mt-1.5 leading-tight">Muat turun templat Excel, isi nama regu, dan muat naik semula untuk daftar pukal.</p>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-500 font-semibold">Senarai Regu (<span id="team-count">0</span>)</span>
+                        <button onclick="clearAllTeams()" class="text-[11px] text-red-500 hover:underline font-medium">Kosongkan Senarai</button>
+                    </div>
+                    
+                    <ul id="team-list" class="divide-y divide-gray-100 border rounded-lg max-h-60 overflow-y-auto bg-gray-50">
+                        <!-- Generated via JS -->
+                    </ul>
+                </div>
+
+                <!-- Pengurusan Kumpulan (1 - 10 Kumpulan atau Kosongkan) -->
+                <div id="group-management-section" class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 lg:col-span-2 relative transition-all duration-300">
+                    <div id="group-management-overlay" class="hidden absolute inset-0 bg-white/80 z-10 flex items-center justify-center rounded-xl backdrop-blur-sm">
+                        <div class="bg-gray-800 text-white px-5 py-4 rounded-xl text-sm font-semibold shadow-lg text-center max-w-xs">
+                            <i class="fa-solid fa-ban text-red-400 mb-2 block text-2xl"></i>
+                            Pengurusan Kumpulan Dinyahaktifkan<br>
+                            <span class="text-xs font-normal text-gray-300 block mt-1">Kumpulan tidak digunakan bagi peringkat kalah mati.</span>
+                            <button onclick="unlockGroupManagement()" class="mt-3 bg-teal-500 hover:bg-teal-600 text-white text-xs px-3 py-1.5 rounded font-bold transition">Aktifkan Semula Kumpulan</button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-4 gap-3">
+                        <h2 class="font-bold text-lg text-gray-800"><i class="fa-solid fa-people-group mr-2 text-blue-500"></i>Pengurusan Kumpulan</h2>
+                        
+                        <div class="flex flex-wrap items-center gap-2 w-full xl:w-auto">
+                            <div class="flex items-center border rounded-lg bg-gray-50 px-2 py-1 focus-within:ring-2 focus-within:ring-blue-500">
+                                <label for="num-groups" class="text-xs text-gray-500 mr-2 font-medium whitespace-nowrap">Bil. Kumpulan:</label>
+                                <input type="number" id="num-groups" list="group-preset-options" min="1" max="10" placeholder="1 - 10" value="2" class="w-20 bg-transparent text-sm font-bold text-gray-800 focus:outline-none text-center">
+                                <datalist id="group-preset-options">
+                                    <option value="1"></option>
+                                    <option value="2"></option>
+                                    <option value="3"></option>
+                                    <option value="4"></option>
+                                    <option value="5"></option>
+                                    <option value="6"></option>
+                                    <option value="7"></option>
+                                    <option value="8"></option>
+                                    <option value="9"></option>
+                                    <option value="10"></option>
+                                </datalist>
+                            </div>
+
+                            <button onclick="setupGroups()" class="text-xs bg-gray-700 text-white px-3 py-2 rounded-lg hover:bg-gray-800 shadow-sm transition font-semibold">
+                                <i class="fa-solid fa-table-columns mr-1"></i> Set Kumpulan
+                            </button>
+                            <button onclick="autoAssignGroups()" class="text-xs bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 shadow-sm transition font-semibold" title="Agihkan baki regu secara automatik">
+                                <i class="fa-solid fa-shuffle mr-1"></i> Agih Rawak
+                            </button>
+                            <button onclick="clearGroups()" class="text-xs bg-red-50 text-red-600 border border-red-200 px-3 py-2 rounded-lg hover:bg-red-100 shadow-sm transition font-semibold" title="Kosongkan semua kumpulan">
+                                <i class="fa-solid fa-eraser mr-1"></i> Kosongkan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="group-management-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 mb-4 min-h-[150px] max-h-[350px] overflow-y-auto p-1">
+                        <div class="text-center text-gray-400 py-6 col-span-full text-sm">Pilih bilangan kumpulan (1-10) atau kosongkan dan klik 'Set Kumpulan'.</div>
+                    </div>
+
+                    <div class="border-t pt-4 flex justify-between items-center flex-wrap gap-2">
+                        <span class="text-xs text-gray-500">Baki regu belum diagih: <strong id="unassigned-count">0</strong></span>
+                        <button onclick="generateMatchesFromGroups()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 shadow-sm transition flex items-center font-semibold text-sm">
+                            <i class="fa-solid fa-calendar-check mr-2"></i> Jana Jadual Perlawanan Kumpulan
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Pusingan Kalah Mati (Suku/Separuh/Akhir) -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+                <div class="bg-gradient-to-r from-amber-50 to-yellow-50 p-4 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <h2 class="font-bold text-lg text-gray-800"><i class="fa-solid fa-trophy mr-2 text-yellow-500"></i>Pusingan Seterusnya (Kalah Mati)</h2>
+                        <p class="text-xs text-gray-500">Jana jadual Pusingan Kalah Mati / Suku Akhir / Separuh Akhir / Akhir selepas pusingan semasa selesai.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="btn-next-round" onclick="generateNextRound()" class="bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow-sm transition flex items-center">
+                            <i class="fa-solid fa-bolt mr-1.5"></i> Jana Jadual Seterusnya
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4 text-sm text-gray-600">
+                    <div id="match-status-info" class="mb-3 p-3 bg-blue-50 rounded-lg text-blue-700 border border-blue-100 flex flex-wrap items-center justify-between gap-2">
+                        <span>Status Perlawanan Semasa: 0 Selesai / 0 Belum Mula</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <div>
+                            <span>Rujukan Ketetapan: <strong id="active-qualify-label" class="text-teal-700">2 Pasukan Setiap Kumpulan</strong></span>
+                            <span class="mx-1.5 text-gray-300">|</span>
+                            <span>Kaedah Pelengkap: <strong id="active-method-label" class="text-indigo-700">Format Bye (Biasa)</strong></span>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <label for="quick-qualify-method" class="font-semibold text-gray-700 whitespace-nowrap">Pilihan Kuota Ganjil:</label>
+                            <select id="quick-qualify-method" onchange="changeQuickQualifyMethod(this.value)" class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 flex-1 sm:flex-initial">
+                                <option value="bye">Kekalkan Format Bye (Biasa)</option>
+                                <option value="best_third">Pilih Tempat Ke-3 Terbaik (Genapkan Kuota)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Senarai Kumpulan & Perlawanan -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gray-50 p-4 border-b flex justify-between items-center">
+                    <h2 class="font-bold text-lg text-gray-800"><i class="fa-solid fa-calendar-days mr-2 text-indigo-500"></i>Senarai Jadual Perlawanan Keseluruhan</h2>
+                </div>
+                <div id="admin-schedule-container" class="p-4 max-h-[600px] overflow-y-auto">
+                    <div class="text-center text-gray-400 py-10">Sila susun kumpulan dan klik 'Jana Jadual Perlawanan Kumpulan'.</div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- 3. TAB: PENGADIL (Papan Markah) -->
+        <section id="view-umpire" class="view-section hidden animate-fade-in h-full">
+            
+            <div id="umpire-selection" class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                    <h2 class="font-bold text-lg text-gray-800"><i class="fa-solid fa-whistle mr-2 text-red-500"></i>Pilih Perlawanan untuk Diadili (Kumpulan & Kalah Mati)</h2>
+                    <span id="umpire-phase-indicator" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-200"></span>
+                </div>
+                <div id="umpire-matches-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="text-center text-gray-400 py-10 col-span-full">Sila jana jadual di bahagian Pendaftaran.</div>
+                </div>
+            </div>
+
+            <div id="umpire-scoring" class="hidden h-full flex flex-col">
+                <div class="bg-gray-800 text-white rounded-t-xl p-3 flex justify-between items-center shadow-lg">
+                    <button onclick="backToUmpireSelection()" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm"><i class="fa-solid fa-arrow-left mr-1"></i> Kembali</button>
+                    <div class="font-bold text-center flex-1 flex flex-col">
+                        <span><span id="active-group"></span> - Match #<span id="active-match-id"></span></span>
+                        <span id="umpire-max-score-display" class="text-[10px] text-yellow-400 font-normal"></span>
+                    </div>
+                    <button onclick="finishMatch()" class="bg-green-600 hover:bg-green-500 px-3 py-1 rounded text-sm font-bold shadow-md"><i class="fa-solid fa-check mr-1"></i> Tamat</button>
+                </div>
+                
+                <div class="flex-1 flex flex-col md:flex-row gap-2 bg-black p-2 rounded-b-xl shadow-2xl relative min-h-[380px]">
+                    <div class="flex-1 bg-red-600 rounded-lg flex flex-col relative overflow-hidden select-none">
+                        <div class="bg-red-800 text-white text-center py-2 md:py-4 font-bold text-xl md:text-3xl z-10 shadow-md truncate px-2" id="score-team1-name">Regu 1</div>
+                        <div class="flex-1 flex items-center justify-center relative">
+                            <button onclick="updateScore(1, 1)" class="score-btn absolute inset-0 w-full h-full text-[110px] md:text-[180px] font-bold text-white flex items-center justify-center hover:bg-white/10 active:bg-white/20 transition leading-none z-10 pb-10">
+                                <span id="score-val-1" class="drop-shadow-lg">0</span>
+                            </button>
+                        </div>
+                        <button onclick="updateScore(1, -1)" class="score-btn absolute bottom-0 left-0 right-0 h-14 bg-black/30 hover:bg-black/50 text-white text-2xl flex items-center justify-center z-20 border-t border-white/20 transition">
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                    </div>
+
+                    <div class="hidden md:flex flex-col justify-center items-center px-2 z-20">
+                        <div class="bg-white text-black font-black italic rounded-full w-12 h-12 flex items-center justify-center text-xl shadow-lg border-4 border-gray-300">VS</div>
+                    </div>
+
+                    <div class="flex-1 bg-blue-600 rounded-lg flex flex-col relative overflow-hidden select-none">
+                        <div class="bg-blue-800 text-white text-center py-2 md:py-4 font-bold text-xl md:text-3xl z-10 shadow-md truncate px-2" id="score-team2-name">Regu 2</div>
+                        <div class="flex-1 flex items-center justify-center relative">
+                            <button onclick="updateScore(2, 1)" class="score-btn absolute inset-0 w-full h-full text-[110px] md:text-[180px] font-bold text-white flex items-center justify-center hover:bg-white/10 active:bg-white/20 transition leading-none z-10 pb-10">
+                                <span id="score-val-2" class="drop-shadow-lg">0</span>
+                            </button>
+                        </div>
+                        <button onclick="updateScore(2, -1)" class="score-btn absolute bottom-0 left-0 right-0 h-14 bg-black/30 hover:bg-black/50 text-white text-2xl flex items-center justify-center z-20 border-t border-white/20 transition">
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- 4. TAB: KETETAPAN (SETTINGS) -->
+        <section id="view-settings" class="view-section hidden animate-fade-in h-full">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-5xl mx-auto flex flex-col md:flex-row p-6 gap-6">
+                
+                <div class="flex-1">
+                    <div class="border-b pb-3 mb-4">
+                        <h2 class="font-bold text-gray-700 text-lg"><i class="fa-solid fa-gear mr-2 text-gray-500"></i>Ketetapan Sistem & Perlawanan</h2>
+                        <p class="text-xs text-gray-400 mt-0.5">Masukkan ketetapan dan tekan simpan untuk merekodkan parameter kejohanan.</p>
+                    </div>
+                    <form id="settings-form" class="space-y-4" onsubmit="saveSettingsForm(event)">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Peringkat / Kategori</label>
+                            <input type="text" id="set-peringkat" list="list-peringkat" oninput="handlePhaseSettings()" placeholder="Pilih atau taip peringkat (Contoh: Peringkat Kumpulan)" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 bg-white" required>
+                            <datalist id="list-peringkat">
+                                <option value="Peringkat Kumpulan"></option>
+                                <option value="Pusingan Kalah Mati"></option>
+                                <option value="Suku Akhir"></option>
+                                <option value="Separuh Akhir"></option>
+                                <option value="Pusingan Akhir"></option>
+                            </datalist>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Format Perlawanan</label>
+                            <input type="text" id="set-format" list="list-format" placeholder="Pilih atau taip format (Contoh: Round Robin)" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 bg-white" required>
+                            <datalist id="list-format">
+                                <option value="Round Robin"></option>
+                                <option value="Kalah Mati (Knockout)"></option>
+                                <option value="Timbal Balik"></option>
+                            </datalist>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Mata Tamat Maksimum (Contoh: 15, 21, 30)</label>
+                            <input type="number" id="set-max-score" placeholder="Biarkan kosong jika tiada had mata" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 bg-white">
+                        </div>
+                        
+                        <div class="pt-2" id="setting-qualify-wrapper">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Pasukan Layak Ke Pusingan Seterusnya (Dari Setiap Kumpulan)</label>
+                            <select id="set-num-qualify" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm" onchange="updatePhaseIndicator()">
+                                <option value="2">2 Pasukan (Setiap Kump.)</option>
+                                <option value="4">4 Pasukan (Setiap Kump.)</option>
+                                <option value="8">8 Pasukan (Setiap Kump.)</option>
+                                <option value="16">16 Pasukan (Setiap Kump.)</option>
+                            </select>
+                            
+                            <label class="block text-sm font-semibold text-gray-700 mt-3 mb-1">Pilihan Jika Kuota Pasukan Tidak Genap (Bukan Kuasa 2)</label>
+                            <select id="set-qualify-method" onchange="updatePhaseIndicator()" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm">
+                                <option value="bye">Format Bye (Beri Bye kepada pasukan terbaik seperti biasa)</option>
+                                <option value="best_third">Pilih Tempat Ke-3 Terbaik Automatik (Mata > Beza Mata > Markah Terkumpul)</option>
+                            </select>
+                            <p id="phase-indicator" class="text-[11px] text-blue-600 mt-1.5 font-bold"></p>
+                        </div>
+
+                        <div class="pt-4 border-t mt-4">
+                            <button type="submit" class="bg-teal-600 text-white px-6 py-2.5 rounded-lg hover:bg-teal-700 shadow transition w-full font-bold"><i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Ke Rekod Ketetapan</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="flex-1 md:border-l md:pl-6 mt-8 md:mt-0 flex flex-col h-full">
+                    <div class="border-b pb-3 mb-4 flex justify-between items-center">
+                        <div>
+                            <h2 class="font-bold text-gray-700 text-lg"><i class="fa-solid fa-clock-rotate-left mr-2 text-teal-600"></i>Rekod Ketetapan (Rujukan Sistem)</h2>
+                            <p class="text-xs text-gray-400">Sistem merujuk kepada rekod ketetapan di bawah.</p>
+                        </div>
+                    </div>
+                    <div class="overflow-y-auto flex-1 max-h-[380px] border rounded-lg bg-gray-50">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-200 text-gray-600 text-xs uppercase">
+                                <tr>
+                                    <th class="p-2.5">Masa</th>
+                                    <th class="p-2.5">Butiran Ketetapan (Aktif)</th>
+                                    <th class="p-2.5 text-center w-12">Tindakan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="settings-history-body">
+                                <tr><td colspan="3" class="p-4 text-center text-gray-400">Tiada rekod ketetapan.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center transform scale-95 transition-transform duration-200">
+            <div id="modal-icon" class="text-4xl mb-4"></div>
+            <h3 id="modal-title" class="text-xl font-bold mb-2">Makluman</h3>
+            <p id="modal-message" class="text-gray-600 mb-6 text-sm">Mesej</p>
+            <button onclick="closeModal()" class="w-full bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg font-semibold transition">OK</button>
+        </div>
+    </div>
+
+    <div id="confirm-overlay" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center">
+            <div class="text-4xl mb-3 text-amber-500"><i class="fa-solid fa-circle-question"></i></div>
+            <h3 id="confirm-title" class="text-lg font-bold mb-2 text-gray-800">Pengesahan</h3>
+            <p id="confirm-message" class="text-gray-600 mb-6 text-sm">Adakah anda pasti?</p>
+            <div class="flex gap-2">
+                <button onclick="closeConfirmModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 rounded-lg font-semibold transition text-sm">Batal</button>
+                <button id="confirm-yes-btn" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg font-semibold transition text-sm">Teruskan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-score-overlay" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
+            <h3 class="text-lg font-bold mb-4 text-gray-800"><i class="fa-solid fa-pen-to-square mr-2 text-blue-500"></i>Kemaskini Markah Manual</h3>
+            <form onsubmit="saveEditScore(event)">
+                <input type="hidden" id="edit-match-id">
+                <div class="flex justify-between items-center mb-4 gap-4">
+                    <div class="flex-1 text-center">
+                        <label id="edit-team1-name" class="block text-sm font-bold text-gray-700 mb-2 truncate">Regu 1</label>
+                        <input type="number" id="edit-score1" class="w-full text-center border rounded-lg px-2 py-3 text-2xl font-bold focus:ring-2 focus:ring-blue-500" required min="0">
+                    </div>
+                    <div class="text-gray-400 font-black italic">VS</div>
+                    <div class="flex-1 text-center">
+                        <label id="edit-team2-name" class="block text-sm font-bold text-gray-700 mb-2 truncate">Regu 2</label>
+                        <input type="number" id="edit-score2" class="w-full text-center border rounded-lg px-2 py-3 text-2xl font-bold focus:ring-2 focus:ring-blue-500" required min="0">
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeEditScore()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-semibold transition">Batal</button>
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK & Application Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Global Environment Setup ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'kpdn-badminton-penang';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDummyKeyForCanvasRuntime999",
+            authDomain: "canvas-app.firebaseapp.com",
+            projectId: "canvas-app",
+            storageBucket: "canvas-app.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456:web:abcd"
+        };
+
+        let app, db, auth;
+        let isCloudSynced = false;
+
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            
+            const initAuth = async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    setupCloudListener();
+                } catch (err) {
+                    console.warn("Firebase Auth fallback:", err);
+                }
+            };
+            initAuth();
+        } catch (e) {
+            console.warn("Firebase Init fallback:", e);
+        }
+
+        // --- State Management ---
+        window.state = {
+            teams: [],
+            groups: {},
+            matches: [],
+            activeMatchId: null,
+            groupClauseCollapsed: false,
+            settingsHistory: [],
+            settings: {
+                peringkat: 'Peringkat Kumpulan',
+                format: 'Round Robin',
+                maxScore: '',
+                numGroups: '2',
+                numQualify: '2',
+                qualifyMethod: 'bye'
+            }
+        };
+
+        let confirmActionCallback = null;
+        let localSyncTimer = null;
+
+        function updateCloudIndicator(status, text) {
+            const el = document.getElementById('cloud-status');
+            if (!el) return;
+            if (status === 'synced') {
+                el.className = 'bg-green-500 text-[10px] px-2 py-0.5 rounded-full text-white';
+                el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-1"></i>${text}`;
+            } else if (status === 'syncing') {
+                el.className = 'bg-amber-500 text-[10px] px-2 py-0.5 rounded-full text-white animate-pulse';
+                el.innerHTML = `<i class="fa-solid fa-arrows-rotate mr-1"></i>${text}`;
+            } else {
+                el.className = 'bg-red-500 text-[10px] px-2 py-0.5 rounded-full text-white';
+                el.innerHTML = `<i class="fa-solid fa-cloud-slash mr-1"></i>${text}`;
+            }
+        }
+
+        function setupCloudListener() {
+            if (!db || !auth) return;
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'tournament_state');
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const cloudData = docSnap.data();
+                    if (cloudData && cloudData.statePayload) {
+                        try {
+                            const parsed = JSON.parse(cloudData.statePayload);
+                            // Merge cloud state if newer or distinct
+                            window.state = { ...window.state, ...parsed };
+                            if (!window.state.settingsHistory) window.state.settingsHistory = [];
+                            updateCloudIndicator('synced', 'Awan Diselaraskan');
+                            renderAll();
+                        } catch (err) {
+                            console.error("Parse cloud data error:", err);
+                        }
+                    }
+                } else {
+                    // Initialize document if not exists
+                    saveDataToCloud(true);
+                }
+            }, (error) => {
+                console.warn("Cloud listener error:", error);
+                updateCloudIndicator('offline', 'Mod Luar Talian');
+            });
+        }
+
+        async function saveDataToCloud(isInitial = false) {
+            localStorage.setItem('badmintonKPDNState', JSON.stringify(window.state));
+            renderAll();
+
+            if (!db || !auth) return;
+            updateCloudIndicator('syncing', 'Menyimpan...');
+            if (localSyncTimer) clearTimeout(localSyncTimer);
+            
+            localSyncTimer = setTimeout(async () => {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'tournament_state');
+                    await setDoc(docRef, {
+                        statePayload: JSON.stringify(window.state),
+                        updatedAt: new Date().toISOString()
+                    });
+                    updateCloudIndicator('synced', 'Awan Diselaraskan');
+                } catch (e) {
+                    console.error("Cloud save failed:", e);
+                    updateCloudIndicator('offline', 'Simpan Tempatan Sahaja');
+                }
+            }, isInitial ? 100 : 800);
+        }
+
+        window.saveData = function() {
+            saveDataToCloud(false);
+        };
+
+        // --- Utility & Navigation ---
+        window.generateId = function() {
+            return Math.random().toString(36).substring(2, 9);
+        };
+
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-active'));
+            
+            const targetView = document.getElementById(`view-${tabId}`);
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetView) targetView.classList.remove('hidden');
+            if (targetTab) targetTab.classList.add('tab-active');
+            
+            renderAll();
+        };
+
+        window.toggleGroupClauseManual = function(e) {
+            const detailsEl = document.getElementById('public-group-clause');
+            if (detailsEl) {
+                setTimeout(() => {
+                    window.state.groupClauseCollapsed = !detailsEl.hasAttribute('open');
+                    window.saveData();
+                }, 0);
+            }
+        };
+
+        window.showModal = function(title, message, type = 'info') {
+            const overlay = document.getElementById('modal-overlay');
+            const iconEl = document.getElementById('modal-icon');
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+
+            if (type === 'success') {
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-check text-green-500"></i>';
+            } else if (type === 'error') {
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-exclamation text-red-500"></i>';
+            } else {
+                iconEl.innerHTML = '<i class="fa-solid fa-circle-info text-blue-500"></i>';
+            }
+
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        };
+
+        window.closeModal = function() {
+            const overlay = document.getElementById('modal-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        };
+
+        window.showConfirm = function(title, message, onConfirm) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            confirmActionCallback = onConfirm;
+            
+            const overlay = document.getElementById('confirm-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
+            const yesBtn = document.getElementById('confirm-yes-btn');
+            yesBtn.onclick = () => {
+                const cb = confirmActionCallback;
+                closeConfirmModal();
+                if (typeof cb === 'function') cb();
+            };
+        };
+
+        window.closeConfirmModal = function() {
+            const overlay = document.getElementById('confirm-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+            confirmActionCallback = null;
+        };
+
+        window.openEditScore = function(matchId) {
+            const match = window.state.matches.find(m => m.id === matchId);
+            if (!match) return;
+            document.getElementById('edit-match-id').value = match.id;
+            document.getElementById('edit-team1-name').innerText = match.team1.name;
+            document.getElementById('edit-team2-name').innerText = match.team2.name;
+            document.getElementById('edit-score1').value = match.score1;
+            document.getElementById('edit-score2').value = match.score2;
+            const overlay = document.getElementById('edit-score-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        };
+
+        window.closeEditScore = function() {
+            const overlay = document.getElementById('edit-score-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        };
+
+        window.saveEditScore = function(e) {
+            e.preventDefault();
+            const matchId = document.getElementById('edit-match-id').value;
+            const s1 = parseInt(document.getElementById('edit-score1').value) || 0;
+            const s2 = parseInt(document.getElementById('edit-score2').value) || 0;
+            const match = window.state.matches.find(m => m.id === matchId);
+            if (match) {
+                match.score1 = Math.max(0, s1);
+                match.score2 = Math.max(0, s2);
+                window.saveData();
+            }
+            closeEditScore();
+            showModal('Berjaya Dikemaskini', 'Markah perlawanan telah dikemaskini.', 'success');
+        };
+
+        window.deleteSettingsRecord = function(id) {
+            window.state.settingsHistory = window.state.settingsHistory.filter(r => r.id !== id);
+            window.saveData();
+        };
+
+        window.unlockGroupManagement = function() {
+            window.state.settings.peringkat = 'Peringkat Kumpulan';
+            const overlay = document.getElementById('group-management-overlay');
+            if (overlay) overlay.classList.add('hidden');
+            window.saveData();
+        };
+
+        // --- Settings & Qualifications ---
+        window.getActiveSettingsForPhase = function(phaseName) {
+            if (window.state.settingsHistory && window.state.settingsHistory.length > 0) {
+                const matched = window.state.settingsHistory.find(r => r.peringkat && phaseName && r.peringkat.toLowerCase() === phaseName.toLowerCase());
+                if (matched) return matched;
+                return window.state.settingsHistory[0];
+            }
+            return window.state.settings;
+        };
+
+        window.getQualifyCountPerGroup = function() {
+            if (window.state.settingsHistory && window.state.settingsHistory.length > 0) {
+                const groupRecord = window.state.settingsHistory.find(r => r.peringkat === 'Peringkat Kumpulan' && r.numQualify);
+                if (groupRecord && parseInt(groupRecord.numQualify) > 0) {
+                    return parseInt(groupRecord.numQualify);
+                }
+                const latestWithQualify = window.state.settingsHistory.find(r => r.numQualify && parseInt(r.numQualify) > 0);
+                if (latestWithQualify) return parseInt(latestWithQualify.numQualify);
+            }
+            return parseInt(window.state.settings.numQualify) || 2;
+        };
+
+        window.getQualifyMethod = function() {
+            if (window.state.settings && window.state.settings.qualifyMethod) {
+                return window.state.settings.qualifyMethod;
+            }
+            return 'bye';
+        };
+
+        window.getTargetBracketSize = function(count) {
+            if (count <= 2) return 2;
+            if (count <= 4) return 4;
+            if (count <= 8) return 8;
+            if (count <= 16) return 16;
+            return 32;
+        };
+
+        window.getBestThirdPlacedQualifiedIds = function() {
+            const method = window.getQualifyMethod();
+            if (method !== 'best_third') return [];
+
+            const groupKeys = Object.keys(window.state.groups).sort();
+            if (groupKeys.length === 0) return [];
+
+            const numQualifyPerGroup = window.getQualifyCountPerGroup();
+            let baseCount = 0;
+            let candidates = [];
+
+            groupKeys.forEach(g => {
+                const st = window.calculateStandings(g);
+                baseCount += Math.min(st.length, numQualifyPerGroup);
+                st.slice(numQualifyPerGroup).forEach((item, idx) => {
+                    candidates.push({
+                        ...item,
+                        group: g,
+                        rank: numQualifyPerGroup + idx + 1
+                    });
+                });
+            });
+
+            const targetBracket = window.getTargetBracketSize(baseCount);
+            const needed = targetBracket - baseCount;
+            if (needed <= 0 || candidates.length === 0) return [];
+
+            candidates.sort((a, b) => {
+                if (a.rank !== b.rank) return a.rank - b.rank;
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                if (b.diff !== a.diff) return b.diff - a.diff;
+                return b.pf - a.pf;
+            });
+
+            return candidates.slice(0, needed).map(c => c.id);
+        };
+
+        window.changeQuickQualifyMethod = function(val) {
+            window.state.settings.qualifyMethod = val;
+            const setSelect = document.getElementById('set-qualify-method');
+            if (setSelect) setSelect.value = val;
+            window.saveData();
+        };
+
+        window.updatePhaseIndicator = function() {
+            const selectEl = document.getElementById('set-num-qualify');
+            const val = selectEl ? parseInt(selectEl.value) || 2 : 2;
+            const methodEl = document.getElementById('set-qualify-method');
+            const method = methodEl ? methodEl.value : 'bye';
+            const ind = document.getElementById('phase-indicator');
+            if (!ind) return;
+            
+            const numGroups = Object.keys(window.state.groups).length || 0;
+            const totalQualify = val * numGroups;
+            
+            if (numGroups === 0) {
+                ind.innerText = `${val} pasukan setiap kumpulan akan layak (${method === 'best_third' ? 'Tempat Ke-3 Terbaik' : 'Format Bye'}).`;
+            } else {
+                const targetBracket = window.getTargetBracketSize(totalQualify);
+                const extraNeeded = targetBracket - totalQualify;
+                if (extraNeeded > 0 && method === 'best_third') {
+                    ind.innerText = `Seterusnya: ${totalQualify} Pasukan Utama + ${extraNeeded} Tempat Ke-3 Terbaik = ${targetBracket} Pasukan`;
+                } else {
+                    ind.innerText = `Seterusnya: Kuota Genap ${totalQualify} Pasukan daripada ${numGroups} kumpulan`;
+                }
+            }
+        };
+
+        window.saveSettingsForm = function(e) {
+            e.preventDefault();
+            const peringkat = document.getElementById('set-peringkat').value.trim() || 'Peringkat Kumpulan';
+            const format = document.getElementById('set-format').value.trim() || 'Round Robin';
+            const maxScore = document.getElementById('set-max-score').value.trim();
+            const numQualify = document.getElementById('set-num-qualify').value.trim() || '2';
+            const qualifyMethodEl = document.getElementById('set-qualify-method');
+            const qualifyMethod = qualifyMethodEl ? qualifyMethodEl.value : 'bye';
+
+            window.state.settings.peringkat = peringkat;
+            window.state.settings.format = format;
+            window.state.settings.maxScore = maxScore;
+            if (peringkat === 'Peringkat Kumpulan') {
+                window.state.settings.numQualify = numQualify;
+                window.state.settings.qualifyMethod = qualifyMethod;
+            }
+
+            const date = new Date();
+            const timeStr = date.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' });
+            const dateStr = date.toLocaleDateString('ms-MY');
+            
+            const methodText = qualifyMethod === 'best_third' ? 'Tempat Ke-3 Terbaik' : 'Format Bye';
+            const qualifyInfo = peringkat === 'Peringkat Kumpulan' ? ` | Layak: Top ${numQualify} (${methodText})` : '';
+            const maxScoreInfo = maxScore ? ` | Mata Maks: ${maxScore}` : ' | Mata: Bebas';
+
+            window.state.settingsHistory.unshift({
+                id: window.generateId(),
+                time: `${dateStr} ${timeStr}`,
+                peringkat: peringkat,
+                format: format,
+                maxScore: maxScore,
+                numQualify: peringkat === 'Peringkat Kumpulan' ? numQualify : window.state.settings.numQualify,
+                qualifyMethod: peringkat === 'Peringkat Kumpulan' ? qualifyMethod : window.state.settings.qualifyMethod,
+                details: `${peringkat} (${format})${maxScoreInfo}${qualifyInfo}`
+            });
+
+            document.getElementById('set-peringkat').value = '';
+            document.getElementById('set-format').value = '';
+            document.getElementById('set-max-score').value = '';
+
+            window.saveData();
+            window.handlePhaseSettings();
+            showModal('Rekod Ketetapan Disimpan', 'Maklumat ketetapan telah disimpan ke dalam sistem.', 'success');
+        };
+
+        window.handlePhaseSettings = function() {
+            const overlay = document.getElementById('group-management-overlay');
+            const qualifyWrapper = document.getElementById('setting-qualify-wrapper');
+            const peringkatInput = document.getElementById('set-peringkat');
+            const inputVal = peringkatInput ? peringkatInput.value.trim() : '';
+            
+            if (inputVal !== '' && inputVal.toLowerCase() !== 'peringkat kumpulan') {
+                if (qualifyWrapper) qualifyWrapper.classList.add('hidden');
+            } else {
+                if (qualifyWrapper) qualifyWrapper.classList.remove('hidden');
+            }
+
+            const groupKeys = Object.keys(window.state.groups);
+            const hasKnockoutMatches = window.state.matches.some(m => !groupKeys.includes(m.group));
+            if (hasKnockoutMatches && window.state.settings.peringkat !== 'Peringkat Kumpulan') {
+                if (overlay) overlay.classList.remove('hidden');
+            } else {
+                if (overlay) overlay.classList.add('hidden');
+            }
+        };
+
+        window.updateMatchStatus = function() {
+            const btnNext = document.getElementById('btn-next-round');
+            const statusInfo = document.getElementById('match-status-info');
+            const qualifyLabel = document.getElementById('active-qualify-label');
+            const methodLabel = document.getElementById('active-method-label');
+            const quickMethodSelect = document.getElementById('quick-qualify-method');
+            if (!btnNext || !statusInfo) return;
+
+            const numQualify = window.getQualifyCountPerGroup();
+            const qualifyMethod = window.getQualifyMethod();
+            if (qualifyLabel) qualifyLabel.innerText = `Top ${numQualify} Setiap Kumpulan`;
+            if (methodLabel) methodLabel.innerText = qualifyMethod === 'best_third' ? 'Tempat Ke-3 Terbaik (Genap)' : 'Format Bye (Biasa)';
+            if (quickMethodSelect) quickMethodSelect.value = qualifyMethod;
+            
+            if (window.state.matches.length === 0) {
+                statusInfo.innerHTML = '<span>Belum ada jadual perlawanan dijana.</span>';
+                statusInfo.className = "mb-3 p-3 bg-gray-50 rounded-lg text-gray-500 border border-gray-200 flex items-center justify-between";
+                btnNext.disabled = true;
+                return;
+            }
+
+            const groupKeys = Object.keys(window.state.groups);
+            const knockoutMatches = window.state.matches.filter(m => !groupKeys.includes(m.group));
+            
+            let currentPhaseMatches = [];
+            let currentPhaseLabel = "";
+
+            if (knockoutMatches.length === 0) {
+                currentPhaseMatches = window.state.matches.filter(m => groupKeys.includes(m.group));
+                currentPhaseLabel = "Peringkat Kumpulan";
+            } else {
+                const phases = [...new Set(knockoutMatches.map(m => m.group))];
+                currentPhaseLabel = phases[phases.length - 1];
+                currentPhaseMatches = knockoutMatches.filter(m => m.group === currentPhaseLabel);
+            }
+                
+            const total = currentPhaseMatches.length;
+            const completed = currentPhaseMatches.filter(m => m.status === 'completed').length;
+            const pending = total - completed;
+
+            let html = `<span class="font-medium">Status Peringkat Semasa (<strong>${currentPhaseLabel}</strong>): <strong>${completed}</strong> Selesai / <strong>${pending}</strong> Belum Selesai</span>`;
+            
+            if (currentPhaseLabel === 'Pusingan Akhir' && pending === 0 && total > 0) {
+                btnNext.disabled = true;
+                statusInfo.className = "mb-3 p-3 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-200 flex items-center justify-between";
+                html += '<span class="text-xs bg-indigo-600 text-white px-2.5 py-1 rounded shadow-sm font-bold"><i class="fa-solid fa-trophy mr-1"></i>Kejohanan Tamat</span>';
+            } else if (pending === 0 && total > 0) {
+                btnNext.disabled = false;
+                statusInfo.className = "mb-3 p-3 bg-green-50 rounded-lg text-green-700 border border-green-200 flex items-center justify-between";
+                html += '<span class="text-xs bg-green-600 text-white px-2.5 py-1 rounded shadow-sm font-bold"><i class="fa-solid fa-check mr-1"></i>Sedia Dijana Seterusnya</span>';
+            } else {
+                btnNext.disabled = true;
+                statusInfo.className = "mb-3 p-3 bg-orange-50 rounded-lg text-orange-700 border border-orange-200 flex items-center justify-between";
+                html += '<span class="text-xs bg-orange-500 text-white px-2.5 py-1 rounded shadow-sm font-bold"><i class="fa-solid fa-clock mr-1"></i>Selesaikan Perlawanan Dahulu</span>';
+            }
+            statusInfo.innerHTML = html;
+        };
+
+        // --- Next Round (Knockout) Generation ---
+        window.generateNextRound = function() {
+            const btnNext = document.getElementById('btn-next-round');
+            if (btnNext && btnNext.disabled) {
+                showModal('Amaran', 'Sila pastikan semua perlawanan pusingan semasa telah selesai.', 'error');
+                return;
+            }
+
+            let qualifiedTeams = [];
+            let nextPhaseName = '';
+            
+            const groupKeys = Object.keys(window.state.groups).sort();
+            const knockoutMatches = window.state.matches.filter(m => !groupKeys.includes(m.group));
+            const pullingFromGroups = knockoutMatches.length === 0;
+            const qualifyMethod = window.getQualifyMethod();
+
+            if (pullingFromGroups) {
+                const numQualifyPerGroup = window.getQualifyCountPerGroup();
+                let primaryQualifiers = [];
+                let remainingCandidates = [];
+
+                groupKeys.forEach(g => {
+                    const st = window.calculateStandings(g);
+                    st.slice(0, numQualifyPerGroup).forEach((item, idx) => {
+                        primaryQualifiers.push({
+                            id: item.id,
+                            name: item.name,
+                            group: g,
+                            rank: idx + 1,
+                            pts: item.pts,
+                            diff: item.diff,
+                            pf: item.pf,
+                            isBestThird: false
+                        });
+                    });
+                    st.slice(numQualifyPerGroup).forEach((item, idx) => {
+                        remainingCandidates.push({
+                            id: item.id,
+                            name: item.name,
+                            group: g,
+                            rank: numQualifyPerGroup + idx + 1,
+                            pts: item.pts,
+                            diff: item.diff,
+                            pf: item.pf,
+                            isBestThird: true
+                        });
+                    });
+                });
+
+                primaryQualifiers.sort((a, b) => {
+                    if (a.rank !== b.rank) return a.rank - b.rank;
+                    if (b.pts !== a.pts) return b.pts - a.pts;
+                    if (b.diff !== a.diff) return b.diff - a.diff;
+                    return b.pf - a.pf;
+                });
+
+                let allQualified = [...primaryQualifiers];
+                const targetBracket = window.getTargetBracketSize(primaryQualifiers.length);
+                const neededForFullBracket = targetBracket - primaryQualifiers.length;
+
+                if (qualifyMethod === 'best_third' && neededForFullBracket > 0 && remainingCandidates.length > 0) {
+                    remainingCandidates.sort((a, b) => {
+                        if (a.rank !== b.rank) return a.rank - b.rank;
+                        if (b.pts !== a.pts) return b.pts - a.pts;
+                        if (b.diff !== a.diff) return b.diff - a.diff;
+                        return b.pf - a.pf;
+                    });
+                    const bestExtras = remainingCandidates.slice(0, neededForFullBracket);
+                    allQualified = [...allQualified, ...bestExtras];
+                }
+
+                qualifiedTeams = allQualified.map(q => ({
+                    id: q.id || window.generateId(),
+                    name: q.isBestThird ? `${q.name} (${q.group}${q.rank} - Terbaik)` : `${q.name} (${q.group}${q.rank})`
+                }));
+
+                const bracketSize = window.getTargetBracketSize(qualifiedTeams.length);
+                if (bracketSize >= 16) nextPhaseName = 'Pusingan Kalah Mati';
+                else if (bracketSize === 8) nextPhaseName = 'Suku Akhir';
+                else if (bracketSize === 4) nextPhaseName = 'Separuh Akhir';
+                else if (bracketSize === 2) nextPhaseName = 'Pusingan Akhir';
+                else nextPhaseName = `Kalah Mati (${qualifiedTeams.length} Pasukan)`;
+                
+            } else {
+                const phases = [...new Set(knockoutMatches.map(m => m.group))];
+                const lastPhase = phases[phases.length - 1]; 
+                const currentMatches = knockoutMatches.filter(m => m.group === lastPhase);
+                
+                currentMatches.forEach(m => {
+                    if (m.score1 >= m.score2) qualifiedTeams.push(m.team1);
+                    else qualifiedTeams.push(m.team2);
+                });
+                
+                const t = qualifiedTeams.length;
+                if (t < 2) {
+                    showModal('Kejohanan Tamat', 'Peringkat Akhir telah selesai!', 'success');
+                    return;
+                }
+
+                const bracketSize = window.getTargetBracketSize(t);
+                if (bracketSize >= 16) nextPhaseName = 'Pusingan Kalah Mati (16)';
+                else if (bracketSize === 8) nextPhaseName = 'Suku Akhir';
+                else if (bracketSize === 4) nextPhaseName = 'Separuh Akhir';
+                else if (bracketSize === 2) nextPhaseName = 'Pusingan Akhir';
+                else nextPhaseName = `Kalah Mati (${t} Pasukan)`;
+            }
+
+            if (window.state.matches.some(m => m.group === nextPhaseName)) {
+                showModal('Info', `Jadual bagi ${nextPhaseName} telah pun wujud.`, 'info');
+                return;
+            }
+
+            let newMatchesCreated = 0;
+            const totalTeams = qualifiedTeams.length;
+            const targetBracket = window.getTargetBracketSize(totalTeams);
+            const numByes = targetBracket - totalTeams;
+
+            if (numByes > 0) {
+                const byeTeams = qualifiedTeams.slice(0, numByes);
+                const playingTeams = qualifiedTeams.slice(numByes);
+
+                byeTeams.forEach(t1 => {
+                    window.state.matches.push({
+                        id: window.generateId(),
+                        group: nextPhaseName,
+                        team1: t1,
+                        team2: { id: 'bye', name: 'BYE (Automasi)' },
+                        score1: 21,
+                        score2: 0,
+                        status: 'completed'
+                    });
+                    newMatchesCreated++;
+                });
+
+                const halfPlay = Math.floor(playingTeams.length / 2);
+                for (let i = 0; i < halfPlay; i++) {
+                    window.state.matches.push({
+                        id: window.generateId(),
+                        group: nextPhaseName,
+                        team1: playingTeams[i],
+                        team2: playingTeams[playingTeams.length - 1 - i],
+                        score1: 0,
+                        score2: 0,
+                        status: 'pending'
+                    });
+                    newMatchesCreated++;
+                }
+            } else {
+                const half = Math.floor(totalTeams / 2);
+                for (let i = 0; i < half; i++) {
+                    window.state.matches.push({
+                        id: window.generateId(),
+                        group: nextPhaseName,
+                        team1: qualifiedTeams[i],
+                        team2: qualifiedTeams[totalTeams - 1 - i],
+                        score1: 0,
+                        score2: 0,
+                        status: 'pending'
+                    });
+                    newMatchesCreated++;
+                }
+            }
+
+            window.state.groupClauseCollapsed = true;
+            window.state.settings.peringkat = nextPhaseName;
+
+            const date = new Date();
+            window.state.settingsHistory.unshift({
+                id: window.generateId(),
+                time: `${date.toLocaleDateString('ms-MY')} ${date.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' })}`,
+                peringkat: nextPhaseName,
+                format: 'Kalah Mati',
+                maxScore: window.state.settings.maxScore || '',
+                numQualify: window.state.settings.numQualify || '2',
+                qualifyMethod: window.state.settings.qualifyMethod || 'bye',
+                details: `Janaan Automatik: ${nextPhaseName} (${newMatchesCreated} Perlawanan)`
+            });
+
+            window.saveData();
+            window.handlePhaseSettings();
+            showModal('Jadual Kalah Mati Dijana!', `Sebanyak ${newMatchesCreated} perlawanan bagi "${nextPhaseName}" telah dijana.`, 'success');
+        };
+
+        // --- Audio Umpire ---
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playSound(teamNum) {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(teamNum === 1 ? 800 : 400, audioCtx.currentTime);
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                osc.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.1);
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch (e) {}
+        }
+
+        // --- Registration & Excel Bundle ---
+        window.addTeam = function(e) {
+            e.preventDefault();
+            const input = document.getElementById('team-name');
+            const name = input.value.trim();
+            if (name) {
+                window.state.teams.push({ id: window.generateId(), name: name });
+                input.value = '';
+                window.saveData();
+            }
+        };
+
+        window.downloadTemplate = function() {
+            const sampleData = [
+                ["Bil", "Nama Regu / Pasukan"],
+                [1, "KPDN Putrajaya A"],
+                [2, "KPDN Pulau Pinang B"],
+                [3, "KPDN Seberang Perai"],
+                [4, "KPDN Timur Laut"]
+            ];
+            if (typeof XLSX !== 'undefined') {
+                const ws = XLSX.utils.aoa_to_sheet(sampleData);
+                ws['!cols'] = [{ wch: 8 }, { wch: 30 }];
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Senarai_Regu");
+                XLSX.writeFile(wb, "Templat_Pasukan_Badminton_KPDN.xlsx");
+            }
+        };
+
+        window.handleBulkUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let addedCount = 0;
+                    if (typeof XLSX !== 'undefined') {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                        rows.forEach((row, index) => {
+                            if (!row || row.length === 0) return;
+                            let teamName = '';
+                            if (row.length >= 2 && row[1] !== undefined && String(row[1]).trim() !== '') {
+                                teamName = String(row[1]).trim();
+                            } else if (row[0] !== undefined) {
+                                teamName = String(row[0]).trim();
+                            }
+
+                            if (index === 0 && (teamName.toLowerCase().includes('nama') || teamName.toLowerCase() === 'bil')) return;
+                            if (teamName && isNaN(teamName)) {
+                                window.state.teams.push({ id: window.generateId(), name: teamName });
+                                addedCount++;
+                            }
+                        });
+                    }
+                    event.target.value = '';
+                    window.saveData();
+                    if (addedCount > 0) {
+                        showModal('Muat Naik Berjaya', `${addedCount} regu telah didaftarkan secara pukal.`, 'success');
+                    } else {
+                        showModal('Tiada Data', 'Tiada nama regu sah di dalam fail.', 'error');
+                    }
+                } catch (err) {
+                    showModal('Ralat Fail', 'Gagal membaca fail Excel.', 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
+        window.removeTeam = function(id) {
+            window.state.teams = window.state.teams.filter(t => t.id !== id);
+            for (let group in window.state.groups) {
+                if (window.state.groups[group]) {
+                    window.state.groups[group] = window.state.groups[group].filter(t => t.id !== id);
+                }
+            }
+            window.saveData();
+        };
+
+        window.clearAllTeams = function() {
+            if (window.state.teams.length === 0) return;
+            showConfirm('Kosongkan Senarai', 'Padam semua regu berdaftar?', () => {
+                window.state.teams = [];
+                window.state.groups = {};
+                window.state.matches = [];
+                window.saveData();
+            });
+        };
+
+        // --- Group Management ---
+        function getGroupLabel(index) {
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            if (index < 26) return letters[index];
+            return "G" + (index + 1);
+        }
+
+        window.setupGroups = function() {
+            const rawVal = document.getElementById('num-groups').value.trim();
+            if (!rawVal || parseInt(rawVal) <= 0) {
+                window.clearGroups();
+                return;
+            }
+            const numGroups = Math.min(10, Math.max(1, parseInt(rawVal)));
+            const executeSetup = () => {
+                window.state.groups = {};
+                for (let i = 0; i < numGroups; i++) {
+                    window.state.groups[getGroupLabel(i)] = [];
+                }
+                window.state.matches = [];
+                window.state.groupClauseCollapsed = false;
+                window.saveData();
+                showModal('Kumpulan Disediakan', `${numGroups} kumpulan telah diwujudkan.`, 'success');
+            };
+
+            if (Object.keys(window.state.groups).length > 0 && window.state.matches.length > 0) {
+                showConfirm('Tetapan Semula', 'Padam jadual perlawanan sedia ada?', executeSetup);
+            } else {
+                executeSetup();
+            }
+        };
+
+        window.clearGroups = function() {
+            if (Object.keys(window.state.groups).length === 0) {
+                document.getElementById('num-groups').value = '';
+                return;
+            }
+            showConfirm('Kosongkan Kumpulan', 'Kosongkan semua kumpulan dan perlawanan?', () => {
+                window.state.groups = {};
+                window.state.matches = [];
+                document.getElementById('num-groups').value = '';
+                window.saveData();
+            });
+        };
+
+        function getUnassignedTeams() {
+            let assignedIds = [];
+            for (let group in window.state.groups) {
+                window.state.groups[group].forEach(t => assignedIds.push(t.id));
+            }
+            return window.state.teams.filter(t => !assignedIds.includes(t.id));
+        }
+
+        window.autoAssignGroups = function() {
+            if (Object.keys(window.state.groups).length === 0) {
+                showModal('Ralat', 'Sila set bilangan kumpulan dahulu.', 'error');
+                return;
+            }
+            let unassigned = getUnassignedTeams();
+            if (unassigned.length === 0) {
+                showModal('Info', 'Semua regu telah diagihkan.', 'info');
+                return;
+            }
+            let shuffled = [...unassigned].sort(() => 0.5 - Math.random());
+            const groupKeys = Object.keys(window.state.groups);
+            
+            shuffled.forEach(team => {
+                let smallestGroup = groupKeys[0];
+                let minSize = window.state.groups[smallestGroup].length;
+                for (let i = 1; i < groupKeys.length; i++) {
+                    if (window.state.groups[groupKeys[i]].length < minSize) {
+                        smallestGroup = groupKeys[i];
+                        minSize = window.state.groups[groupKeys[i]].length;
+                    }
+                }
+                window.state.groups[smallestGroup].push(team);
+            });
+            window.saveData();
+            showModal('Berjaya', 'Regu telah diagihkan secara rawak.', 'success');
+        };
+
+        window.assignToGroup = function(groupName) {
+            const selectEl = document.getElementById(`select-group-${groupName}`);
+            const teamId = selectEl.value;
+            if (!teamId) return;
+            const team = window.state.teams.find(t => t.id === teamId);
+            if (team) {
+                window.state.groups[groupName].push(team);
+                window.saveData();
+            }
+        };
+
+        window.removeFromGroup = function(groupName, teamId) {
+            window.state.groups[groupName] = window.state.groups[groupName].filter(t => t.id !== teamId);
+            window.saveData();
+        };
+
+        window.generateMatchesFromGroups = function() {
+            if (Object.keys(window.state.groups).length === 0) {
+                showModal('Ralat', 'Sila set kumpulan dahulu.', 'error');
+                return;
+            }
+            let valid = true;
+            for (let group in window.state.groups) {
+                if (window.state.groups[group].length < 2) valid = false;
+            }
+            if (!valid) {
+                showModal('Ralat', 'Setiap kumpulan mesti ada sekurang-kurangnya 2 regu.', 'error');
+                return;
+            }
+
+            const buildSchedule = () => {
+                window.state.matches = [];
+                window.state.groupClauseCollapsed = false;
+                window.state.settings.peringkat = 'Peringkat Kumpulan';
+                let allGroupMatches = [];
+
+                for (const [groupName, teamsInGroup] of Object.entries(window.state.groups)) {
+                    let currentGroupMatches = [];
+                    for (let i = 0; i < teamsInGroup.length; i++) {
+                        for (let j = i + 1; j < teamsInGroup.length; j++) {
+                            currentGroupMatches.push({
+                                id: window.generateId(),
+                                group: groupName,
+                                team1: teamsInGroup[i],
+                                team2: teamsInGroup[j],
+                                score1: 0,
+                                score2: 0,
+                                status: 'pending' 
+                            });
+                        }
+                    }
+                    if (currentGroupMatches.length > 2) {
+                        let optimized = [currentGroupMatches.shift()];
+                        while (currentGroupMatches.length > 0) {
+                            let lastMatch = optimized[optimized.length - 1];
+                            let foundIndex = currentGroupMatches.findIndex(m => 
+                                m.team1.id !== lastMatch.team1.id && m.team1.id !== lastMatch.team2.id && 
+                                m.team2.id !== lastMatch.team1.id && m.team2.id !== lastMatch.team2.id
+                            );
+                            if (foundIndex !== -1) {
+                                optimized.push(currentGroupMatches.splice(foundIndex, 1)[0]);
+                            } else {
+                                optimized.push(currentGroupMatches.shift());
+                            }
+                        }
+                        currentGroupMatches = optimized;
+                    }
+                    allGroupMatches.push(currentGroupMatches);
+                }
+                
+                let maxLen = allGroupMatches.length > 0 ? Math.max(...allGroupMatches.map(g => g.length)) : 0;
+                for (let i = 0; i < maxLen; i++) {
+                    for (let

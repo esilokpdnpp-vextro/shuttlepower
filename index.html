@@ -35,15 +35,20 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold leading-tight">Badminton KPDN P.Pinang</h1>
-                    <p class="text-xs text-teal-100 flex items-center gap-2">
+                    <p class="text-xs text-teal-100 flex flex-wrap items-center gap-2 mt-0.5">
                         <span>Sistem Kejohanan Tertutup</span>
-                        <span id="cloud-status" class="bg-teal-500 text-[10px] px-2 py-0.5 rounded-full text-white"><i class="fa-solid fa-cloud mr-1"></i>Menghubungkan Awan...</span>
+                        <button onclick="openFirebaseSetupModal()" id="cloud-status" class="bg-amber-500 hover:opacity-90 text-[10px] px-2.5 py-0.5 rounded-full text-white font-semibold transition cursor-pointer shadow-xs" title="Klik untuk semak atau tetapkan sambungan Firebase">
+                            <i class="fa-solid fa-cloud mr-1"></i>Menghubungkan Awan...
+                        </button>
                     </p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
+                <button onclick="openFirebaseSetupModal()" class="text-xs bg-teal-800/70 hover:bg-teal-900 px-3 py-1.5 rounded shadow text-white transition font-semibold" title="Konfigurasi Firebase Awan">
+                    <i class="fa-solid fa-cloud-bolt mr-1"></i><span class="hidden sm:inline">Tetapan Awan</span>
+                </button>
                 <button onclick="resetData()" class="text-xs bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded shadow text-white transition font-semibold">
-                    <i class="fa-solid fa-rotate-right mr-1"></i> Reset Sistem
+                    <i class="fa-solid fa-rotate-right mr-1"></i><span class="hidden sm:inline">Reset Sistem</span>
                 </button>
             </div>
         </div>
@@ -462,46 +467,186 @@
         </div>
     </div>
 
+    <!-- Modal Tetapan Sambungan Firebase (Untuk Vercel / Hosting Luar) -->
+    <div id="firebase-setup-overlay" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 my-8">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-bolt text-teal-600"></i> Diagnostik & Konfigurasi Awan (Firebase)
+                </h3>
+                <button onclick="closeFirebaseSetupModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <!-- Kotak Status Semasa -->
+            <div id="fb-diagnostic-box" class="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 space-y-1">
+                <div class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-circle-info"></i> Status Sambungan Semasa:</div>
+                <div id="fb-diagnostic-msg">Menyemak konfigurasi...</div>
+            </div>
+
+            <div class="space-y-3 text-xs text-gray-600 mb-4">
+                <p class="font-semibold text-gray-700">Kenapa "Tidak Dapat Menghubungkan Awan" di Vercel / WhatsApp?</p>
+                <ol class="list-decimal pl-4 space-y-1">
+                    <li>Anda perlu menampal kod <code>firebaseConfig</code> daripada projek Firebase anda di ruangan di bawah (atau di dalam kod <code>index.html</code>).</li>
+                    <li>Di <strong>Firebase Console &rarr; Firestore Database &rarr; Rules</strong>, pastikan <em>Test Mode</em> diaktifkan: <code>allow read, write: if true;</code></li>
+                    <li>Di <strong>Firebase Console &rarr; Authentication &rarr; Sign-in method</strong>, pastikan <strong>Anonymous</strong> telah diaktifkan (Enable).</li>
+                </ol>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-gray-700 mb-1">Tampal Kod <code>firebaseConfig</code> Anda Di Sini:</label>
+                <textarea id="fb-config-input" rows="6" placeholder='Contoh:
+{
+  "apiKey": "AIzaSy...",
+  "authDomain": "projek-anda.firebaseapp.com",
+  "projectId": "projek-anda",
+  "storageBucket": "projek-anda.appspot.com",
+  "messagingSenderId": "123456...",
+  "appId": "1:123456:web:..."
+}' class="w-full border rounded-lg p-2.5 text-xs font-mono bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+                <p class="text-[11px] text-gray-400 mt-1">Tips: Anda boleh tampal keseluruhan blok <code>const firebaseConfig = { ... };</code> terus dari Firebase Console.</p>
+            </div>
+
+            <div class="flex flex-wrap gap-2 justify-end border-t pt-4">
+                <button type="button" onclick="clearCustomFirebaseConfig()" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg text-xs font-semibold transition">Reset Config</button>
+                <button type="button" onclick="closeFirebaseSetupModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-xs font-semibold transition">Tutup</button>
+                <button type="button" onclick="saveCustomFirebaseConfig()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow transition"><i class="fa-solid fa-plug mr-1"></i>Simpan & Hubungkan</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK & Application Logic -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Global Environment Setup ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'kpdn-badminton-penang';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyDummyKeyForCanvasRuntime999",
-            authDomain: "canvas-app.firebaseapp.com",
-            projectId: "canvas-app",
-            storageBucket: "canvas-app.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456:web:abcd"
+        // ============================================================================
+        // PENTING UNTUK PENGGUNA GITHUB & VERCEL (shutterpower.vercel.app):
+        // Sila gantikan nilai di dalam MANUAL_FIREBASE_CONFIG di bawah dengan
+        // firebaseConfig daripada Firebase Console anda supaya semua peranti penonton
+        // & pengadil di WhatsApp bersambung secara automatik!
+        // ============================================================================
+        const MANUAL_FIREBASE_CONFIG = {
+            apiKey: "MASUKKAN_API_KEY_ANDA_DI_SINI",
+            authDomain: "projek-anda.firebaseapp.com",
+            projectId: "projek-anda",
+            storageBucket: "projek-anda.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
         };
 
-        let app, db, auth;
-        let isCloudSynced = false;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'kpdn-badminton-penang';
+        let app = null, db = null, auth = null, unsubscribeSnapshot = null;
+        let lastCloudError = "";
 
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            
-            const initAuth = async () => {
+        // Fungsi untuk mengekstrak objek JSON walaupun pengguna tampal kod JS "const firebaseConfig = {...}"
+        function parseFirebaseConfigInput(rawStr) {
+            if (!rawStr) return null;
+            try {
+                return JSON.parse(rawStr);
+            } catch (e) {
+                try {
+                    const match = rawStr.match(/\{[\s\S]*\}/);
+                    if (match) {
+                        let objStr = match[0]
+                            .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":')
+                            .replace(/'/g, '"')
+                            .replace(/,\s*\}/g, '}');
+                        return JSON.parse(objStr);
+                    }
+                } catch (err) {
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        function getActiveFirebaseConfig() {
+            // 1. Semak jika ada disimpan melalui Modal UI Tetapan Awan
+            const savedCustom = localStorage.getItem('customFirebaseConfigKPDN');
+            if (savedCustom) {
+                const parsed = parseFirebaseConfigInput(savedCustom);
+                if (parsed && parsed.apiKey && parsed.projectId) return parsed;
+            }
+            // 2. Semak jika pengguna telah mengisi MANUAL_FIREBASE_CONFIG di dalam kod HTML
+            if (MANUAL_FIREBASE_CONFIG.apiKey && !MANUAL_FIREBASE_CONFIG.apiKey.includes("MASUKKAN_")) {
+                return MANUAL_FIREBASE_CONFIG;
+            }
+            // 3. Semak persekitaran Canvas
+            if (typeof __firebase_config !== 'undefined') {
+                return JSON.parse(__firebase_config);
+            }
+            return null;
+        }
+
+        function updateCloudIndicator(status, text, detailMsg = "") {
+            const el = document.getElementById('cloud-status');
+            const diagBox = document.getElementById('fb-diagnostic-box');
+            const diagMsg = document.getElementById('fb-diagnostic-msg');
+
+            if (detailMsg) lastCloudError = detailMsg;
+
+            if (el) {
+                if (status === 'synced') {
+                    el.className = 'bg-green-500 hover:opacity-90 text-[10px] px-2.5 py-0.5 rounded-full text-white font-semibold transition cursor-pointer shadow-xs';
+                    el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-1"></i>${text}`;
+                } else if (status === 'syncing') {
+                    el.className = 'bg-amber-500 hover:opacity-90 text-[10px] px-2.5 py-0.5 rounded-full text-white font-semibold animate-pulse cursor-pointer shadow-xs';
+                    el.innerHTML = `<i class="fa-solid fa-arrows-rotate mr-1"></i>${text}`;
+                } else if (status === 'error') {
+                    el.className = 'bg-red-500 hover:bg-red-600 text-[10px] px-2.5 py-0.5 rounded-full text-white font-semibold cursor-pointer shadow-xs';
+                    el.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i>${text} (Klik Baiki)`;
+                } else {
+                    el.className = 'bg-blue-600 hover:bg-blue-700 text-[10px] px-2.5 py-0.5 rounded-full text-white font-semibold cursor-pointer shadow-xs';
+                    el.innerHTML = `<i class="fa-solid fa-database mr-1"></i>${text} (Klik Setup)`;
+                }
+            }
+
+            if (diagBox && diagMsg) {
+                if (status === 'synced') {
+                    diagBox.className = 'mb-4 p-3 rounded-lg bg-green-50 border border-green-200 text-xs text-green-800 space-y-1';
+                    diagMsg.innerHTML = `<strong>Berjaya Disambungkan!</strong> Projek: <code>${app?.options?.projectId || 'Aktif'}</code>. Data diselaraskan secara langsung (Real-time).`;
+                } else {
+                    diagBox.className = 'mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-800 space-y-1';
+                    diagMsg.innerHTML = `<strong>Status:</strong> ${text}<br><strong>Punca:</strong> ${lastCloudError || 'Konfigurasi Firebase belum dimasukkan.'}`;
+                }
+            }
+        }
+
+        async function connectToFirebase() {
+            const activeConfig = getActiveFirebaseConfig();
+
+            if (!activeConfig || !activeConfig.apiKey || activeConfig.apiKey.includes("DummyKey") || activeConfig.apiKey.includes("MASUKKAN_")) {
+                updateCloudIndicator('local', 'Awan Belum Dikonfigurasi', 'Kunci firebaseConfig sebenar belum dimasukkan. Sila klik butang "Tetapan Awan" di penjuru kanan atas untuk memasukkan firebaseConfig anda.');
+                return;
+            }
+
+            try {
+                updateCloudIndicator('syncing', 'Menghubungkan Awan...');
+                if (getApps().length === 0) {
+                    app = initializeApp(activeConfig);
+                } else {
+                    app = getApp();
+                }
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Cuba log masuk Tanpa Nama (jika gagal kerana belum diaktifkan di Firebase Console, teruskan cuba baca Firestore)
                 try {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                         await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
                         await signInAnonymously(auth);
                     }
-                    setupCloudListener();
-                } catch (err) {
-                    console.warn("Firebase Auth fallback:", err);
+                } catch (authErr) {
+                    console.warn("Amaran Auth (Akan cuba akses Firestore secara terus):", authErr.message);
                 }
-            };
-            initAuth();
-        } catch (e) {
-            console.warn("Firebase Init fallback:", e);
+
+                setupCloudListener();
+            } catch (e) {
+                console.error("Firebase Init Error:", e);
+                updateCloudIndicator('error', 'Ralat Sambungan Awan', e.message);
+            }
         }
 
         // --- State Management ---
@@ -525,33 +670,26 @@
         let confirmActionCallback = null;
         let localSyncTimer = null;
 
-        function updateCloudIndicator(status, text) {
-            const el = document.getElementById('cloud-status');
-            if (!el) return;
-            if (status === 'synced') {
-                el.className = 'bg-green-500 text-[10px] px-2 py-0.5 rounded-full text-white';
-                el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-1"></i>${text}`;
-            } else if (status === 'syncing') {
-                el.className = 'bg-amber-500 text-[10px] px-2 py-0.5 rounded-full text-white animate-pulse';
-                el.innerHTML = `<i class="fa-solid fa-arrows-rotate mr-1"></i>${text}`;
-            } else {
-                el.className = 'bg-red-500 text-[10px] px-2 py-0.5 rounded-full text-white';
-                el.innerHTML = `<i class="fa-solid fa-cloud-slash mr-1"></i>${text}`;
-            }
+        // PENTING: Laluan Firestore MESTI mempunyai bilangan segmen GENAP (6 segmen):
+        // artifacts (1) / {appId} (2) / public (3) / data (4) / kpdn_state (5) / main (6)
+        function getTournamentDocRef() {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'kpdn_state', 'main');
         }
 
         function setupCloudListener() {
-            if (!db || !auth) return;
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'tournament_state');
-            onSnapshot(docRef, (docSnap) => {
+            if (!db) return;
+            if (unsubscribeSnapshot) unsubscribeSnapshot();
+
+            const docRef = getTournamentDocRef();
+            unsubscribeSnapshot = onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const cloudData = docSnap.data();
                     if (cloudData && cloudData.statePayload) {
                         try {
                             const parsed = JSON.parse(cloudData.statePayload);
-                            // Merge cloud state if newer or distinct
                             window.state = { ...window.state, ...parsed };
                             if (!window.state.settingsHistory) window.state.settingsHistory = [];
+                            localStorage.setItem('badmintonKPDNState', JSON.stringify(window.state));
                             updateCloudIndicator('synced', 'Awan Diselaraskan');
                             renderAll();
                         } catch (err) {
@@ -559,12 +697,15 @@
                         }
                     }
                 } else {
-                    // Initialize document if not exists
                     saveDataToCloud(true);
                 }
             }, (error) => {
                 console.warn("Cloud listener error:", error);
-                updateCloudIndicator('offline', 'Mod Luar Talian');
+                let helpMsg = error.message;
+                if (error.code === 'permission-denied') {
+                    helpMsg = "Akses ditolak oleh Firestore Rules (permission-denied). Sila buka Firebase Console -> Firestore Database -> Rules, dan tukar kepada 'allow read, write: if true;' kemudian klik Publish.";
+                }
+                updateCloudIndicator('error', 'Gagal Akses Awan', helpMsg);
             });
         }
 
@@ -572,13 +713,13 @@
             localStorage.setItem('badmintonKPDNState', JSON.stringify(window.state));
             renderAll();
 
-            if (!db || !auth) return;
-            updateCloudIndicator('syncing', 'Menyimpan...');
+            if (!db) return;
+            updateCloudIndicator('syncing', 'Menyimpan ke Awan...');
             if (localSyncTimer) clearTimeout(localSyncTimer);
             
             localSyncTimer = setTimeout(async () => {
                 try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'tournament_state');
+                    const docRef = getTournamentDocRef();
                     await setDoc(docRef, {
                         statePayload: JSON.stringify(window.state),
                         updatedAt: new Date().toISOString()
@@ -586,13 +727,56 @@
                     updateCloudIndicator('synced', 'Awan Diselaraskan');
                 } catch (e) {
                     console.error("Cloud save failed:", e);
-                    updateCloudIndicator('offline', 'Simpan Tempatan Sahaja');
+                    let helpMsg = e.message;
+                    if (e.code === 'permission-denied') {
+                        helpMsg = "Akses ditolak (permission-denied). Pastikan Firestore Rules anda membenarkan bacaan/tulisan (Test Mode).";
+                    }
+                    updateCloudIndicator('error', 'Gagal Simpan Awan', helpMsg);
                 }
-            }, isInitial ? 100 : 800);
+            }, isInitial ? 100 : 600);
         }
 
         window.saveData = function() {
             saveDataToCloud(false);
+        };
+
+        // --- Fungsi Modal Tetapan Firebase ---
+        window.openFirebaseSetupModal = function() {
+            const overlay = document.getElementById('firebase-setup-overlay');
+            const input = document.getElementById('fb-config-input');
+            const currentCustom = localStorage.getItem('customFirebaseConfigKPDN');
+            if (currentCustom) {
+                input.value = currentCustom;
+            } else if (MANUAL_FIREBASE_CONFIG.apiKey && !MANUAL_FIREBASE_CONFIG.apiKey.includes("MASUKKAN_")) {
+                input.value = JSON.stringify(MANUAL_FIREBASE_CONFIG, null, 2);
+            }
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        };
+
+        window.closeFirebaseSetupModal = function() {
+            const overlay = document.getElementById('firebase-setup-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        };
+
+        window.saveCustomFirebaseConfig = function() {
+            const raw = document.getElementById('fb-config-input').value.trim();
+            const parsed = parseFirebaseConfigInput(raw);
+            if (!parsed || !parsed.apiKey || !parsed.projectId) {
+                showModal('Format Tidak Sah', 'Sila pastikan kod firebaseConfig mengandungi sekurang-kurangnya "apiKey" dan "projectId".', 'error');
+                return;
+            }
+            localStorage.setItem('customFirebaseConfigKPDN', JSON.stringify(parsed, null, 2));
+            closeFirebaseSetupModal();
+            showModal('Menghubungkan Semula', 'Konfigurasi Firebase disimpan! Halaman akan dimuat semula untuk menyambung ke Awan.', 'success');
+            setTimeout(() => window.location.reload(), 1200);
+        };
+
+        window.clearCustomFirebaseConfig = function() {
+            localStorage.removeItem('customFirebaseConfigKPDN');
+            document.getElementById('fb-config-input').value = '';
+            showModal('Tetapan Direset', 'Konfigurasi tersuai telah dipadam.', 'info');
         };
 
         // --- Utility & Navigation ---
@@ -717,15 +901,6 @@
         };
 
         // --- Settings & Qualifications ---
-        window.getActiveSettingsForPhase = function(phaseName) {
-            if (window.state.settingsHistory && window.state.settingsHistory.length > 0) {
-                const matched = window.state.settingsHistory.find(r => r.peringkat && phaseName && r.peringkat.toLowerCase() === phaseName.toLowerCase());
-                if (matched) return matched;
-                return window.state.settingsHistory[0];
-            }
-            return window.state.settings;
-        };
-
         window.getQualifyCountPerGroup = function() {
             if (window.state.settingsHistory && window.state.settingsHistory.length > 0) {
                 const groupRecord = window.state.settingsHistory.find(r => r.peringkat === 'Peringkat Kumpulan' && r.numQualify);
@@ -751,43 +926,6 @@
             if (count <= 8) return 8;
             if (count <= 16) return 16;
             return 32;
-        };
-
-        window.getBestThirdPlacedQualifiedIds = function() {
-            const method = window.getQualifyMethod();
-            if (method !== 'best_third') return [];
-
-            const groupKeys = Object.keys(window.state.groups).sort();
-            if (groupKeys.length === 0) return [];
-
-            const numQualifyPerGroup = window.getQualifyCountPerGroup();
-            let baseCount = 0;
-            let candidates = [];
-
-            groupKeys.forEach(g => {
-                const st = window.calculateStandings(g);
-                baseCount += Math.min(st.length, numQualifyPerGroup);
-                st.slice(numQualifyPerGroup).forEach((item, idx) => {
-                    candidates.push({
-                        ...item,
-                        group: g,
-                        rank: numQualifyPerGroup + idx + 1
-                    });
-                });
-            });
-
-            const targetBracket = window.getTargetBracketSize(baseCount);
-            const needed = targetBracket - baseCount;
-            if (needed <= 0 || candidates.length === 0) return [];
-
-            candidates.sort((a, b) => {
-                if (a.rank !== b.rank) return a.rank - b.rank;
-                if (b.pts !== a.pts) return b.pts - a.pts;
-                if (b.diff !== a.diff) return b.diff - a.diff;
-                return b.pf - a.pf;
-            });
-
-            return candidates.slice(0, needed).map(c => c.id);
         };
 
         window.changeQuickQualifyMethod = function(val) {
@@ -877,278 +1015,87 @@
             } else {
                 if (qualifyWrapper) qualifyWrapper.classList.remove('hidden');
             }
-
-            const groupKeys = Object.keys(window.state.groups);
-            const hasKnockoutMatches = window.state.matches.some(m => !groupKeys.includes(m.group));
-            if (hasKnockoutMatches && window.state.settings.peringkat !== 'Peringkat Kumpulan') {
-                if (overlay) overlay.classList.remove('hidden');
-            } else {
-                if (overlay) overlay.classList.add('hidden');
-            }
         };
 
-        window.updateMatchStatus = function() {
-            const btnNext = document.getElementById('btn-next-round');
-            const statusInfo = document.getElementById('match-status-info');
-            const qualifyLabel = document.getElementById('active-qualify-label');
-            const methodLabel = document.getElementById('active-method-label');
-            const quickMethodSelect = document.getElementById('quick-qualify-method');
-            if (!btnNext || !statusInfo) return;
-
-            const numQualify = window.getQualifyCountPerGroup();
-            const qualifyMethod = window.getQualifyMethod();
-            if (qualifyLabel) qualifyLabel.innerText = `Top ${numQualify} Setiap Kumpulan`;
-            if (methodLabel) methodLabel.innerText = qualifyMethod === 'best_third' ? 'Tempat Ke-3 Terbaik (Genap)' : 'Format Bye (Biasa)';
-            if (quickMethodSelect) quickMethodSelect.value = qualifyMethod;
-            
-            if (window.state.matches.length === 0) {
-                statusInfo.innerHTML = '<span>Belum ada jadual perlawanan dijana.</span>';
-                statusInfo.className = "mb-3 p-3 bg-gray-50 rounded-lg text-gray-500 border border-gray-200 flex items-center justify-between";
-                btnNext.disabled = true;
-                return;
-            }
-
-            const groupKeys = Object.keys(window.state.groups);
-            const knockoutMatches = window.state.matches.filter(m => !groupKeys.includes(m.group));
-            
-            let currentPhaseMatches = [];
-            let currentPhaseLabel = "";
-
-            if (knockoutMatches.length === 0) {
-                currentPhaseMatches = window.state.matches.filter(m => groupKeys.includes(m.group));
-                currentPhaseLabel = "Peringkat Kumpulan";
-            } else {
-                const phases = [...new Set(knockoutMatches.map(m => m.group))];
-                currentPhaseLabel = phases[phases.length - 1];
-                currentPhaseMatches = knockoutMatches.filter(m => m.group === currentPhaseLabel);
-            }
-                
-            const total = currentPhaseMatches.length;
-            const completed = currentPhaseMatches.filter(m => m.status === 'completed').length;
-            const pending = total - completed;
-
-            let html = `<span class="font-medium">Status Peringkat Semasa (<strong>${currentPhaseLabel}</strong>): <strong>${completed}</strong> Selesai / <strong>${pending}</strong> Belum Selesai</span>`;
-            
-            if (currentPhaseLabel === 'Pusingan Akhir' && pending === 0 && total > 0) {
-                btnNext.disabled = true;
-                statusInfo.className = "mb-3 p-3 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-200 flex items-center justify-between";
-                html += '<span class="text-xs bg-indigo-600 text-white px-2.5 py-1 rounded shadow-sm font-bold"><i class="fa-solid fa-trophy mr-1"></i>Kejohanan Tamat</span>';
-            } else if (pending === 0 && total > 0) {
-                btnNext.disabled = false;
-                statusInfo.className = "mb-3 p-3 bg-green-50 rounded-lg text-green-700 border border-green-200 flex items-center justify-between";
-                html += '<span class="text-xs bg-green-600 text-white px-2.5 py-1 rounded shadow-sm font-bold"><i class="fa-solid fa-check mr-1"></i>Sedia Dijana Seterusnya</span>';
-            } else {
-                btnNext.disabled = true;
-                statusInfo.className = "mb-3 p-3 bg-orange-50 rounded-lg text-orange-700 border border-orange-200 flex items-center justify-between";
-                html += '<span class="text-xs bg-orange-500 text-white px-2.5 py-1 rounded shadow-sm font-bold"><i class="fa-solid fa-clock mr-1"></i>Selesaikan Perlawanan Dahulu</span>';
-            }
-            statusInfo.innerHTML = html;
-        };
-
-        // --- Next Round (Knockout) Generation ---
-        window.generateNextRound = function() {
-            const btnNext = document.getElementById('btn-next-round');
-            if (btnNext && btnNext.disabled) {
-                showModal('Amaran', 'Sila pastikan semua perlawanan pusingan semasa telah selesai.', 'error');
-                return;
-            }
-
-            let qualifiedTeams = [];
-            let nextPhaseName = '';
-            
+        // --- Standings & Group Calculation ---
+        window.getBestThirdPlacedQualifiedIds = function() {
+            if (window.getQualifyMethod() !== 'best_third') return [];
             const groupKeys = Object.keys(window.state.groups).sort();
-            const knockoutMatches = window.state.matches.filter(m => !groupKeys.includes(m.group));
-            const pullingFromGroups = knockoutMatches.length === 0;
-            const qualifyMethod = window.getQualifyMethod();
+            if (groupKeys.length === 0) return [];
 
-            if (pullingFromGroups) {
-                const numQualifyPerGroup = window.getQualifyCountPerGroup();
-                let primaryQualifiers = [];
-                let remainingCandidates = [];
+            const numQualifyPerGroup = window.getQualifyCountPerGroup();
+            let totalPrimary = groupKeys.length * numQualifyPerGroup;
+            const targetBracket = window.getTargetBracketSize(totalPrimary);
+            const needed = targetBracket - totalPrimary;
+            if (needed <= 0) return [];
 
-                groupKeys.forEach(g => {
-                    const st = window.calculateStandings(g);
-                    st.slice(0, numQualifyPerGroup).forEach((item, idx) => {
-                        primaryQualifiers.push({
-                            id: item.id,
-                            name: item.name,
-                            group: g,
-                            rank: idx + 1,
-                            pts: item.pts,
-                            diff: item.diff,
-                            pf: item.pf,
-                            isBestThird: false
-                        });
-                    });
-                    st.slice(numQualifyPerGroup).forEach((item, idx) => {
-                        remainingCandidates.push({
-                            id: item.id,
-                            name: item.name,
-                            group: g,
-                            rank: numQualifyPerGroup + idx + 1,
-                            pts: item.pts,
-                            diff: item.diff,
-                            pf: item.pf,
-                            isBestThird: true
-                        });
+            let remainingCandidates = [];
+            groupKeys.forEach(g => {
+                const st = window.calculateStandings(g);
+                st.slice(numQualifyPerGroup).forEach((item, idx) => {
+                    remainingCandidates.push({
+                        id: item.id,
+                        rank: numQualifyPerGroup + idx + 1,
+                        pts: item.pts,
+                        diff: item.diff,
+                        pf: item.pf
                     });
                 });
-
-                primaryQualifiers.sort((a, b) => {
-                    if (a.rank !== b.rank) return a.rank - b.rank;
-                    if (b.pts !== a.pts) return b.pts - a.pts;
-                    if (b.diff !== a.diff) return b.diff - a.diff;
-                    return b.pf - a.pf;
-                });
-
-                let allQualified = [...primaryQualifiers];
-                const targetBracket = window.getTargetBracketSize(primaryQualifiers.length);
-                const neededForFullBracket = targetBracket - primaryQualifiers.length;
-
-                if (qualifyMethod === 'best_third' && neededForFullBracket > 0 && remainingCandidates.length > 0) {
-                    remainingCandidates.sort((a, b) => {
-                        if (a.rank !== b.rank) return a.rank - b.rank;
-                        if (b.pts !== a.pts) return b.pts - a.pts;
-                        if (b.diff !== a.diff) return b.diff - a.diff;
-                        return b.pf - a.pf;
-                    });
-                    const bestExtras = remainingCandidates.slice(0, neededForFullBracket);
-                    allQualified = [...allQualified, ...bestExtras];
-                }
-
-                qualifiedTeams = allQualified.map(q => ({
-                    id: q.id || window.generateId(),
-                    name: q.isBestThird ? `${q.name} (${q.group}${q.rank} - Terbaik)` : `${q.name} (${q.group}${q.rank})`
-                }));
-
-                const bracketSize = window.getTargetBracketSize(qualifiedTeams.length);
-                if (bracketSize >= 16) nextPhaseName = 'Pusingan Kalah Mati';
-                else if (bracketSize === 8) nextPhaseName = 'Suku Akhir';
-                else if (bracketSize === 4) nextPhaseName = 'Separuh Akhir';
-                else if (bracketSize === 2) nextPhaseName = 'Pusingan Akhir';
-                else nextPhaseName = `Kalah Mati (${qualifiedTeams.length} Pasukan)`;
-                
-            } else {
-                const phases = [...new Set(knockoutMatches.map(m => m.group))];
-                const lastPhase = phases[phases.length - 1]; 
-                const currentMatches = knockoutMatches.filter(m => m.group === lastPhase);
-                
-                currentMatches.forEach(m => {
-                    if (m.score1 >= m.score2) qualifiedTeams.push(m.team1);
-                    else qualifiedTeams.push(m.team2);
-                });
-                
-                const t = qualifiedTeams.length;
-                if (t < 2) {
-                    showModal('Kejohanan Tamat', 'Peringkat Akhir telah selesai!', 'success');
-                    return;
-                }
-
-                const bracketSize = window.getTargetBracketSize(t);
-                if (bracketSize >= 16) nextPhaseName = 'Pusingan Kalah Mati (16)';
-                else if (bracketSize === 8) nextPhaseName = 'Suku Akhir';
-                else if (bracketSize === 4) nextPhaseName = 'Separuh Akhir';
-                else if (bracketSize === 2) nextPhaseName = 'Pusingan Akhir';
-                else nextPhaseName = `Kalah Mati (${t} Pasukan)`;
-            }
-
-            if (window.state.matches.some(m => m.group === nextPhaseName)) {
-                showModal('Info', `Jadual bagi ${nextPhaseName} telah pun wujud.`, 'info');
-                return;
-            }
-
-            let newMatchesCreated = 0;
-            const totalTeams = qualifiedTeams.length;
-            const targetBracket = window.getTargetBracketSize(totalTeams);
-            const numByes = targetBracket - totalTeams;
-
-            if (numByes > 0) {
-                const byeTeams = qualifiedTeams.slice(0, numByes);
-                const playingTeams = qualifiedTeams.slice(numByes);
-
-                byeTeams.forEach(t1 => {
-                    window.state.matches.push({
-                        id: window.generateId(),
-                        group: nextPhaseName,
-                        team1: t1,
-                        team2: { id: 'bye', name: 'BYE (Automasi)' },
-                        score1: 21,
-                        score2: 0,
-                        status: 'completed'
-                    });
-                    newMatchesCreated++;
-                });
-
-                const halfPlay = Math.floor(playingTeams.length / 2);
-                for (let i = 0; i < halfPlay; i++) {
-                    window.state.matches.push({
-                        id: window.generateId(),
-                        group: nextPhaseName,
-                        team1: playingTeams[i],
-                        team2: playingTeams[playingTeams.length - 1 - i],
-                        score1: 0,
-                        score2: 0,
-                        status: 'pending'
-                    });
-                    newMatchesCreated++;
-                }
-            } else {
-                const half = Math.floor(totalTeams / 2);
-                for (let i = 0; i < half; i++) {
-                    window.state.matches.push({
-                        id: window.generateId(),
-                        group: nextPhaseName,
-                        team1: qualifiedTeams[i],
-                        team2: qualifiedTeams[totalTeams - 1 - i],
-                        score1: 0,
-                        score2: 0,
-                        status: 'pending'
-                    });
-                    newMatchesCreated++;
-                }
-            }
-
-            window.state.groupClauseCollapsed = true;
-            window.state.settings.peringkat = nextPhaseName;
-
-            const date = new Date();
-            window.state.settingsHistory.unshift({
-                id: window.generateId(),
-                time: `${date.toLocaleDateString('ms-MY')} ${date.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' })}`,
-                peringkat: nextPhaseName,
-                format: 'Kalah Mati',
-                maxScore: window.state.settings.maxScore || '',
-                numQualify: window.state.settings.numQualify || '2',
-                qualifyMethod: window.state.settings.qualifyMethod || 'bye',
-                details: `Janaan Automatik: ${nextPhaseName} (${newMatchesCreated} Perlawanan)`
             });
 
-            window.saveData();
-            window.handlePhaseSettings();
-            showModal('Jadual Kalah Mati Dijana!', `Sebanyak ${newMatchesCreated} perlawanan bagi "${nextPhaseName}" telah dijana.`, 'success');
+            remainingCandidates.sort((a, b) => {
+                if (a.rank !== b.rank) return a.rank - b.rank;
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                if (b.diff !== a.diff) return b.diff - a.diff;
+                return b.pf - a.pf;
+            });
+
+            return remainingCandidates.slice(0, needed).map(c => c.id);
         };
 
-        // --- Audio Umpire ---
-        let audioCtx;
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-        }
+        window.calculateStandings = function(groupName) {
+            let teamsInGroup = window.state.groups[groupName] || [];
+            let stats = {};
+            teamsInGroup.forEach(t => {
+                stats[t.id] = { id: t.id, name: t.name, p: 0, w: 0, l: 0, pf: 0, pa: 0, diff: 0, pts: 0 };
+            });
 
-        function playSound(teamNum) {
-            try {
-                initAudio();
-                const osc = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(teamNum === 1 ? 800 : 400, audioCtx.currentTime);
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                osc.start();
-                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.1);
-                osc.stop(audioCtx.currentTime + 0.1);
-            } catch (e) {}
-        }
+            let groupMatches = window.state.matches.filter(m => m.group === groupName && m.status === 'completed');
+            groupMatches.forEach(m => {
+                let id1 = m.team1.id;
+                let id2 = m.team2.id;
+                if (!stats[id1] || !stats[id2]) return;
+
+                stats[id1].p++;
+                stats[id2].p++;
+                stats[id1].pf += m.score1;
+                stats[id1].pa += m.score2;
+                stats[id2].pf += m.score2;
+                stats[id2].pa += m.score1;
+
+                if (m.score1 > m.score2) {
+                    stats[id1].w++;
+                    stats[id1].pts += 2;
+                    stats[id2].l++;
+                } else if (m.score2 > m.score1) {
+                    stats[id2].w++;
+                    stats[id2].pts += 2;
+                    stats[id1].l++;
+                } else {
+                    stats[id1].pts += 1;
+                    stats[id2].pts += 1;
+                }
+            });
+
+            let arr = Object.values(stats);
+            arr.forEach(item => { item.diff = item.pf - item.pa; });
+            arr.sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                if (b.diff !== a.diff) return b.diff - a.diff;
+                return b.pf - a.pf;
+            });
+            return arr;
+        };
 
         // --- Registration & Excel Bundle ---
         window.addTeam = function(e) {
@@ -1396,4 +1343,699 @@
                 
                 let maxLen = allGroupMatches.length > 0 ? Math.max(...allGroupMatches.map(g => g.length)) : 0;
                 for (let i = 0; i < maxLen; i++) {
-                    for (let
+                    for (let j = 0; j < allGroupMatches.length; j++) {
+                        if (allGroupMatches[j][i]) {
+                            window.state.matches.push(allGroupMatches[j][i]);
+                        }
+                    }
+                }
+                window.saveData();
+                showModal('Jadual Selesai', 'Jadual Perlawanan Peringkat Kumpulan telah berjaya dijana.', 'success');
+            };
+
+            if (window.state.matches.length > 0) {
+                showConfirm('Jana Semula Jadual', 'Jadual sedia ada akan dipadam. Teruskan?', buildSchedule);
+            } else {
+                buildSchedule();
+            }
+        };
+
+        // --- Next Round Generation ---
+        window.generateNextRound = function() {
+            let qualifiedTeams = [];
+            let nextPhaseName = '';
+            
+            const groupKeys = Object.keys(window.state.groups).sort();
+            const knockoutMatches = window.state.matches.filter(m => !groupKeys.includes(m.group));
+            const pullingFromGroups = knockoutMatches.length === 0;
+            const qualifyMethod = window.getQualifyMethod();
+
+            if (pullingFromGroups) {
+                const numQualifyPerGroup = window.getQualifyCountPerGroup();
+                let primaryQualifiers = [];
+                let remainingCandidates = [];
+
+                groupKeys.forEach(g => {
+                    const st = window.calculateStandings(g);
+                    st.slice(0, numQualifyPerGroup).forEach((item, idx) => {
+                        primaryQualifiers.push({
+                            id: item.id,
+                            name: item.name,
+                            group: g,
+                            rank: idx + 1,
+                            pts: item.pts,
+                            diff: item.diff,
+                            pf: item.pf,
+                            isBestThird: false
+                        });
+                    });
+                    st.slice(numQualifyPerGroup).forEach((item, idx) => {
+                        remainingCandidates.push({
+                            id: item.id,
+                            name: item.name,
+                            group: g,
+                            rank: numQualifyPerGroup + idx + 1,
+                            pts: item.pts,
+                            diff: item.diff,
+                            pf: item.pf,
+                            isBestThird: true
+                        });
+                    });
+                });
+
+                primaryQualifiers.sort((a, b) => {
+                    if (a.rank !== b.rank) return a.rank - b.rank;
+                    if (b.pts !== a.pts) return b.pts - a.pts;
+                    if (b.diff !== a.diff) return b.diff - a.diff;
+                    return b.pf - a.pf;
+                });
+
+                let allQualified = [...primaryQualifiers];
+                const targetBracket = window.getTargetBracketSize(primaryQualifiers.length);
+                const neededForFullBracket = targetBracket - primaryQualifiers.length;
+
+                if (qualifyMethod === 'best_third' && neededForFullBracket > 0 && remainingCandidates.length > 0) {
+                    remainingCandidates.sort((a, b) => {
+                        if (a.rank !== b.rank) return a.rank - b.rank;
+                        if (b.pts !== a.pts) return b.pts - a.pts;
+                        if (b.diff !== a.diff) return b.diff - a.diff;
+                        return b.pf - a.pf;
+                    });
+                    const bestExtras = remainingCandidates.slice(0, neededForFullBracket);
+                    allQualified = [...allQualified, ...bestExtras];
+                }
+
+                qualifiedTeams = allQualified.map(q => ({
+                    id: q.id,
+                    name: q.isBestThird ? `${q.name} (${q.group}${q.rank} - Terbaik)` : `${q.name} (${q.group}${q.rank})`
+                }));
+
+                const bracketSize = window.getTargetBracketSize(qualifiedTeams.length);
+                if (bracketSize >= 16) nextPhaseName = 'Pusingan Kalah Mati';
+                else if (bracketSize === 8) nextPhaseName = 'Suku Akhir';
+                else if (bracketSize === 4) nextPhaseName = 'Separuh Akhir';
+                else if (bracketSize === 2) nextPhaseName = 'Pusingan Akhir';
+                else nextPhaseName = `Kalah Mati (${qualifiedTeams.length} Pasukan)`;
+                
+            } else {
+                const phases = [...new Set(knockoutMatches.map(m => m.group))];
+                const lastPhase = phases[phases.length - 1]; 
+                const currentMatches = knockoutMatches.filter(m => m.group === lastPhase);
+                
+                currentMatches.forEach(m => {
+                    if (m.score1 >= m.score2) qualifiedTeams.push(m.team1);
+                    else qualifiedTeams.push(m.team2);
+                });
+                
+                const t = qualifiedTeams.length;
+                if (t < 2) {
+                    showModal('Kejohanan Tamat', 'Peringkat Akhir telah selesai!', 'success');
+                    return;
+                }
+
+                const bracketSize = window.getTargetBracketSize(t);
+                if (bracketSize >= 16) nextPhaseName = 'Pusingan Kalah Mati (16)';
+                else if (bracketSize === 8) nextPhaseName = 'Suku Akhir';
+                else if (bracketSize === 4) nextPhaseName = 'Separuh Akhir';
+                else if (bracketSize === 2) nextPhaseName = 'Pusingan Akhir';
+                else nextPhaseName = `Kalah Mati (${t} Pasukan)`;
+            }
+
+            let newMatchesCreated = 0;
+            const totalTeams = qualifiedTeams.length;
+            const targetBracket = window.getTargetBracketSize(totalTeams);
+            const numByes = targetBracket - totalTeams;
+
+            if (numByes > 0) {
+                const byeTeams = qualifiedTeams.slice(0, numByes);
+                const playingTeams = qualifiedTeams.slice(numByes);
+
+                byeTeams.forEach(t1 => {
+                    window.state.matches.push({
+                        id: window.generateId(),
+                        group: nextPhaseName,
+                        team1: t1,
+                        team2: { id: 'bye', name: 'BYE (Automasi)' },
+                        score1: 21,
+                        score2: 0,
+                        status: 'completed'
+                    });
+                    newMatchesCreated++;
+                });
+
+                const halfPlay = Math.floor(playingTeams.length / 2);
+                for (let i = 0; i < halfPlay; i++) {
+                    window.state.matches.push({
+                        id: window.generateId(),
+                        group: nextPhaseName,
+                        team1: playingTeams[i],
+                        team2: playingTeams[playingTeams.length - 1 - i],
+                        score1: 0,
+                        score2: 0,
+                        status: 'pending'
+                    });
+                    newMatchesCreated++;
+                }
+            } else {
+                const half = Math.floor(totalTeams / 2);
+                for (let i = 0; i < half; i++) {
+                    window.state.matches.push({
+                        id: window.generateId(),
+                        group: nextPhaseName,
+                        team1: qualifiedTeams[i],
+                        team2: qualifiedTeams[totalTeams - 1 - i],
+                        score1: 0,
+                        score2: 0,
+                        status: 'pending'
+                    });
+                    newMatchesCreated++;
+                }
+            }
+
+            window.state.groupClauseCollapsed = true;
+            window.state.settings.peringkat = nextPhaseName;
+
+            const date = new Date();
+            window.state.settingsHistory.unshift({
+                id: window.generateId(),
+                time: `${date.toLocaleDateString('ms-MY')} ${date.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' })}`,
+                peringkat: nextPhaseName,
+                format: 'Kalah Mati',
+                maxScore: window.state.settings.maxScore || '',
+                numQualify: window.state.settings.numQualify || '2',
+                qualifyMethod: window.state.settings.qualifyMethod || 'bye',
+                details: `Janaan Automatik: ${nextPhaseName} (${newMatchesCreated} Perlawanan)`
+            });
+
+            window.saveData();
+            window.handlePhaseSettings();
+            showModal('Jadual Kalah Mati Dijana!', `Sebanyak ${newMatchesCreated} perlawanan bagi "${nextPhaseName}" telah dijana.`, 'success');
+        };
+
+        // --- Audio Umpire ---
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playSound(teamNum) {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(teamNum === 1 ? 800 : 400, audioCtx.currentTime);
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                osc.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.1);
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch (e) {}
+        }
+
+        // --- Umpire Match Selection & Scoring ---
+        window.selectMatchForUmpire = function(matchId) {
+            const match = window.state.matches.find(m => m.id === matchId);
+            if (!match) return;
+            window.state.activeMatchId = matchId;
+            document.getElementById('umpire-selection').classList.add('hidden');
+            document.getElementById('umpire-scoring').classList.remove('hidden');
+            document.getElementById('score-team1-name').innerText = match.team1.name;
+            document.getElementById('score-team2-name').innerText = match.team2.name;
+            document.getElementById('score-val-1').innerText = match.score1;
+            document.getElementById('score-val-2').innerText = match.score2;
+            document.getElementById('active-group').innerText = match.group;
+            document.getElementById('active-match-id').innerText = match.id.substring(0, 4);
+
+            const maxScore = window.state.settings.maxScore;
+            const maxScoreDisplay = document.getElementById('umpire-max-score-display');
+            if (maxScoreDisplay) {
+                maxScoreDisplay.innerText = maxScore ? `Mata Maks: ${maxScore}` : 'Mata: Bebas';
+            }
+        };
+
+        window.backToUmpireSelection = function() {
+            window.state.activeMatchId = null;
+            document.getElementById('umpire-scoring').classList.add('hidden');
+            document.getElementById('umpire-selection').classList.remove('hidden');
+            renderAll();
+        };
+
+        window.updateScore = function(teamNum, delta) {
+            if (!window.state.activeMatchId) return;
+            const match = window.state.matches.find(m => m.id === window.state.activeMatchId);
+            if (!match) return;
+
+            if (teamNum === 1) {
+                match.score1 = Math.max(0, match.score1 + delta);
+                if (delta > 0) playSound(1);
+                document.getElementById('score-val-1').innerText = match.score1;
+            } else {
+                match.score2 = Math.max(0, match.score2 + delta);
+                if (delta > 0) playSound(2);
+                document.getElementById('score-val-2').innerText = match.score2;
+            }
+            match.status = 'in_progress';
+            window.saveData();
+        };
+
+        window.finishMatch = function() {
+            if (!window.state.activeMatchId) return;
+            const match = window.state.matches.find(m => m.id === window.state.activeMatchId);
+            if (match) {
+                match.status = 'completed';
+                window.saveData();
+            }
+            window.backToUmpireSelection();
+            showModal('Perlawanan Tamat', 'Markah telah direkodkan secara rasmi.', 'success');
+        };
+
+        window.resetData = function() {
+            showConfirm('Reset Sistem', 'Adakah anda pasti untuk memadam semua data kejohanan?', () => {
+                localStorage.removeItem('badmintonKPDNState');
+                window.state = {
+                    teams: [],
+                    groups: {},
+                    matches: [],
+                    activeMatchId: null,
+                    groupClauseCollapsed: false,
+                    settingsHistory: [],
+                    settings: { peringkat: 'Peringkat Kumpulan', format: 'Round Robin', maxScore: '', numGroups: '2', numQualify: '2', qualifyMethod: 'bye' }
+                };
+                window.saveData();
+                showModal('Set Semula', 'Sistem telah dikosongkan.', 'success');
+            });
+        };
+
+        // --- Rendering Engine ---
+        function renderAll() {
+            renderTeams();
+            renderGroupsManagement();
+            renderAdminSchedule();
+            renderUmpireSelection();
+            renderSettingsHistory();
+            renderPublicView();
+            updateMatchStatus();
+        }
+
+        function renderTeams() {
+            const list = document.getElementById('team-list');
+            const countEl = document.getElementById('team-count');
+            if (!list) return;
+            countEl.innerText = window.state.teams.length;
+            if (window.state.teams.length === 0) {
+                list.innerHTML = `<li class="p-4 text-center text-gray-400 text-xs">Tiada regu berdaftar.</li>`;
+                return;
+            }
+            list.innerHTML = window.state.teams.map(t => `
+                <li class="px-3 py-2 flex justify-between items-center text-sm hover:bg-gray-100">
+                    <span class="font-medium text-gray-700">${t.name}</span>
+                    <button onclick="removeTeam('${t.id}')" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                </li>
+            `).join('');
+        }
+
+        function renderGroupsManagement() {
+            const container = document.getElementById('group-management-container');
+            const unassignedSpan = document.getElementById('unassigned-count');
+            if (!container) return;
+
+            const groupKeys = Object.keys(window.state.groups);
+            if (groupKeys.length === 0) {
+                container.innerHTML = `<div class="text-center text-gray-400 py-6 col-span-full text-sm">Pilih bilangan kumpulan (1-10) dan klik 'Set Kumpulan'.</div>`;
+                if (unassignedSpan) unassignedSpan.innerText = window.state.teams.length;
+                return;
+            }
+
+            let unassigned = getUnassignedTeams();
+            if (unassignedSpan) unassignedSpan.innerText = unassigned.length;
+
+            container.innerHTML = groupKeys.map(g => {
+                let teamsInG = window.state.groups[g] || [];
+                let options = unassigned.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+
+                return `
+                    <div class="border rounded-xl p-3 bg-gray-50 flex flex-col justify-between shadow-xs">
+                        <div>
+                            <div class="flex justify-between items-center mb-2 pb-2 border-b">
+                                <span class="font-bold text-teal-700 text-sm"><i class="fa-solid fa-layer-group mr-1"></i> Kumpulan ${g}</span>
+                                <span class="text-[11px] bg-teal-100 text-teal-800 px-2 py-0.5 rounded font-bold">${teamsInG.length} Regu</span>
+                            </div>
+                            <ul class="space-y-1 mb-3 max-h-32 overflow-y-auto">
+                                ${teamsInG.length === 0 ? '<li class="text-gray-400 text-xs italic py-1">Kosong</li>' : teamsInG.map(t => `
+                                    <li class="text-xs bg-white border px-2 py-1 rounded flex justify-between items-center shadow-2xs">
+                                        <span class="truncate">${t.name}</span>
+                                        <button onclick="removeFromGroup('${g}', '${t.id}')" class="text-red-500 hover:text-red-700 ml-1"><i class="fa-solid fa-xmark"></i></button>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        <div class="flex gap-1 mt-2">
+                            <select id="select-group-${g}" class="text-xs border rounded px-2 py-1 bg-white flex-1 focus:outline-none">
+                                <option value="">-- Pilih Regu --</option>
+                                ${options}
+                            </select>
+                            <button onclick="assignToGroup('${g}')" class="bg-teal-600 text-white px-2.5 py-1 rounded text-xs hover:bg-teal-700 font-bold"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderAdminSchedule() {
+            const container = document.getElementById('admin-schedule-container');
+            if (!container) return;
+
+            if (window.state.matches.length === 0) {
+                container.innerHTML = `<div class="text-center text-gray-400 py-10">Sila susun kumpulan dan klik 'Jana Jadual Perlawanan Kumpulan'.</div>`;
+                return;
+            }
+
+            const groupKeys = Object.keys(window.state.groups);
+            const matchesByGroup = {};
+            window.state.matches.forEach(m => {
+                if (!matchesByGroup[m.group]) matchesByGroup[m.group] = [];
+                matchesByGroup[m.group].push(m);
+            });
+
+            container.innerHTML = Object.entries(matchesByGroup).map(([groupName, mList]) => {
+                const isGroup = groupKeys.includes(groupName);
+                const titleHeading = isGroup ? `Kumpulan ${groupName}` : groupName;
+                return `
+                    <div class="mb-6 border rounded-xl overflow-hidden shadow-2xs bg-white">
+                        <div class="bg-gradient-to-r ${isGroup ? 'from-teal-600 to-green-600' : 'from-indigo-600 to-purple-600'} text-white px-4 py-2 font-bold text-sm flex justify-between items-center">
+                            <span><i class="fa-solid fa-trophy mr-1.5"></i> ${titleHeading}</span>
+                            <span class="text-xs bg-white/20 px-2 py-0.5 rounded">${mList.length} Perlawanan</span>
+                        </div>
+                        <div class="divide-y">
+                            ${mList.map(m => {
+                                const isCompleted = m.status === 'completed';
+                                const badgeClass = isCompleted ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800';
+                                const badgeText = isCompleted ? 'Selesai' : 'Belum Mula';
+                                return `
+                                    <div class="p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 hover:bg-gray-50 text-sm">
+                                        <div class="flex items-center gap-2 flex-1">
+                                            <span class="text-xs font-semibold text-gray-400">#${m.id.substring(0,4)}</span>
+                                            <span class="font-bold text-gray-800 text-right flex-1 truncate">${m.team1.name}</span>
+                                            <span class="bg-gray-200 px-2 py-1 rounded font-bold text-xs">${isCompleted ? `${m.score1} - ${m.score2}` : 'VS'}</span>
+                                            <span class="font-bold text-gray-800 text-left flex-1 truncate">${m.team2.name}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 self-end sm:self-center">
+                                            <span class="text-[10px] px-2 py-0.5 rounded font-bold ${badgeClass}">${badgeText}</span>
+                                            ${isCompleted ? `<button onclick="openEditScore('${m.id}')" class="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2.5 py-1 rounded hover:bg-blue-100 font-bold"><i class="fa-solid fa-pen mr-1"></i>Edit</button>` : ''}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderUmpireSelection() {
+            const listContainer = document.getElementById('umpire-matches-list');
+            const phaseInd = document.getElementById('umpire-phase-indicator');
+            if (!listContainer) return;
+
+            if (window.state.matches.length === 0) {
+                listContainer.innerHTML = `<div class="text-center text-gray-400 py-10 col-span-full">Sila jana jadual di bahagian Pendaftaran.</div>`;
+                if (phaseInd) phaseInd.innerText = 'Tiada Perlawanan';
+                return;
+            }
+
+            const groupKeys = Object.keys(window.state.groups);
+            const activeMatches = window.state.matches.filter(m => m.status !== 'completed');
+            
+            if (phaseInd) {
+                phaseInd.innerText = `${activeMatches.length} Perlawanan Aktif Menunggu`;
+            }
+
+            if (activeMatches.length === 0) {
+                listContainer.innerHTML = `<div class="text-center text-green-600 font-bold py-10 col-span-full bg-green-50 rounded-xl border border-green-200">Semua perlawanan semasa telah tamat! Sila jana perlawanan seterusnya.</div>`;
+                return;
+            }
+
+            listContainer.innerHTML = activeMatches.map(m => {
+                const isGroup = groupKeys.includes(m.group);
+                return `
+                    <div class="border rounded-xl p-4 bg-white shadow-2xs hover:shadow-md transition flex flex-col justify-between border-l-4 ${isGroup ? 'border-l-teal-500' : 'border-l-indigo-500'}">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-xs font-bold ${isGroup ? 'text-teal-700 bg-teal-50' : 'text-indigo-700 bg-indigo-50'} px-2 py-0.5 rounded">${isGroup ? `Kumpulan ${m.group}` : m.group}</span>
+                                <span class="text-xs text-gray-400 font-mono">#${m.id.substring(0, 4)}</span>
+                            </div>
+                            <div class="flex justify-between items-center mb-4 text-sm font-bold text-gray-800">
+                                <span class="flex-1 text-right truncate pr-2">${m.team1.name}</span>
+                                <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">VS</span>
+                                <span class="flex-1 text-left truncate pl-2">${m.team2.name}</span>
+                            </div>
+                        </div>
+                        <button onclick="selectMatchForUmpire('${m.id}')" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-whistle"></i> Mula Mengadil / Skor
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderSettingsHistory() {
+            const tbody = document.getElementById('settings-history-body');
+            if (!tbody) return;
+            if (!window.state.settingsHistory || window.state.settingsHistory.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-400">Tiada rekod ketetapan.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = window.state.settingsHistory.map(r => `
+                <tr class="border-b hover:bg-gray-100 text-xs">
+                    <td class="p-2.5 font-mono text-gray-500">${r.time}</td>
+                    <td class="p-2.5 font-semibold text-gray-800">${r.details}</td>
+                    <td class="p-2.5 text-center">
+                        <button onclick="deleteSettingsRecord('${r.id}')" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPublicView() {
+            const standingsContainer = document.getElementById('standings-container');
+            const matchesContainer = document.getElementById('public-matches-container');
+            const groupClause = document.getElementById('public-group-clause');
+            const knockoutContainer = document.getElementById('public-knockout-container');
+            const bracketContainer = document.getElementById('public-knockout-bracket');
+            const knockoutMatchesContainer = document.getElementById('public-knockout-matches');
+            
+            if (!standingsContainer || !matchesContainer) return;
+
+            const groupKeys = Object.keys(window.state.groups);
+            const knockoutMatches = window.state.matches.filter(m => !groupKeys.includes(m.group));
+            const hasKnockout = knockoutMatches.length > 0;
+
+            if (groupClause) {
+                if (window.state.groupClauseCollapsed) {
+                    groupClause.removeAttribute('open');
+                } else {
+                    groupClause.setAttribute('open', '');
+                }
+            }
+
+            if (knockoutContainer) {
+                if (hasKnockout) {
+                    knockoutContainer.classList.remove('hidden');
+                    
+                    const phases = [...new Set(knockoutMatches.map(m => m.group))];
+                    const currentPhase = phases[phases.length - 1];
+                    const phaseBadge = document.getElementById('knockout-phase-badge');
+                    if (phaseBadge) phaseBadge.innerText = currentPhase;
+
+                    const currentPhaseMatches = knockoutMatches.filter(m => m.group === currentPhase);
+                    if (bracketContainer) {
+                        bracketContainer.innerHTML = currentPhaseMatches.map(m => `
+                            <div class="bg-white border border-indigo-200 rounded-xl p-3 shadow-2xs flex flex-col justify-between">
+                                <div class="text-[10px] font-bold text-indigo-600 mb-2 uppercase tracking-wide">Match #${m.id.substring(0,4)}</div>
+                                <div class="space-y-1.5 text-xs font-bold">
+                                    <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${m.score1 >= m.score2 && m.status === 'completed' ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
+                                        <span class="truncate pr-2">${m.team1.name}</span>
+                                        <span class="font-mono">${m.status === 'completed' ? m.score1 : '-'}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${m.score2 > m.score1 && m.status === 'completed' ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
+                                        <span class="truncate pr-2">${m.team2.name}</span>
+                                        <span class="font-mono">${m.status === 'completed' ? m.score2 : '-'}</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-right">
+                                    <span class="text-[10px] px-2 py-0.5 rounded font-bold ${m.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${m.status === 'completed' ? 'Selesai' : 'Belum Mula'}</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+
+                    if (knockoutMatchesContainer) {
+                        knockoutMatchesContainer.innerHTML = currentPhaseMatches.map(m => `
+                            <div class="border rounded-xl p-3 bg-white shadow-2xs flex justify-between items-center text-xs">
+                                <div class="flex-1 truncate pr-2">
+                                    <div class="font-bold text-gray-800 truncate">${m.team1.name}</div>
+                                    <div class="font-bold text-gray-800 truncate mt-1">${m.team2.name}</div>
+                                </div>
+                                <div class="px-3 py-1 bg-gray-100 rounded text-center font-mono font-bold">
+                                    <div>${m.status === 'completed' ? m.score1 : '-'}</div>
+                                    <div class="mt-1">${m.status === 'completed' ? m.score2 : '-'}</div>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+
+                } else {
+                    knockoutContainer.classList.add('hidden');
+                }
+            }
+
+            if (groupKeys.length === 0) {
+                standingsContainer.innerHTML = `<div class="text-center text-gray-400 py-10 w-full col-span-full">Sila tetapkan kumpulan dan jadual di bahagian pendaftaran dahulu.</div>`;
+                matchesContainer.innerHTML = `<div class="text-center text-gray-400 py-10">Tiada perlawanan.</div>`;
+                return;
+            }
+
+            const bestThirdIds = window.getBestThirdPlacedQualifiedIds();
+            const numQualify = window.getQualifyCountPerGroup();
+
+            standingsContainer.innerHTML = groupKeys.map(g => {
+                let st = window.calculateStandings(g);
+                return `
+                    <div class="border rounded-xl overflow-hidden shadow-2xs bg-white">
+                        <div class="bg-gray-100 px-3 py-2 font-bold text-xs text-gray-700 border-b flex justify-between items-center">
+                            <span>Kumpulan ${g}</span>
+                            <span class="text-[10px] text-gray-500">P / M / K / PTS</span>
+                        </div>
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gray-50 text-gray-500 border-b">
+                                <tr>
+                                    <th class="p-2">Regu</th>
+                                    <th class="p-2 text-center">P</th>
+                                    <th class="p-2 text-center">M</th>
+                                    <th class="p-2 text-center">K</th>
+                                    <th class="p-2 text-center">+/-</th>
+                                    <th class="p-2 text-center">PTS</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                ${st.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-gray-400">Belum ada perlawanan.</td></tr>' : st.map((item, idx) => {
+                                    const isQualified = idx < numQualify;
+                                    const isBestThird = bestThirdIds.includes(item.id);
+                                    let badgeHtml = '';
+                                    if (isQualified) badgeHtml = `<span class="bg-green-100 text-green-800 text-[9px] px-1.5 py-0.5 rounded font-bold ml-1">Q${idx+1}</span>`;
+                                    else if (isBestThird) badgeHtml = `<span class="bg-blue-100 text-blue-800 text-[9px] px-1.5 py-0.5 rounded font-bold ml-1">Ke-3 Terbaik</span>`;
+
+                                    return `
+                                        <tr class="${isQualified || isBestThird ? 'bg-green-50/40' : ''}">
+                                            <td class="p-2 font-medium text-gray-800 truncate max-w-[120px]">${idx + 1}. ${item.name} ${badgeHtml}</td>
+                                            <td class="p-2 text-center font-mono">${item.p}</td>
+                                            <td class="p-2 text-center font-mono">${item.w}</td>
+                                            <td class="p-2 text-center font-mono">${item.l}</td>
+                                            <td class="p-2 text-center font-mono">${item.diff > 0 ? '+' + item.diff : item.diff}</td>
+                                            <td class="p-2 text-center font-bold font-mono text-teal-700">${item.pts}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }).join('');
+
+            const groupMatches = window.state.matches.filter(m => groupKeys.includes(m.group));
+            if (groupMatches.length === 0) {
+                matchesContainer.innerHTML = `<div class="text-center text-gray-400 py-10">Tiada perlawanan kumpulan.</div>`;
+                return;
+            }
+
+            matchesContainer.innerHTML = groupMatches.map(m => {
+                const isCompleted = m.status === 'completed';
+                return `
+                    <div class="p-3 hover:bg-gray-50 flex justify-between items-center text-xs border-b last:border-b-0">
+                        <div class="flex-1 truncate pr-2">
+                            <span class="font-bold text-teal-700 mr-1">[${m.group}]</span>
+                            <span class="text-gray-800 font-semibold truncate">${m.team1.name} vs ${m.team2.name}</span>
+                        </div>
+                        <div class="font-bold px-2 py-1 rounded bg-gray-100 text-gray-700 font-mono">
+                            ${isCompleted ? `${m.score1} - ${m.score2}` : 'B/M'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateMatchStatus() {
+            const btnNext = document.getElementById('btn-next-round');
+            const statusInfo = document.getElementById('match-status-info');
+            const qualifyLabel = document.getElementById('active-qualify-label');
+            const methodLabel = document.getElementById('active-method-label');
+            const quickMethodSelect = document.getElementById('quick-qualify-method');
+            if (!btnNext || !statusInfo) return;
+
+            const numQualify = window.getQualifyCountPerGroup();
+            const qualifyMethod = window.getQualifyMethod();
+            if (qualifyLabel) qualifyLabel.innerText = `Top ${numQualify} Setiap Kumpulan`;
+            if (methodLabel) methodLabel.innerText = qualifyMethod === 'best_third' ? 'Tempat Ke-3 Terbaik (Genap)' : 'Format Bye (Biasa)';
+            if (quickMethodSelect) quickMethodSelect.value = qualifyMethod;
+            
+            if (window.state.matches.length === 0) {
+                statusInfo.innerHTML = '<span>Belum ada jadual perlawanan dijana.</span>';
+                statusInfo.className = "mb-3 p-3 bg-gray-50 rounded-lg text-gray-500 border border-gray-200 flex items-center justify-between";
+                btnNext.disabled = true;
+                return;
+            }
+
+            const groupKeys = Object.keys(window.state.groups);
+            const knockoutMatches = window.state.matches.filter(m => !groupKeys.includes(m.group));
+            
+            let currentPhaseMatches = [];
+            let currentPhaseLabel = "";
+
+            if (knockoutMatches.length === 0) {
+                currentPhaseMatches = window.state.matches.filter(m => groupKeys.includes(m.group));
+                currentPhaseLabel = "Peringkat Kumpulan";
+            } else {
+                const phases = [...new Set(knockoutMatches.map(m => m.group))];
+                currentPhaseLabel = phases[phases.length - 1];
+                currentPhaseMatches = knockoutMatches.filter(m => m.group === currentPhaseLabel);
+            }
+                
+            const total = currentPhaseMatches.length;
+            const completed = currentPhaseMatches.filter(m => m.status === 'completed').length;
+            const pending = total - completed;
+
+            let html = `<span class="font-medium">Status Peringkat Semasa (<strong>${currentPhaseLabel}</strong>): <strong>${completed}</strong> Selesai / <strong>${pending}</strong> Belum Selesai</span>`;
+            
+            if (currentPhaseLabel === 'Pusingan Akhir' && pending === 0 && total > 0) {
+                btnNext.disabled = true;
+                statusInfo.className = "mb-3 p-3 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-200 flex items-center justify-between";
+                html += '<span class="text-xs bg-indigo-600 text-white px-2.5 py-1 rounded shadow-sm font-bold"><i class="fa-solid fa-trophy mr-1"></i>Kejohanan Tamat</span>';
+            } else if (pending === 0 && total > 0) {
+                btnNext.disabled = false;
+                statusInfo.className = "mb-3 p-3 bg-green-50 rounded-lg text-green-700 border border-green-200 flex items-center justify-between";
+                html += '<span class="text-xs bg-green-600 text-white px-2.5 py-1 rounded shadow-sm font-bold"><i class="fa-solid fa-check mr-1"></i>Sedia Dijana Seterusnya</span>';
+            } else {
+                btnNext.disabled = true;
+                statusInfo.className = "mb-3 p-3 bg-orange-50 rounded-lg text-orange-700 border border-orange-200 flex items-center justify-between";
+                html += '<span class="text-xs bg-orange-500 text-white px-2.5 py-1 rounded shadow-sm font-bold"><i class="fa-solid fa-clock mr-1"></i>Selesaikan Perlawanan Dahulu</span>';
+            }
+            statusInfo.innerHTML = html;
+        }
+
+        // Initial Load
+        window.onload = function() {
+            // Restore from localStorage first for instant render
+            const local = localStorage.getItem('badmintonKPDNState');
+            if (local) {
+                try {
+                    window.state = { ...window.state, ...JSON.parse(local) };
+                } catch (e) {}
+            }
+            renderAll();
+            connectToFirebase();
+        };
+    </script>
+</body>
+</html>

@@ -28,33 +28,48 @@
 
     <!-- Header -->
     <header class="bg-gradient-to-r from-teal-600 to-green-600 text-white shadow-md z-10">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center gap-2">
             <div class="flex items-center gap-3">
-                <div class="bg-white p-2 rounded-full text-teal-600">
+                <div class="bg-white p-2 rounded-full text-teal-600 shadow-xs">
                     <i class="fa-solid fa-trophy text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-lg font-bold leading-tight">Badminton KPDN P.Pinang</h1>
+                    <h1 class="text-base sm:text-lg font-bold leading-tight">Badminton KPDN P.Pinang</h1>
                     <p class="text-xs text-teal-100 flex flex-wrap items-center gap-2 mt-0.5">
-                        <span>Sistem Kejohanan Tertutup</span>
-                        <button onclick="openFirebaseSetupModal()" id="cloud-status" class="bg-amber-500 hover:opacity-90 text-[10px] px-2.5 py-0.5 rounded-full text-white font-semibold transition cursor-pointer shadow-xs" title="Klik untuk semak atau tetapkan sambungan Firebase">
+                        <span id="role-badge" class="bg-teal-900/60 text-teal-100 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-teal-400/30">
+                            <i class="fa-solid fa-eye mr-1"></i>Paparan Awam (Langsung)
+                        </span>
+                        <button onclick="handleCloudStatusClick()" id="cloud-status" class="bg-amber-500 hover:opacity-90 text-[10px] px-2.5 py-0.5 rounded-full text-white font-semibold transition cursor-pointer shadow-xs" title="Status penyelarasan data langsung">
                             <i class="fa-solid fa-cloud mr-1"></i>Menghubungkan Awan...
                         </button>
                     </p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button onclick="openFirebaseSetupModal()" class="text-xs bg-teal-800/70 hover:bg-teal-900 px-3 py-1.5 rounded shadow text-white transition font-semibold" title="Konfigurasi Firebase Awan">
-                    <i class="fa-solid fa-cloud-bolt mr-1"></i><span class="hidden sm:inline">Tetapan Awan</span>
+
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                <!-- Butang Kongsi Link Penonton (Sentiasa Ada) -->
+                <button onclick="openShareModal()" class="text-xs bg-white/15 hover:bg-white/25 border border-white/30 px-2.5 py-1.5 rounded-lg shadow-xs text-white transition font-semibold flex items-center gap-1.5" title="Kongsi Pautan Paparan Awam ke WhatsApp">
+                    <i class="fa-solid fa-share-nodes"></i><span class="hidden md:inline">Kongsi Link Awam</span>
                 </button>
-                <button onclick="resetData()" class="text-xs bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded shadow text-white transition font-semibold">
-                    <i class="fa-solid fa-rotate-right mr-1"></i><span class="hidden sm:inline">Reset Sistem</span>
+
+                <!-- Butang Admin Sahaja (Disembunyikan Dalam Mod Penonton) -->
+                <button id="btn-cloud-setup" onclick="openFirebaseSetupModal()" class="hidden text-xs bg-teal-800/70 hover:bg-teal-900 px-2.5 py-1.5 rounded-lg shadow-xs text-white transition font-semibold" title="Konfigurasi Firebase Awan">
+                    <i class="fa-solid fa-cloud-bolt mr-1"></i><span class="hidden lg:inline">Tetapan Awan</span>
+                </button>
+                <button id="btn-reset-system" onclick="resetData()" class="hidden text-xs bg-red-500 hover:bg-red-600 px-2.5 py-1.5 rounded-lg shadow-xs text-white transition font-semibold" title="Reset Keseluruhan Sistem">
+                    <i class="fa-solid fa-rotate-right mr-1"></i><span class="hidden lg:inline">Reset Sistem</span>
+                </button>
+
+                <!-- Butang Log Masuk / Log Keluar Admin -->
+                <button id="btn-admin-toggle" onclick="toggleAdminAuth()" class="text-xs bg-teal-900/50 hover:bg-teal-900 border border-teal-400/30 px-2.5 py-1.5 rounded-lg text-teal-100 transition font-semibold flex items-center gap-1" title="Log Masuk Urusetia / Pengadil">
+                    <i id="admin-lock-icon" class="fa-solid fa-lock"></i>
+                    <span id="admin-lock-text" class="hidden sm:inline">Urusetia</span>
                 </button>
             </div>
         </div>
         
-        <!-- Navigation Tabs -->
-        <nav class="flex overflow-x-auto bg-white text-gray-500 shadow-inner">
+        <!-- Navigation Tabs (Hanya Muncul Untuk Urusetia / Pengadil) -->
+        <nav id="main-nav-tabs" class="hidden flex overflow-x-auto bg-white text-gray-500 shadow-inner border-t">
             <button onclick="switchTab('public')" id="tab-public" class="tab-btn tab-active px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-tv mr-2"></i>Paparan Awam</button>
             <button onclick="switchTab('admin')" id="tab-admin" class="tab-btn px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-users-gear mr-2"></i>Pendaftaran</button>
             <button onclick="switchTab('umpire')" id="tab-umpire" class="tab-btn px-4 py-3 whitespace-nowrap flex-1 text-center hover:bg-gray-50 transition"><i class="fa-solid fa-gavel mr-2"></i>Pengadil / Skor</button>
@@ -68,6 +83,17 @@
         <!-- 1. TAB: PAPARAN AWAM -->
         <section id="view-public" class="view-section animate-fade-in space-y-6">
             
+            <!-- Banner Makluman Mod Penonton (Hanya Kelihatan Kepada Admin) -->
+            <div id="admin-link-banner" class="hidden bg-teal-50 border border-teal-200 rounded-xl p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs text-teal-900">
+                <div class="flex items-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-lg text-green-600"></i>
+                    <span><strong>Tips Urusetia:</strong> Gunakan pautan khas penonton supaya pemain & penonton hanya melihat <strong>Paparan Awam</strong> tanpa menu tetapan.</span>
+                </div>
+                <button onclick="openShareModal()" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded-lg font-bold whitespace-nowrap transition shadow-2xs">
+                    <i class="fa-solid fa-copy mr-1"></i> Dapatkan Link Penonton
+                </button>
+            </div>
+
             <!-- BAHAGIAN PUSINGAN KALAH MATI (Muncul apabila dijana) -->
             <div id="public-knockout-container" class="hidden space-y-6">
                 <div class="bg-white rounded-xl shadow-md border-2 border-indigo-200 overflow-hidden">
@@ -115,7 +141,7 @@
                                 <h2 class="font-bold text-gray-700"><i class="fa-solid fa-ranking-star mr-2 text-yellow-500"></i>Kedudukan Kumpulan</h2>
                             </div>
                             <div id="standings-container" class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <div class="text-center text-gray-400 py-10 w-full col-span-full">Sila jana jadual di bahagian pendaftaran dahulu.</div>
+                                <div class="text-center text-gray-400 py-10 w-full col-span-full">Menunggu jadual perlawanan dijana oleh urusetia.</div>
                             </div>
                         </div>
 
@@ -336,7 +362,7 @@
         </section>
 
         <!-- 4. TAB: KETETAPAN (SETTINGS) -->
-        <section id="view-settings" class="view-section hidden animate-fade-in h-full">
+        <section id="view-settings" class="view-section hidden animate-fade-in h-full space-y-6">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden max-w-5xl mx-auto flex flex-col md:flex-row p-6 gap-6">
                 
                 <div class="flex-1">
@@ -387,6 +413,12 @@
                             <p id="phase-indicator" class="text-[11px] text-blue-600 mt-1.5 font-bold"></p>
                         </div>
 
+                        <div class="pt-3 border-t">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1"><i class="fa-solid fa-key mr-1 text-amber-500"></i>Kod PIN Urusetia / Pengadil</label>
+                            <input type="text" id="set-admin-pin" placeholder="PIN Lalai: 1234" class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 bg-white text-sm">
+                            <p class="text-[11px] text-gray-400 mt-1">Digunakan untuk membuka menu Pendaftaran, Pengadil dan Ketetapan.</p>
+                        </div>
+
                         <div class="pt-4 border-t mt-4">
                             <button type="submit" class="bg-teal-600 text-white px-6 py-2.5 rounded-lg hover:bg-teal-700 shadow transition w-full font-bold"><i class="fa-solid fa-floppy-disk mr-2"></i>Simpan Ke Rekod Ketetapan</button>
                         </div>
@@ -400,7 +432,7 @@
                             <p class="text-xs text-gray-400">Sistem merujuk kepada rekod ketetapan di bawah.</p>
                         </div>
                     </div>
-                    <div class="overflow-y-auto flex-1 max-h-[380px] border rounded-lg bg-gray-50">
+                    <div class="overflow-y-auto flex-1 max-h-[420px] border rounded-lg bg-gray-50">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-gray-200 text-gray-600 text-xs uppercase">
                                 <tr>
@@ -420,6 +452,59 @@
         </section>
 
     </main>
+
+    <!-- Modal Kongsi Pautan Awam (Penonton / Pemain) -->
+    <div id="share-overlay" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-share-nodes text-teal-600"></i> Pautan Khas Penonton & Pemain
+                </h3>
+                <button onclick="closeShareModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <p class="text-xs text-gray-600 mb-3 leading-relaxed">
+                Kongsikan pautan di bawah kepada para pemain dan penonton. Apabila mereka membuka pautan ini, mereka <strong>hanya akan melihat Paparan Awam</strong> (kedudukan kumpulan, carta kalah mati & keputusan langsung) tanpa boleh mengubah sebarang tetapan.
+            </p>
+
+            <div class="bg-gray-50 border rounded-lg p-2.5 mb-4">
+                <label class="block text-[11px] font-bold text-gray-500 uppercase mb-1">Pautan Paparan Awam Sahaja:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="public-share-url" readonly class="flex-1 bg-white border rounded px-2.5 py-1.5 text-xs font-mono text-gray-700 focus:outline-none">
+                    <button onclick="copyPublicLink()" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded text-xs font-bold transition whitespace-nowrap">
+                        <i class="fa-solid fa-copy mr-1"></i> Salin
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2">
+                <button onclick="shareToWhatsApp()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                    <i class="fa-brands fa-whatsapp text-base"></i> Hantar ke WhatsApp
+                </button>
+                <button onclick="closeShareModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2.5 rounded-lg font-semibold text-xs transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Log Masuk PIN Urusetia / Pengadil -->
+    <div id="admin-login-overlay" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center">
+            <div class="w-12 h-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center mx-auto mb-3 text-xl">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-1">Akses Urusetia & Pengadil</h3>
+            <p class="text-xs text-gray-500 mb-4">Masukkan Kod PIN untuk membuka menu Pendaftaran, Pengadil dan Ketetapan.</p>
+            <form onsubmit="verifyAdminPin(event)">
+                <input type="password" id="admin-pin-input" placeholder="Masukkan PIN (Lalai: 1234)" class="w-full text-center border rounded-lg px-4 py-2.5 text-lg font-bold tracking-widest mb-4 focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeAdminLoginModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 rounded-lg font-semibold text-sm transition">Batal</button>
+                    <button type="submit" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg font-bold text-sm transition shadow">Masuk</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Modals -->
     <div id="modal-overlay" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
@@ -496,12 +581,12 @@
                 <label class="block text-xs font-bold text-gray-700 mb-1">Tampal Kod <code>firebaseConfig</code> Anda Di Sini:</label>
                 <textarea id="fb-config-input" rows="6" placeholder='Contoh:
 {
-  "apiKey": "AIzaSyASB40Gp73AINfOciNTwCEoNa1azx4ACZU",
-              "authDomain": "shuttlepower-vextro.firebaseapp.com",
-              "projectId": "shuttlepower-vextro",
-              "storageBucket": "shuttlepower-vextro.firebasestorage.app",
-              "messagingSenderId": "1089690272152",
-              "appId": "1:1089690272152:web:af3f14a4877036d20babed"
+  "apiKey": "AIzaSy...",
+  "authDomain": "projek-anda.firebaseapp.com",
+  "projectId": "projek-anda",
+  "storageBucket": "projek-anda.appspot.com",
+  "messagingSenderId": "123456...",
+  "appId": "1:123456:web:..."
 }' class="w-full border rounded-lg p-2.5 text-xs font-mono bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
                 <p class="text-[11px] text-gray-400 mt-1">Tips: Anda boleh tampal keseluruhan blok <code>const firebaseConfig = { ... };</code> terus dari Firebase Console.</p>
             </div>
@@ -527,18 +612,22 @@
         // & pengadil di WhatsApp bersambung secara automatik!
         // ============================================================================
         const MANUAL_FIREBASE_CONFIG = {
-              apiKey: "AIzaSyASB40Gp73AINfOciNTwCEoNa1azx4ACZU",
-              authDomain: "shuttlepower-vextro.firebaseapp.com",
-              projectId: "shuttlepower-vextro",
-              storageBucket: "shuttlepower-vextro.firebasestorage.app",
-              messagingSenderId: "1089690272152",
-              appId: "1:1089690272152:web:af3f14a4877036d20babed"
-
+          apiKey: "AIzaSyASB40Gp73AINfOciNTwCEoNa1azx4ACZU",
+  authDomain: "shuttlepower-vextro.firebaseapp.com",
+  projectId: "shuttlepower-vextro",
+  storageBucket: "shuttlepower-vextro.firebasestorage.app",
+  messagingSenderId: "1089690272152",
+  appId: "1:1089690272152:web:af3f14a4877036d20babed"
         };
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'kpdn-badminton-penang';
         let app = null, db = null, auth = null, unsubscribeSnapshot = null;
         let lastCloudError = "";
+
+        // Semak sama ada pautan dibuka dengan parameter ?view=public atau di dalam mod Admin
+        const urlParams = new URLSearchParams(window.location.search);
+        const isForcedPublicLink = urlParams.get('view') === 'public' || urlParams.get('mode') === 'public';
+        let isAdminAuthenticated = !isForcedPublicLink && sessionStorage.getItem('kpdnAdminAuth') === 'true';
 
         // Fungsi untuk mengekstrak objek JSON walaupun pengguna tampal kod JS "const firebaseConfig = {...}"
         function parseFirebaseConfigInput(rawStr) {
@@ -563,17 +652,14 @@
         }
 
         function getActiveFirebaseConfig() {
-            // 1. Semak jika ada disimpan melalui Modal UI Tetapan Awan
             const savedCustom = localStorage.getItem('customFirebaseConfigKPDN');
             if (savedCustom) {
                 const parsed = parseFirebaseConfigInput(savedCustom);
                 if (parsed && parsed.apiKey && parsed.projectId) return parsed;
             }
-            // 2. Semak jika pengguna telah mengisi MANUAL_FIREBASE_CONFIG di dalam kod HTML
             if (MANUAL_FIREBASE_CONFIG.apiKey && !MANUAL_FIREBASE_CONFIG.apiKey.includes("MASUKKAN_")) {
                 return MANUAL_FIREBASE_CONFIG;
             }
-            // 3. Semak persekitaran Canvas
             if (typeof __firebase_config !== 'undefined') {
                 return JSON.parse(__firebase_config);
             }
@@ -596,10 +682,10 @@
                     el.innerHTML = `<i class="fa-solid fa-arrows-rotate mr-1"></i>${text}`;
                 } else if (status === 'error') {
                     el.className = 'bg-red-500 hover:bg-red-600 text-[10px] px-2.5 py-0.5 rounded-full text-white font-semibold cursor-pointer shadow-xs';
-                    el.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i>${text} (Klik Baiki)`;
+                    el.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i>${text}`;
                 } else {
                     el.className = 'bg-blue-600 hover:bg-blue-700 text-[10px] px-2.5 py-0.5 rounded-full text-white font-semibold cursor-pointer shadow-xs';
-                    el.innerHTML = `<i class="fa-solid fa-database mr-1"></i>${text} (Klik Setup)`;
+                    el.innerHTML = `<i class="fa-solid fa-database mr-1"></i>${text}`;
                 }
             }
 
@@ -614,11 +700,19 @@
             }
         }
 
+        window.handleCloudStatusClick = function() {
+            if (isAdminAuthenticated) {
+                window.openFirebaseSetupModal();
+            } else {
+                showModal('Status Sambungan Langsung', 'Paparan ini disambungkan terus ke pangkalan data awan kejohanan. Markah dan kedudukan akan dikemas kini secara automatik.', 'info');
+            }
+        };
+
         async function connectToFirebase() {
             const activeConfig = getActiveFirebaseConfig();
 
             if (!activeConfig || !activeConfig.apiKey || activeConfig.apiKey.includes("DummyKey") || activeConfig.apiKey.includes("MASUKKAN_")) {
-                updateCloudIndicator('local', 'Awan Belum Dikonfigurasi', 'Kunci firebaseConfig sebenar belum dimasukkan. Sila klik butang "Tetapan Awan" di penjuru kanan atas untuk memasukkan firebaseConfig anda.');
+                updateCloudIndicator('local', 'Mod Tempatan', 'Kunci firebaseConfig sebenar belum dimasukkan. Sila log masuk sebagai Urusetia dan klik "Tetapan Awan" untuk memasukkan firebaseConfig anda.');
                 return;
             }
 
@@ -632,7 +726,6 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                // Cuba log masuk Tanpa Nama (jika gagal kerana belum diaktifkan di Firebase Console, teruskan cuba baca Firestore)
                 try {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                         await signInWithCustomToken(auth, __initial_auth_token);
@@ -664,15 +757,14 @@
                 maxScore: '',
                 numGroups: '2',
                 numQualify: '2',
-                qualifyMethod: 'bye'
+                qualifyMethod: 'bye',
+                adminPin: '1234'
             }
         };
 
         let confirmActionCallback = null;
         let localSyncTimer = null;
 
-        // PENTING: Laluan Firestore MESTI mempunyai bilangan segmen GENAP (6 segmen):
-        // artifacts (1) / {appId} (2) / public (3) / data (4) / kpdn_state (5) / main (6)
         function getTournamentDocRef() {
             return doc(db, 'artifacts', appId, 'public', 'data', 'kpdn_state', 'main');
         }
@@ -690,15 +782,16 @@
                             const parsed = JSON.parse(cloudData.statePayload);
                             window.state = { ...window.state, ...parsed };
                             if (!window.state.settingsHistory) window.state.settingsHistory = [];
+                            if (!window.state.settings.adminPin) window.state.settings.adminPin = '1234';
                             localStorage.setItem('badmintonKPDNState', JSON.stringify(window.state));
-                            updateCloudIndicator('synced', 'Awan Diselaraskan');
+                            updateCloudIndicator('synced', 'Langsung (Live)');
                             renderAll();
                         } catch (err) {
                             console.error("Parse cloud data error:", err);
                         }
                     }
                 } else {
-                    saveDataToCloud(true);
+                    if (isAdminAuthenticated) saveDataToCloud(true);
                 }
             }, (error) => {
                 console.warn("Cloud listener error:", error);
@@ -725,7 +818,7 @@
                         statePayload: JSON.stringify(window.state),
                         updatedAt: new Date().toISOString()
                     });
-                    updateCloudIndicator('synced', 'Awan Diselaraskan');
+                    updateCloudIndicator('synced', 'Langsung (Live)');
                 } catch (e) {
                     console.error("Cloud save failed:", e);
                     let helpMsg = e.message;
@@ -734,11 +827,133 @@
                     }
                     updateCloudIndicator('error', 'Gagal Simpan Awan', helpMsg);
                 }
-            }, isInitial ? 100 : 600);
+            }, isInitial ? 100 : 500);
         }
 
         window.saveData = function() {
             saveDataToCloud(false);
+        };
+
+        // --- Kawalan Mod Penonton (Awam) vs Mod Urusetia (Admin) ---
+        function applyAccessControlUI() {
+            const navTabs = document.getElementById('main-nav-tabs');
+            const btnCloud = document.getElementById('btn-cloud-setup');
+            const btnReset = document.getElementById('btn-reset-system');
+            const lockIcon = document.getElementById('admin-lock-icon');
+            const lockText = document.getElementById('admin-lock-text');
+            const roleBadge = document.getElementById('role-badge');
+            const adminBanner = document.getElementById('admin-link-banner');
+            const pinInputSetting = document.getElementById('set-admin-pin');
+
+            if (pinInputSetting && window.state.settings.adminPin) {
+                pinInputSetting.value = window.state.settings.adminPin;
+            }
+
+            if (isAdminAuthenticated) {
+                navTabs?.classList.remove('hidden');
+                btnCloud?.classList.remove('hidden');
+                btnReset?.classList.remove('hidden');
+                adminBanner?.classList.remove('hidden');
+                if (lockIcon) lockIcon.className = 'fa-solid fa-lock-open text-amber-300';
+                if (lockText) lockText.innerText = 'Mod Penonton';
+                if (roleBadge) {
+                    roleBadge.className = 'bg-amber-500/90 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-2xs';
+                    roleBadge.innerHTML = '<i class="fa-solid fa-user-gear mr-1"></i>Mod Urusetia / Pengadil';
+                }
+            } else {
+                navTabs?.classList.add('hidden');
+                btnCloud?.classList.add('hidden');
+                btnReset?.classList.add('hidden');
+                adminBanner?.classList.add('hidden');
+                if (lockIcon) lockIcon.className = 'fa-solid fa-lock';
+                if (lockText) lockText.innerText = 'Urusetia';
+                if (roleBadge) {
+                    roleBadge.className = 'bg-teal-900/60 text-teal-100 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-teal-400/30';
+                    roleBadge.innerHTML = '<i class="fa-solid fa-eye mr-1"></i>Paparan Awam (Langsung)';
+                }
+                // Paksa kembali ke paparan awam sekiranya bukan admin
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                document.getElementById('view-public')?.classList.remove('hidden');
+            }
+        }
+
+        window.toggleAdminAuth = function() {
+            if (isAdminAuthenticated) {
+                isAdminAuthenticated = false;
+                sessionStorage.removeItem('kpdnAdminAuth');
+                applyAccessControlUI();
+                showModal('Mod Penonton Aktif', 'Anda kini melihat paparan seperti yang dilihat oleh pemain dan penonton awam.', 'info');
+            } else {
+                const overlay = document.getElementById('admin-login-overlay');
+                const input = document.getElementById('admin-pin-input');
+                if (input) input.value = '';
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+                setTimeout(() => input?.focus(), 100);
+            }
+        };
+
+        window.closeAdminLoginModal = function() {
+            const overlay = document.getElementById('admin-login-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        };
+
+        window.verifyAdminPin = function(e) {
+            e.preventDefault();
+            const entered = document.getElementById('admin-pin-input').value.trim();
+            const correctPin = (window.state.settings && window.state.settings.adminPin) ? String(window.state.settings.adminPin) : '1234';
+
+            if (entered === correctPin) {
+                isAdminAuthenticated = true;
+                sessionStorage.setItem('kpdnAdminAuth', 'true');
+                closeAdminLoginModal();
+                applyAccessControlUI();
+                showModal('Akses Dibenarkan', 'Selamat datang ke Mod Urusetia & Pengadil.', 'success');
+            } else {
+                showModal('PIN Tidak Sah', 'Kod PIN yang dimasukkan salah. Sila cuba lagi.', 'error');
+            }
+        };
+
+        // --- Fungsi Kongsi Pautan Awam (Share Modal) ---
+        window.getPublicShareUrl = function() {
+            const baseUrl = window.location.origin + window.location.pathname;
+            return `${baseUrl}?view=public`;
+        };
+
+        window.openShareModal = function() {
+            const overlay = document.getElementById('share-overlay');
+            const input = document.getElementById('public-share-url');
+            if (input) input.value = window.getPublicShareUrl();
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        };
+
+        window.closeShareModal = function() {
+            const overlay = document.getElementById('share-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        };
+
+        window.copyPublicLink = function() {
+            const url = window.getPublicShareUrl();
+            navigator.clipboard.writeText(url).then(() => {
+                closeShareModal();
+                showModal('Pautan Disalin!', 'Pautan Paparan Awam telah disalin. Anda boleh menampalnya di WhatsApp.', 'success');
+            }).catch(() => {
+                const input = document.getElementById('public-share-url');
+                input.select();
+                document.execCommand('copy');
+                closeShareModal();
+                showModal('Pautan Disalin!', 'Pautan Paparan Awam telah disalin.', 'success');
+            });
+        };
+
+        window.shareToWhatsApp = function() {
+            const url = window.getPublicShareUrl();
+            const text = `🏸 *KEPUTUSAN & JADUAL LANGSUNG KEJOHANAN BADMINTON TERTUTUP KPDN PULAU PINANG*\n\nSila klik pautan di bawah untuk melihat kedudukan kumpulan, carta kalah mati dan keputusan perlawanan secara langsung:\n👉 ${url}`;
+            const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(waUrl, '_blank');
         };
 
         // --- Fungsi Modal Tetapan Firebase ---
@@ -786,6 +1001,10 @@
         };
 
         window.switchTab = function(tabId) {
+            if (!isAdminAuthenticated && tabId !== 'public') {
+                window.toggleAdminAuth();
+                return;
+            }
             document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-active'));
             
@@ -799,7 +1018,7 @@
 
         window.toggleGroupClauseManual = function(e) {
             const detailsEl = document.getElementById('public-group-clause');
-            if (detailsEl) {
+            if (detailsEl && isAdminAuthenticated) {
                 setTimeout(() => {
                     window.state.groupClauseCollapsed = !detailsEl.hasAttribute('open');
                     window.saveData();
@@ -968,10 +1187,13 @@
             const numQualify = document.getElementById('set-num-qualify').value.trim() || '2';
             const qualifyMethodEl = document.getElementById('set-qualify-method');
             const qualifyMethod = qualifyMethodEl ? qualifyMethodEl.value : 'bye';
+            const newPinEl = document.getElementById('set-admin-pin');
+            const newPin = newPinEl && newPinEl.value.trim() ? newPinEl.value.trim() : '1234';
 
             window.state.settings.peringkat = peringkat;
             window.state.settings.format = format;
             window.state.settings.maxScore = maxScore;
+            window.state.settings.adminPin = newPin;
             if (peringkat === 'Peringkat Kumpulan') {
                 window.state.settings.numQualify = numQualify;
                 window.state.settings.qualifyMethod = qualifyMethod;
@@ -1002,11 +1224,10 @@
 
             window.saveData();
             window.handlePhaseSettings();
-            showModal('Rekod Ketetapan Disimpan', 'Maklumat ketetapan telah disimpan ke dalam sistem.', 'success');
+            showModal('Rekod Ketetapan Disimpan', 'Maklumat ketetapan & PIN sistem telah disimpan.', 'success');
         };
 
         window.handlePhaseSettings = function() {
-            const overlay = document.getElementById('group-management-overlay');
             const qualifyWrapper = document.getElementById('setting-qualify-wrapper');
             const peringkatInput = document.getElementById('set-peringkat');
             const inputVal = peringkatInput ? peringkatInput.value.trim() : '';
@@ -1622,7 +1843,7 @@
                     activeMatchId: null,
                     groupClauseCollapsed: false,
                     settingsHistory: [],
-                    settings: { peringkat: 'Peringkat Kumpulan', format: 'Round Robin', maxScore: '', numGroups: '2', numQualify: '2', qualifyMethod: 'bye' }
+                    settings: { peringkat: 'Peringkat Kumpulan', format: 'Round Robin', maxScore: '', numGroups: '2', numQualify: '2', qualifyMethod: 'bye', adminPin: '1234' }
                 };
                 window.saveData();
                 showModal('Set Semula', 'Sistem telah dikosongkan.', 'success');
@@ -1631,6 +1852,7 @@
 
         // --- Rendering Engine ---
         function renderAll() {
+            applyAccessControlUI();
             renderTeams();
             renderGroupsManagement();
             renderAdminSchedule();
@@ -1732,14 +1954,15 @@
                         <div class="divide-y">
                             ${mList.map(m => {
                                 const isCompleted = m.status === 'completed';
-                                const badgeClass = isCompleted ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800';
-                                const badgeText = isCompleted ? 'Selesai' : 'Belum Mula';
+                                const isInProgress = m.status === 'in_progress';
+                                const badgeClass = isCompleted ? 'bg-green-100 text-green-800' : (isInProgress ? 'bg-red-100 text-red-700 animate-pulse' : 'bg-amber-100 text-amber-800');
+                                const badgeText = isCompleted ? 'Selesai' : (isInProgress ? 'LIVE' : 'Belum Mula');
                                 return `
                                     <div class="p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 hover:bg-gray-50 text-sm">
                                         <div class="flex items-center gap-2 flex-1">
                                             <span class="text-xs font-semibold text-gray-400">#${m.id.substring(0,4)}</span>
                                             <span class="font-bold text-gray-800 text-right flex-1 truncate">${m.team1.name}</span>
-                                            <span class="bg-gray-200 px-2 py-1 rounded font-bold text-xs">${isCompleted ? `${m.score1} - ${m.score2}` : 'VS'}</span>
+                                            <span class="bg-gray-200 px-2 py-1 rounded font-bold text-xs">${isCompleted || isInProgress ? `${m.score1} - ${m.score2}` : 'VS'}</span>
                                             <span class="font-bold text-gray-800 text-left flex-1 truncate">${m.team2.name}</span>
                                         </div>
                                         <div class="flex items-center gap-2 self-end sm:self-center">
@@ -1852,39 +2075,47 @@
 
                     const currentPhaseMatches = knockoutMatches.filter(m => m.group === currentPhase);
                     if (bracketContainer) {
-                        bracketContainer.innerHTML = currentPhaseMatches.map(m => `
-                            <div class="bg-white border border-indigo-200 rounded-xl p-3 shadow-2xs flex flex-col justify-between">
-                                <div class="text-[10px] font-bold text-indigo-600 mb-2 uppercase tracking-wide">Match #${m.id.substring(0,4)}</div>
-                                <div class="space-y-1.5 text-xs font-bold">
-                                    <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${m.score1 >= m.score2 && m.status === 'completed' ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
-                                        <span class="truncate pr-2">${m.team1.name}</span>
-                                        <span class="font-mono">${m.status === 'completed' ? m.score1 : '-'}</span>
+                        bracketContainer.innerHTML = currentPhaseMatches.map(m => {
+                            const isLive = m.status === 'in_progress';
+                            const isDone = m.status === 'completed';
+                            return `
+                                <div class="bg-white border ${isLive ? 'border-red-400 ring-2 ring-red-100' : 'border-indigo-200'} rounded-xl p-3 shadow-2xs flex flex-col justify-between">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wide">Match #${m.id.substring(0,4)}</span>
+                                        <span class="text-[10px] px-2 py-0.5 rounded font-bold ${isDone ? 'bg-green-100 text-green-800' : (isLive ? 'bg-red-500 text-white animate-pulse' : 'bg-amber-100 text-amber-800')}">${isDone ? 'Selesai' : (isLive ? 'LIVE' : 'Belum Mula')}</span>
                                     </div>
-                                    <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${m.score2 > m.score1 && m.status === 'completed' ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
-                                        <span class="truncate pr-2">${m.team2.name}</span>
-                                        <span class="font-mono">${m.status === 'completed' ? m.score2 : '-'}</span>
+                                    <div class="space-y-1.5 text-xs font-bold">
+                                        <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${m.score1 >= m.score2 && isDone ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
+                                            <span class="truncate pr-2">${m.team1.name}</span>
+                                            <span class="font-mono">${isDone || isLive ? m.score1 : '-'}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center bg-gray-50 px-2.5 py-1.5 rounded ${m.score2 > m.score1 && isDone ? 'bg-green-50 text-green-800 border border-green-200' : ''}">
+                                            <span class="truncate pr-2">${m.team2.name}</span>
+                                            <span class="font-mono">${isDone || isLive ? m.score2 : '-'}</span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="mt-2 text-right">
-                                    <span class="text-[10px] px-2 py-0.5 rounded font-bold ${m.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${m.status === 'completed' ? 'Selesai' : 'Belum Mula'}</span>
-                                </div>
-                            </div>
-                        `).join('');
+                            `;
+                        }).join('');
                     }
 
                     if (knockoutMatchesContainer) {
-                        knockoutMatchesContainer.innerHTML = currentPhaseMatches.map(m => `
-                            <div class="border rounded-xl p-3 bg-white shadow-2xs flex justify-between items-center text-xs">
-                                <div class="flex-1 truncate pr-2">
-                                    <div class="font-bold text-gray-800 truncate">${m.team1.name}</div>
-                                    <div class="font-bold text-gray-800 truncate mt-1">${m.team2.name}</div>
+                        knockoutMatchesContainer.innerHTML = currentPhaseMatches.map(m => {
+                            const isLive = m.status === 'in_progress';
+                            const isDone = m.status === 'completed';
+                            return `
+                                <div class="border rounded-xl p-3 bg-white shadow-2xs flex justify-between items-center text-xs">
+                                    <div class="flex-1 truncate pr-2">
+                                        <div class="font-bold text-gray-800 truncate">${m.team1.name}</div>
+                                        <div class="font-bold text-gray-800 truncate mt-1">${m.team2.name}</div>
+                                    </div>
+                                    <div class="px-3 py-1 ${isLive ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-gray-100'} rounded text-center font-mono font-bold">
+                                        <div>${isDone || isLive ? m.score1 : '-'}</div>
+                                        <div class="mt-1">${isDone || isLive ? m.score2 : '-'}</div>
+                                    </div>
                                 </div>
-                                <div class="px-3 py-1 bg-gray-100 rounded text-center font-mono font-bold">
-                                    <div>${m.status === 'completed' ? m.score1 : '-'}</div>
-                                    <div class="mt-1">${m.status === 'completed' ? m.score2 : '-'}</div>
-                                </div>
-                            </div>
-                        `).join('');
+                            `;
+                        }).join('');
                     }
 
                 } else {
@@ -1893,7 +2124,7 @@
             }
 
             if (groupKeys.length === 0) {
-                standingsContainer.innerHTML = `<div class="text-center text-gray-400 py-10 w-full col-span-full">Sila tetapkan kumpulan dan jadual di bahagian pendaftaran dahulu.</div>`;
+                standingsContainer.innerHTML = `<div class="text-center text-gray-400 py-10 w-full col-span-full">Menunggu jadual perlawanan dijana oleh urusetia.</div>`;
                 matchesContainer.innerHTML = `<div class="text-center text-gray-400 py-10">Tiada perlawanan.</div>`;
                 return;
             }
@@ -1953,14 +2184,15 @@
 
             matchesContainer.innerHTML = groupMatches.map(m => {
                 const isCompleted = m.status === 'completed';
+                const isLive = m.status === 'in_progress';
                 return `
                     <div class="p-3 hover:bg-gray-50 flex justify-between items-center text-xs border-b last:border-b-0">
                         <div class="flex-1 truncate pr-2">
                             <span class="font-bold text-teal-700 mr-1">[${m.group}]</span>
                             <span class="text-gray-800 font-semibold truncate">${m.team1.name} vs ${m.team2.name}</span>
                         </div>
-                        <div class="font-bold px-2 py-1 rounded bg-gray-100 text-gray-700 font-mono">
-                            ${isCompleted ? `${m.score1} - ${m.score2}` : 'B/M'}
+                        <div class="font-bold px-2 py-1 rounded ${isLive ? 'bg-red-500 text-white animate-pulse' : (isCompleted ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-gray-100 text-gray-700')} font-mono">
+                            ${isCompleted || isLive ? `${m.score1} - ${m.score2}` : 'B/M'}
                         </div>
                     </div>
                 `;
@@ -2027,7 +2259,6 @@
 
         // Initial Load
         window.onload = function() {
-            // Restore from localStorage first for instant render
             const local = localStorage.getItem('badmintonKPDNState');
             if (local) {
                 try {

@@ -120,6 +120,18 @@
                 </button>
             </div>
         </div>
+
+        <!-- Bar Pilihan Kategori (Category Switcher Bar - Dilihat oleh Awam, Pengadil & Super Admin) -->
+        <div class="bg-[#051124]/95 border-t border-cyan-500/20 px-4 py-2 relative z-10">
+            <div class="container mx-auto flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0" id="category-tabs-container">
+                    <!-- Dijana secara dinamik oleh JS (Beregu Lelaki, Beregu Wanita, Beregu Campuran, dll.) -->
+                </div>
+                <button id="btn-manage-categories" onclick="openCategoryManagerModal()" class="hidden shrink-0 text-[11px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 px-2.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-folder-plus"></i><span>Urus Kategori</span>
+                </button>
+            </div>
+        </div>
         
         <!-- Navigation Tabs (Dikawal Mengikut Layer: Awam / Pengadil / Super Admin) -->
         <nav id="main-nav-tabs" class="hidden flex overflow-x-auto bg-white/95 backdrop-blur-xs text-gray-600 shadow-inner border-t border-gray-200 relative z-10">
@@ -165,7 +177,7 @@
                         <!-- Kedudukan Kumpulan (Standings) -->
                         <div class="w-full md:w-2/3 bg-white/95 rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                             <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
-                                <h2 class="font-bold text-gray-700"><i class="fa-solid fa-ranking-star mr-2 text-yellow-500"></i>Kedudukan Kumpulan</h2>
+                                <h2 class="font-bold text-gray-700"><i class="fa-solid fa-ranking-star mr-2 text-yellow-500"></i>Kedudukan Kumpulan <span id="public-active-cat-badge" class="ml-1 text-xs bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-extrabold"></span></h2>
                             </div>
                             <div id="standings-container" class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <div class="text-center text-gray-400 py-10 w-full col-span-full">Menunggu jadual perlawanan dijana oleh urusetia.</div>
@@ -189,6 +201,22 @@
 
         <!-- 2. TAB: PENDAFTARAN & JADUAL (SUPER ADMIN) -->
         <section id="view-admin" class="view-section hidden animate-fade-in">
+            <!-- Bar Makluman Kategori Aktif di Tab Pendaftaran -->
+            <div class="bg-gradient-to-r from-[#07162c] to-sky-900 text-white rounded-xl p-3.5 mb-5 flex flex-wrap justify-between items-center gap-2 shadow-sm border border-cyan-500/30">
+                <div class="flex items-center gap-2.5">
+                    <span class="bg-cyan-400 text-slate-950 font-black text-xs px-2.5 py-1 rounded uppercase tracking-wider" id="admin-cat-code-badge">BL</span>
+                    <div>
+                        <div class="text-[10px] text-cyan-300 uppercase font-bold tracking-wider">Pengurusan Pendaftaran & Jadual Kategori:</div>
+                        <div class="text-base sm:text-lg font-black leading-tight" id="admin-cat-name-title">Beregu Lelaki</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openCategoryManagerModal()" class="text-xs bg-white/10 hover:bg-white/20 border border-white/20 px-3 py-1.5 rounded-lg font-semibold transition">
+                        <i class="fa-solid fa-layer-group mr-1 text-cyan-300"></i> Tukar / Tambah Kategori
+                    </button>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 
                 <!-- Borang Daftar Regu (Manual & Pukal Excel) -->
@@ -343,12 +371,17 @@
         <section id="view-umpire" class="view-section hidden animate-fade-in h-full">
             
             <div id="umpire-selection" class="bg-white/95 backdrop-blur-xs rounded-xl shadow-sm p-5 border border-gray-100">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                     <div>
                         <h2 class="font-bold text-lg text-gray-800"><i class="fa-solid fa-whistle mr-2 text-red-500"></i>Pilih Perlawanan untuk Diadili</h2>
-                        <p class="text-xs text-gray-500">Pilih kod perlawanan (contoh: <strong>#P1, #S1, #SA1, #A1</strong>) dan masukkan nama pengadil sebelum mula.</p>
+                        <p class="text-xs text-gray-500">Pilih kod perlawanan mengikut kategori (contoh: <strong>#BL-P1, #BW-P1, #BC-S1</strong>) dan masukkan nama pengadil sebelum mula.</p>
                     </div>
-                    <span id="umpire-phase-indicator" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-200"></span>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" id="btn-umpire-filter-mode" onclick="toggleUmpireCategoryFilter()" class="text-xs bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 px-3 py-1.5 rounded-lg font-bold transition">
+                            <i class="fa-solid fa-filter mr-1"></i> Tunjuk: Semua Kategori
+                        </button>
+                        <span id="umpire-phase-indicator" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full border border-indigo-200"></span>
+                    </div>
                 </div>
                 <div id="umpire-matches-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="text-center text-gray-400 py-10 col-span-full">Sila jana jadual di bahagian Pendaftaran.</div>
@@ -363,9 +396,9 @@
                             <i class="fa-solid fa-arrow-left mr-1"></i> Kembali
                         </button>
                         <div class="font-bold text-center flex-1 flex flex-col items-center">
-                            <div class="flex items-center gap-2">
-                                <span class="hidden sm:inline-block text-[10px] font-black italic tracking-wider text-cyan-400">SHUTTLEPOWER</span>
-                                <span id="active-match-code" class="bg-amber-400 text-gray-900 px-2.5 py-0.5 rounded font-black text-xs sm:text-sm">P1</span>
+                            <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                                <span id="active-category-badge" class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 px-2 py-0.5 rounded text-[10px] sm:text-xs font-extrabold uppercase">BEREGU LELAKI</span>
+                                <span id="active-match-code" class="bg-amber-400 text-gray-900 px-2.5 py-0.5 rounded font-black text-xs sm:text-sm">#BL-P1</span>
                                 <span id="active-group" class="text-sm sm:text-base font-extrabold text-white">Kumpulan A</span>
                             </div>
                             <div class="flex flex-wrap items-center justify-center gap-2 mt-0.5 text-[11px] text-gray-300">
@@ -633,6 +666,7 @@
 
             <form onsubmit="confirmStartUmpireMatch(event)">
                 <input type="hidden" id="pending-umpire-match-id">
+                <input type="hidden" id="pending-umpire-cat-id">
                 <div class="mb-4">
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1.5">Nama Pengadil Bertugas <span class="text-red-500">*</span></label>
                     <input type="text" id="umpire-name-input" placeholder="Masukkan nama penuh / panggilan pengadil" class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500" required>
@@ -646,6 +680,46 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Pengurusan Kategori Kejohanan (Super Admin) -->
+    <div id="category-manager-overlay" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 my-8">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-sky-600"></i> Pengurusan Kategori Kejohanan
+                </h3>
+                <button type="button" onclick="closeCategoryManagerModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <p class="text-xs text-gray-600 mb-4 leading-relaxed">
+                Setiap kategori mempunyai senarai regu, pembahagian kumpulan, carta kalah mati, dan kod perlawanan yang berasingan (contoh: <strong>#BL-P1</strong> untuk Beregu Lelaki, <strong>#BW-P1</strong> untuk Beregu Wanita).
+            </p>
+
+            <!-- Borang Tambah Kategori Baharu -->
+            <form onsubmit="addNewCategory(event)" class="bg-sky-50/70 border border-sky-200 rounded-xl p-3.5 mb-4">
+                <div class="text-xs font-bold text-sky-900 mb-2"><i class="fa-solid fa-plus-circle mr-1 text-sky-600"></i>Tambah Kategori Baharu</div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input type="text" id="new-cat-name" placeholder="Nama (cth: Beregu Veteran)" class="sm:col-span-2 border rounded-lg px-3 py-2 text-xs font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-sky-500" required>
+                    <input type="text" id="new-cat-code" placeholder="Kod (cth: BV)" maxlength="5" class="border rounded-lg px-3 py-2 text-xs font-bold uppercase bg-white focus:outline-none focus:ring-2 focus:ring-sky-500" required>
+                </div>
+                <button type="submit" class="mt-2.5 w-full bg-sky-600 hover:bg-sky-700 text-white py-2 rounded-lg text-xs font-bold transition shadow-xs">
+                    <i class="fa-solid fa-plus mr-1"></i> Tambah Kategori
+                </button>
+            </form>
+
+            <!-- Senarai Kategori Sedia Ada -->
+            <div class="mb-4">
+                <div class="text-xs font-bold text-gray-700 mb-2 uppercase">Senarai Kategori Aktif:</div>
+                <div id="category-manager-list" class="divide-y border rounded-xl overflow-hidden bg-gray-50 max-h-64 overflow-y-auto">
+                    <!-- Dijana oleh JS -->
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="button" onclick="closeCategoryManagerModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2 rounded-lg font-semibold text-xs transition">Tutup</button>
+            </div>
         </div>
     </div>
 
@@ -1089,8 +1163,50 @@
             }
         }
 
-        // --- State Management ---
+        // --- Multi-Category State Management ---
+        function createDefaultCategoryObject(id, name, shortCode) {
+            return {
+                id: id,
+                name: name,
+                shortCode: shortCode,
+                teams: [],
+                groups: {},
+                matches: [],
+                groupClauseCollapsed: false,
+                collapsedKnockoutPhases: {},
+                settingsHistory: [],
+                settings: {
+                    peringkat: 'Peringkat Kumpulan',
+                    format: 'Round Robin',
+                    matchSetMode: '1_set',
+                    maxScore: '',
+                    numGroups: '2',
+                    numQualify: '2',
+                    qualifyMethod: 'bye',
+                    thirdPlacePlayoff: 'joint'
+                }
+            };
+        }
+
+        function createDefaultCategoriesMap() {
+            return {
+                'cat_bl': createDefaultCategoryObject('cat_bl', 'Beregu Lelaki', 'BL'),
+                'cat_bw': createDefaultCategoryObject('cat_bw', 'Beregu Wanita', 'BW'),
+                'cat_bc': createDefaultCategoryObject('cat_bc', 'Beregu Campuran', 'BC')
+            };
+        }
+
+        window.umpireShowAllCategories = true;
+
         window.state = {
+            activeCategoryId: 'cat_bl',
+            globalSettings: {
+                tournamentName: 'Kejohanan Piala CEO KPDN 2026',
+                adminPin: '1234',
+                umpirePin: '2222',
+                customLogoDataUrl: ''
+            },
+            categories: createDefaultCategoriesMap(),
             teams: [],
             groups: {},
             matches: [],
@@ -1099,7 +1215,7 @@
             collapsedKnockoutPhases: {},
             settingsHistory: [],
             settings: {
-                tournamentName: 'Badminton KPDN P.Pinang',
+                tournamentName: 'Kejohanan Piala CEO KPDN 2026',
                 peringkat: 'Peringkat Kumpulan',
                 format: 'Round Robin',
                 matchSetMode: '1_set',
@@ -1120,15 +1236,126 @@
             return doc(db, 'artifacts', appId, 'public', 'data', 'kpdn_state', 'main');
         }
 
-        function normalizeMatchesStructure() {
-            const groupKeys = Object.keys(window.state.groups || {});
+        window.getActiveCategory = function() {
+            if (!window.state.categories || Object.keys(window.state.categories).length === 0) {
+                window.state.categories = createDefaultCategoriesMap();
+            }
+            const catId = window.state.activeCategoryId;
+            if (!catId || !window.state.categories[catId]) {
+                window.state.activeCategoryId = Object.keys(window.state.categories)[0];
+            }
+            return window.state.categories[window.state.activeCategoryId];
+        };
+
+        window.getActiveCategoryShortCode = function() {
+            const cat = window.getActiveCategory();
+            return (cat && cat.shortCode) ? cat.shortCode.toUpperCase() : 'BL';
+        };
+
+        // Salin data semasa di root window.state ke dalam objek kategori aktif sebelum disimpan
+        window.saveRootToActiveCategory = function() {
+            const cat = window.getActiveCategory();
+            if (!cat) return;
+
+            cat.teams = Array.isArray(window.state.teams) ? window.state.teams : [];
+            cat.groups = window.state.groups || {};
+            cat.matches = Array.isArray(window.state.matches) ? window.state.matches : [];
+            cat.groupClauseCollapsed = !!window.state.groupClauseCollapsed;
+            cat.collapsedKnockoutPhases = window.state.collapsedKnockoutPhases || {};
+            cat.settingsHistory = Array.isArray(window.state.settingsHistory) ? window.state.settingsHistory : [];
+
+            if (!cat.settings) cat.settings = {};
+            if (window.state.settings) {
+                cat.settings.peringkat = window.state.settings.peringkat || 'Peringkat Kumpulan';
+                cat.settings.format = window.state.settings.format || 'Round Robin';
+                cat.settings.matchSetMode = window.state.settings.matchSetMode || '1_set';
+                cat.settings.maxScore = window.state.settings.maxScore || '';
+                cat.settings.numGroups = window.state.settings.numGroups || '2';
+                cat.settings.numQualify = window.state.settings.numQualify || '2';
+                cat.settings.qualifyMethod = window.state.settings.qualifyMethod || 'bye';
+                cat.settings.thirdPlacePlayoff = window.state.settings.thirdPlacePlayoff || 'joint';
+
+                if (!window.state.globalSettings) window.state.globalSettings = {};
+                if (window.state.settings.tournamentName) {
+                    window.state.globalSettings.tournamentName = window.state.settings.tournamentName;
+                }
+                if (window.state.settings.adminPin) {
+                    window.state.globalSettings.adminPin = window.state.settings.adminPin;
+                }
+                if (window.state.settings.umpirePin) {
+                    window.state.globalSettings.umpirePin = window.state.settings.umpirePin;
+                }
+                if (window.state.settings.customLogoDataUrl !== undefined) {
+                    window.state.globalSettings.customLogoDataUrl = window.state.settings.customLogoDataUrl;
+                }
+            }
+        };
+
+        // Muatkan data daripada objek kategori aktif ke root window.state untuk paparan UI
+        window.loadActiveCategoryToRoot = function() {
+            const cat = window.getActiveCategory();
+            if (!cat) return;
+
+            if (!window.state.globalSettings) {
+                window.state.globalSettings = {
+                    tournamentName: window.state.settings?.tournamentName || 'Kejohanan Piala CEO KPDN 2026',
+                    adminPin: window.state.settings?.adminPin || '1234',
+                    umpirePin: window.state.settings?.umpirePin || '2222',
+                    customLogoDataUrl: window.state.settings?.customLogoDataUrl || ''
+                };
+            }
+
+            window.state.teams = Array.isArray(cat.teams) ? cat.teams : [];
+            window.state.groups = cat.groups || {};
+            window.state.matches = Array.isArray(cat.matches) ? cat.matches : [];
+            window.state.groupClauseCollapsed = !!cat.groupClauseCollapsed;
+            window.state.collapsedKnockoutPhases = cat.collapsedKnockoutPhases || {};
+            window.state.settingsHistory = Array.isArray(cat.settingsHistory) ? cat.settingsHistory : [];
+
+            const catSettings = cat.settings || {};
+            window.state.settings = {
+                tournamentName: window.state.globalSettings.tournamentName || 'Kejohanan Piala CEO KPDN 2026',
+                peringkat: catSettings.peringkat || 'Peringkat Kumpulan',
+                format: catSettings.format || 'Round Robin',
+                matchSetMode: catSettings.matchSetMode || '1_set',
+                maxScore: catSettings.maxScore !== undefined ? catSettings.maxScore : '',
+                numGroups: catSettings.numGroups || String(Object.keys(window.state.groups).length || 2),
+                numQualify: catSettings.numQualify || '2',
+                qualifyMethod: catSettings.qualifyMethod || 'bye',
+                thirdPlacePlayoff: catSettings.thirdPlacePlayoff || 'joint',
+                adminPin: window.state.globalSettings.adminPin || '1234',
+                umpirePin: window.state.globalSettings.umpirePin || '2222',
+                customLogoDataUrl: window.state.globalSettings.customLogoDataUrl
+            };
+
+            const numGroupsInput = document.getElementById('num-groups');
+            if (numGroupsInput && document.activeElement !== numGroupsInput) {
+                const gLen = Object.keys(window.state.groups).length;
+                numGroupsInput.value = gLen > 0 ? gLen : (catSettings.numGroups || 2);
+            }
+            const setPeringkat = document.getElementById('set-peringkat');
+            if (setPeringkat && document.activeElement !== setPeringkat) setPeringkat.value = window.state.settings.peringkat;
+            const setFormat = document.getElementById('set-format');
+            if (setFormat && document.activeElement !== setFormat) setFormat.value = window.state.settings.format;
+            const setMaxScore = document.getElementById('set-max-score');
+            if (setMaxScore && document.activeElement !== setMaxScore) setMaxScore.value = window.state.settings.maxScore;
+            const setNumQualify = document.getElementById('set-num-qualify');
+            if (setNumQualify && document.activeElement !== setNumQualify) setNumQualify.value = window.state.settings.numQualify;
+            const setQualifyMethod = document.getElementById('set-qualify-method');
+            if (setQualifyMethod && document.activeElement !== setQualifyMethod) setQualifyMethod.value = window.state.settings.qualifyMethod;
+        };
+
+        function normalizeCategoryMatchesStructure(catObj) {
+            if (!catObj) return;
+            const groupKeys = Object.keys(catObj.groups || {});
+            const shortCode = (catObj.shortCode || 'BL').toUpperCase();
             let pCounter = 1;
             let phaseCounters = {};
 
-            (window.state.matches || []).forEach(m => {
+            (catObj.matches || []).forEach(m => {
                 if (!m.matchCode) {
                     if (groupKeys.includes(m.group)) {
-                        m.matchCode = `P${pCounter++}`;
+                        m.matchCode = `${shortCode}-P${pCounter++}`;
                     } else {
                         let prefix = 'KM';
                         if (m.group === 'Suku Akhir') prefix = 'S';
@@ -1136,8 +1363,10 @@
                         else if (m.group === 'Pusingan Akhir') prefix = 'A';
                         else if (m.group === 'Penentuan Tempat Ke-3 & Ke-4') prefix = 'P34-';
                         phaseCounters[prefix] = (phaseCounters[prefix] || 0) + 1;
-                        m.matchCode = `${prefix}${phaseCounters[prefix]}`;
+                        m.matchCode = `${shortCode}-${prefix}${phaseCounters[prefix]}`;
                     }
+                } else if (!m.matchCode.includes('-')) {
+                    m.matchCode = `${shortCode}-${m.matchCode}`;
                 }
                 if (m.umpireName === undefined) m.umpireName = '';
                 if (!Array.isArray(m.sets) || m.sets.length < 3) {
@@ -1151,16 +1380,216 @@
             });
         }
 
+        function normalizeMatchesStructure() {
+            if (window.state.categories) {
+                Object.values(window.state.categories).forEach(cat => normalizeCategoryMatchesStructure(cat));
+            }
+        }
+
         function ensureDefaultSettings() {
-            if (!window.state.settings) window.state.settings = {};
-            if (!window.state.settings.tournamentName) window.state.settings.tournamentName = 'Badminton KPDN P.Pinang';
-            if (!window.state.settings.matchSetMode) window.state.settings.matchSetMode = '1_set';
-            if (!window.state.settings.adminPin) window.state.settings.adminPin = '1234';
-            if (!window.state.settings.umpirePin) window.state.settings.umpirePin = '2222';
-            if (!window.state.settings.thirdPlacePlayoff) window.state.settings.thirdPlacePlayoff = 'joint';
-            if (!window.state.collapsedKnockoutPhases) window.state.collapsedKnockoutPhases = {};
-            if (!window.state.settingsHistory) window.state.settingsHistory = [];
+            // Migrasi data lama jika belum ada objek categories
+            if (!window.state.categories || Object.keys(window.state.categories).length === 0) {
+                const defaultCats = createDefaultCategoriesMap();
+                if (Array.isArray(window.state.teams) && window.state.teams.length > 0) {
+                    defaultCats['cat_bl'].teams = window.state.teams;
+                    defaultCats['cat_bl'].groups = window.state.groups || {};
+                    defaultCats['cat_bl'].matches = window.state.matches || [];
+                    defaultCats['cat_bl'].groupClauseCollapsed = !!window.state.groupClauseCollapsed;
+                    defaultCats['cat_bl'].collapsedKnockoutPhases = window.state.collapsedKnockoutPhases || {};
+                    defaultCats['cat_bl'].settingsHistory = window.state.settingsHistory || [];
+                    if (window.state.settings) {
+                        defaultCats['cat_bl'].settings = { ...defaultCats['cat_bl'].settings, ...window.state.settings };
+                    }
+                }
+                window.state.categories = defaultCats;
+                window.state.activeCategoryId = 'cat_bl';
+            }
+
+            const savedSessionCat = sessionStorage.getItem('kpdnActiveCategoryId');
+            if (savedSessionCat && window.state.categories[savedSessionCat]) {
+                window.state.activeCategoryId = savedSessionCat;
+            } else if (!window.state.activeCategoryId || !window.state.categories[window.state.activeCategoryId]) {
+                window.state.activeCategoryId = Object.keys(window.state.categories)[0];
+            }
+
+            if (!window.state.globalSettings) {
+                window.state.globalSettings = {
+                    tournamentName: window.state.settings?.tournamentName || 'Kejohanan Piala CEO KPDN 2026',
+                    adminPin: window.state.settings?.adminPin || '1234',
+                    umpirePin: window.state.settings?.umpirePin || '2222',
+                    customLogoDataUrl: window.state.settings?.customLogoDataUrl || ''
+                };
+            }
+
             normalizeMatchesStructure();
+            window.loadActiveCategoryToRoot();
+        }
+
+        // --- Fungsi Penukaran & Pengurusan Kategori ---
+        window.switchCategory = function(catId) {
+            if (!window.state.categories || !window.state.categories[catId]) return;
+            window.saveRootToActiveCategory();
+
+            if (window.state.activeMatchId) {
+                window.state.activeMatchId = null;
+                document.getElementById('umpire-scoring')?.classList.add('hidden');
+                document.getElementById('umpire-selection')?.classList.remove('hidden');
+            }
+
+            window.state.activeCategoryId = catId;
+            sessionStorage.setItem('kpdnActiveCategoryId', catId);
+            window.loadActiveCategoryToRoot();
+            localStorage.setItem('badmintonKPDNState', JSON.stringify(window.state));
+            renderAll();
+        };
+
+        window.openCategoryManagerModal = function() {
+            if (currentUserRole !== 'superadmin') return;
+            renderCategoryManagerList();
+            const overlay = document.getElementById('category-manager-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        };
+
+        window.closeCategoryManagerModal = function() {
+            const overlay = document.getElementById('category-manager-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        };
+
+        window.addNewCategory = function(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('new-cat-name');
+            const codeInput = document.getElementById('new-cat-code');
+            const name = nameInput.value.trim();
+            const shortCode = codeInput.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+            if (!name || !shortCode) return;
+
+            window.saveRootToActiveCategory();
+            const newId = 'cat_' + shortCode.toLowerCase() + '_' + window.generateId().slice(0, 4);
+            window.state.categories[newId] = createDefaultCategoryObject(newId, name, shortCode);
+            window.state.activeCategoryId = newId;
+            sessionStorage.setItem('kpdnActiveCategoryId', newId);
+            window.loadActiveCategoryToRoot();
+
+            nameInput.value = '';
+            codeInput.value = '';
+
+            window.saveData();
+            renderCategoryManagerList();
+            showModal('Kategori Ditambah', `Kategori "${name} (${shortCode})" telah berjaya diwujudkan dan diaktifkan.`, 'success');
+        };
+
+        window.deleteCategoryById = function(catId) {
+            const catKeys = Object.keys(window.state.categories || {});
+            if (catKeys.length <= 1) {
+                showModal('Tidak Boleh Dipadam', 'Sistem memerlukan sekurang-kurangnya satu (1) kategori aktif.', 'error');
+                return;
+            }
+            const targetCat = window.state.categories[catId];
+            if (!targetCat) return;
+
+            showConfirm('Padam Kategori', `Adakah anda pasti mahu memadam kategori "${targetCat.name} (${targetCat.shortCode})" beserta semua rekod perlawanannya?`, () => {
+                delete window.state.categories[catId];
+                if (window.state.activeCategoryId === catId) {
+                    window.state.activeCategoryId = Object.keys(window.state.categories)[0];
+                    sessionStorage.setItem('kpdnActiveCategoryId', window.state.activeCategoryId);
+                }
+                window.loadActiveCategoryToRoot();
+                window.saveData();
+                renderCategoryManagerList();
+            });
+        };
+
+        window.resetCategoryById = function(catId) {
+            const targetCat = window.state.categories[catId];
+            if (!targetCat) return;
+
+            showConfirm('Kosongkan Data Kategori', `Reset semua senarai regu, kumpulan, dan perlawanan bagi kategori "${targetCat.name}" sahaja?`, () => {
+                window.state.categories[catId] = createDefaultCategoryObject(catId, targetCat.name, targetCat.shortCode);
+                if (window.state.activeCategoryId === catId) {
+                    window.loadActiveCategoryToRoot();
+                }
+                window.saveData();
+                renderCategoryManagerList();
+                showModal('Kategori Direset', `Data bagi kategori "${targetCat.name}" telah dikosongkan.`, 'success');
+            });
+        };
+
+        function renderCategoryManagerList() {
+            const listEl = document.getElementById('category-manager-list');
+            if (!listEl) return;
+
+            const cats = Object.values(window.state.categories || {});
+            listEl.innerHTML = cats.map(c => {
+                const isActive = c.id === window.state.activeCategoryId;
+                const teamCount = (c.teams || []).length;
+                const matchCount = (c.matches || []).length;
+                return `
+                    <div class="p-3 flex justify-between items-center gap-2 bg-white hover:bg-gray-50">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span class="bg-[#07162c] text-cyan-300 font-black text-xs px-2.5 py-1 rounded shrink-0">${c.shortCode}</span>
+                            <div class="min-w-0">
+                                <div class="font-bold text-sm text-gray-800 truncate flex items-center gap-1.5">
+                                    <span>${c.name}</span>
+                                    ${isActive ? '<span class="text-[10px] bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-bold">Aktif</span>' : ''}
+                                </div>
+                                <div class="text-[11px] text-gray-500">${teamCount} Regu | ${matchCount} Perlawanan</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="button" onclick="resetCategoryById('${c.id}')" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-2.5 py-1 rounded font-semibold" title="Kosongkan data kategori ini">
+                                <i class="fa-solid fa-rotate-left"></i> Reset
+                            </button>
+                            <button type="button" onclick="deleteCategoryById('${c.id}')" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-2.5 py-1 rounded font-semibold" title="Padam kategori">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderCategorySwitcherBar() {
+            const container = document.getElementById('category-tabs-container');
+            const manageBtn = document.getElementById('btn-manage-categories');
+            if (!container) return;
+
+            if (manageBtn) {
+                if (currentUserRole === 'superadmin') manageBtn.classList.remove('hidden');
+                else manageBtn.classList.add('hidden');
+            }
+
+            const cats = Object.values(window.state.categories || {});
+            container.innerHTML = cats.map(c => {
+                const isActive = c.id === window.state.activeCategoryId;
+                const matches = c.matches || [];
+                const liveCount = matches.filter(m => m.status === 'in_progress').length;
+                const badgeHtml = liveCount > 0
+                    ? `<span class="bg-red-500 text-white text-[9px] px-1.5 py-0.2 rounded-full font-extrabold animate-pulse">${liveCount} LIVE</span>`
+                    : `<span class="text-[10px] opacity-75 font-mono">[${c.shortCode}]</span>`;
+
+                return `
+                    <button type="button" onclick="switchCategory('${c.id}')" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 whitespace-nowrap ${isActive ? 'bg-gradient-to-r from-cyan-400 to-sky-400 text-slate-950 shadow-sm shadow-cyan-500/30' : 'bg-slate-800/90 hover:bg-slate-700 text-cyan-100 border border-cyan-500/20'}">
+                        <i class="fa-solid fa-shuttlecock ${isActive ? 'text-slate-950' : 'text-cyan-400'}"></i>
+                        <span>${c.name}</span>
+                        ${badgeHtml}
+                    </button>
+                `;
+            }).join('');
+
+            const activeCat = window.getActiveCategory();
+            if (activeCat) {
+                const pubBadge = document.getElementById('public-active-cat-badge');
+                if (pubBadge) pubBadge.innerText = `${activeCat.name} (${activeCat.shortCode})`;
+
+                const adminCodeBadge = document.getElementById('admin-cat-code-badge');
+                if (adminCodeBadge) adminCodeBadge.innerText = activeCat.shortCode;
+
+                const adminNameTitle = document.getElementById('admin-cat-name-title');
+                if (adminNameTitle) adminNameTitle.innerText = activeCat.name;
+            }
         }
 
         window.isBestOf3Mode = function() {
@@ -1244,7 +1673,11 @@
                         try {
                             const parsed = JSON.parse(cloudData.statePayload);
                             const currentActiveMatch = window.state.activeMatchId;
+                            const localActiveCat = sessionStorage.getItem('kpdnActiveCategoryId') || window.state.activeCategoryId;
                             window.state = { ...window.state, ...parsed };
+                            if (localActiveCat && window.state.categories && window.state.categories[localActiveCat]) {
+                                window.state.activeCategoryId = localActiveCat;
+                            }
                             if (currentActiveMatch) window.state.activeMatchId = currentActiveMatch;
                             ensureDefaultSettings();
                             localStorage.setItem('badmintonKPDNState', JSON.stringify(window.state));
@@ -1268,6 +1701,7 @@
         }
 
         async function saveDataToCloud(isInitial = false) {
+            window.saveRootToActiveCategory();
             ensureDefaultSettings();
             localStorage.setItem('badmintonKPDNState', JSON.stringify(window.state));
             renderAll();
@@ -2230,17 +2664,18 @@
                 
                 let maxLen = allGroupMatches.length > 0 ? Math.max(...allGroupMatches.map(g => g.length)) : 0;
                 let pCounter = 1;
+                const shortCode = window.getActiveCategoryShortCode();
                 for (let i = 0; i < maxLen; i++) {
                     for (let j = 0; j < allGroupMatches.length; j++) {
                         if (allGroupMatches[j][i]) {
                             const matchObj = allGroupMatches[j][i];
-                            matchObj.matchCode = `P${pCounter++}`;
+                            matchObj.matchCode = `${shortCode}-P${pCounter++}`;
                             window.state.matches.push(matchObj);
                         }
                     }
                 }
                 window.saveData();
-                showModal('Jadual Selesai', `Jadual Peringkat Kumpulan (#P1 hingga #P${pCounter - 1}) telah berjaya dijana.`, 'success');
+                showModal('Jadual Selesai', `Jadual Peringkat Kumpulan bagi ${window.getActiveCategory().name} (#${shortCode}-P1 hingga #${shortCode}-P${pCounter - 1}) telah berjaya dijana.`, 'success');
             };
 
             if (window.state.matches.length > 0) {
@@ -2371,11 +2806,12 @@
             }
 
             let newMatchesCreated = 0;
+            const shortCode = window.getActiveCategoryShortCode();
 
             if (nextPhaseName === 'Pusingan Akhir' && thirdPlaceOption === 'playoff' && losingSemiTeams.length >= 2) {
                 window.state.matches.push({
                     id: window.generateId(),
-                    matchCode: 'P34-1',
+                    matchCode: `${shortCode}-P34-1`,
                     group: 'Penentuan Tempat Ke-3 & Ke-4',
                     team1: losingSemiTeams[0],
                     team2: losingSemiTeams[1],
@@ -2393,7 +2829,7 @@
             const totalTeams = qualifiedTeams.length;
             const targetBracket = window.getTargetBracketSize(totalTeams);
             const numByes = targetBracket - totalTeams;
-            const prefix = getKnockoutCodePrefix(nextPhaseName);
+            const prefix = `${shortCode}-${getKnockoutCodePrefix(nextPhaseName)}`;
             let phaseMatchCounter = 1;
 
             if (numByes > 0) {
@@ -2500,12 +2936,34 @@
         }
 
         // --- Pendaftaran Nama Pengadil & Kawalan Skor / Set ---
-        window.selectMatchForUmpire = function(matchId) {
-            const match = window.state.matches.find(m => m.id === matchId);
-            if (!match) return;
+        window.toggleUmpireCategoryFilter = function() {
+            window.umpireShowAllCategories = !window.umpireShowAllCategories;
+            renderUmpireSelection();
+        };
+
+        window.findMatchAcrossCategories = function(matchId, preferredCatId = null) {
+            if (preferredCatId && window.state.categories[preferredCatId]) {
+                const found = (window.state.categories[preferredCatId].matches || []).find(m => m.id === matchId);
+                if (found) return { match: found, category: window.state.categories[preferredCatId] };
+            }
+            const activeMatch = (window.state.matches || []).find(m => m.id === matchId);
+            if (activeMatch) return { match: activeMatch, category: window.getActiveCategory() };
+
+            for (const cat of Object.values(window.state.categories || {})) {
+                const m = (cat.matches || []).find(item => item.id === matchId);
+                if (m) return { match: m, category: cat };
+            }
+            return null;
+        };
+
+        window.selectMatchForUmpire = function(matchId, catId = null) {
+            const lookup = window.findMatchAcrossCategories(matchId, catId);
+            if (!lookup) return;
+            const { match, category } = lookup;
 
             document.getElementById('pending-umpire-match-id').value = match.id;
-            const groupKeys = Object.keys(window.state.groups);
+            document.getElementById('pending-umpire-cat-id').value = category.id;
+            const groupKeys = Object.keys(category.groups || {});
             const isGroup = groupKeys.includes(match.group);
             const phaseTitle = isGroup ? `Kumpulan ${match.group}` : match.group;
 
@@ -2513,7 +2971,7 @@
             if (infoEl) {
                 infoEl.innerHTML = `
                     <div class="flex justify-between items-center">
-                        <span class="font-bold text-indigo-700">${phaseTitle}</span>
+                        <span class="font-bold text-indigo-700">[${category.name}] ${phaseTitle}</span>
                         <span class="bg-amber-400 text-gray-900 font-black px-2 py-0.5 rounded">#${match.matchCode}</span>
                     </div>
                     <div class="text-sm font-extrabold text-gray-900 pt-1">${match.team1.name} <span class="text-gray-400 font-normal">vs</span> ${match.team2.name}</div>
@@ -2539,10 +2997,18 @@
         window.confirmStartUmpireMatch = function(e) {
             e.preventDefault();
             const matchId = document.getElementById('pending-umpire-match-id').value;
+            const catId = document.getElementById('pending-umpire-cat-id')?.value || window.state.activeCategoryId;
             const umpireName = document.getElementById('umpire-name-input').value.trim();
             if (!umpireName) {
                 showModal('Nama Pengadil Diperlukan', 'Sila masukkan nama pengadil sebelum memulakan perlawanan.', 'error');
                 return;
+            }
+
+            if (catId && catId !== window.state.activeCategoryId && window.state.categories[catId]) {
+                window.saveRootToActiveCategory();
+                window.state.activeCategoryId = catId;
+                sessionStorage.setItem('kpdnActiveCategoryId', catId);
+                window.loadActiveCategoryToRoot();
             }
 
             const match = window.state.matches.find(m => m.id === matchId);
@@ -2559,7 +3025,7 @@
 
         window.promptChangeUmpireName = function() {
             if (!window.state.activeMatchId) return;
-            window.selectMatchForUmpire(window.state.activeMatchId);
+            window.selectMatchForUmpire(window.state.activeMatchId, window.state.activeCategoryId);
         };
 
         window.openUmpireScoreboard = function(matchId) {
@@ -2576,12 +3042,16 @@
             const match = window.state.matches.find(m => m.id === window.state.activeMatchId);
             if (!match) return;
 
+            const activeCat = window.getActiveCategory();
             const evalRes = window.getMatchSetEvaluation(match);
             const curSet = match.currentSet || 0;
             const currentSetObj = match.sets[curSet] || { s1: 0, s2: 0 };
 
             const groupKeys = Object.keys(window.state.groups);
             const isGroup = groupKeys.includes(match.group);
+
+            const catBadge = document.getElementById('active-category-badge');
+            if (catBadge && activeCat) catBadge.innerText = activeCat.name;
 
             document.getElementById('active-match-code').innerText = `#${match.matchCode}`;
             document.getElementById('active-group').innerText = isGroup ? `Kumpulan ${match.group}` : match.group;
@@ -2776,14 +3246,21 @@
 
         window.resetData = function() {
             if (currentUserRole !== 'superadmin') return;
-            showConfirm('Reset Sistem', 'Adakah anda pasti untuk memadam semua data kejohanan?', () => {
-                const savedTName = window.state.settings?.tournamentName || 'Badminton KPDN P.Pinang';
-                const savedAdminPin = window.state.settings?.adminPin || '1234';
-                const savedUmpirePin = window.state.settings?.umpirePin || '2222';
-                const savedSetMode = window.state.settings?.matchSetMode || '1_set';
-                const savedLogo = window.state.settings?.customLogoDataUrl;
+            showConfirm('Reset Keseluruhan Sistem (Semua Kategori)', 'Adakah anda pasti untuk memadam semua data kejohanan merentasi semua kategori?', () => {
+                const savedTName = window.state.globalSettings?.tournamentName || 'Kejohanan Piala CEO KPDN 2026';
+                const savedAdminPin = window.state.globalSettings?.adminPin || '1234';
+                const savedUmpirePin = window.state.globalSettings?.umpirePin || '2222';
+                const savedLogo = window.state.globalSettings?.customLogoDataUrl;
                 localStorage.removeItem('badmintonKPDNState');
                 window.state = {
+                    activeCategoryId: 'cat_bl',
+                    globalSettings: {
+                        tournamentName: savedTName,
+                        adminPin: savedAdminPin,
+                        umpirePin: savedUmpirePin,
+                        customLogoDataUrl: savedLogo
+                    },
+                    categories: createDefaultCategoriesMap(),
                     teams: [],
                     groups: {},
                     matches: [],
@@ -2795,7 +3272,7 @@
                         tournamentName: savedTName,
                         peringkat: 'Peringkat Kumpulan',
                         format: 'Round Robin',
-                        matchSetMode: savedSetMode,
+                        matchSetMode: '1_set',
                         maxScore: '',
                         numGroups: '2',
                         numQualify: '2',
@@ -2806,16 +3283,101 @@
                         customLogoDataUrl: savedLogo
                     }
                 };
+                window.loadActiveCategoryToRoot();
                 window.saveData();
-                showModal('Set Semula', 'Sistem telah dikosongkan.', 'success');
+                showModal('Set Semula', 'Keseluruhan sistem dan semua kategori telah dikosongkan.', 'success');
             });
         };
 
-        // --- Muat Turun Keputusan Penuh Kejohanan (Excel & Word) ---
+        // --- Semak Status Tamat Mengikut Kategori Tertentu (Untuk Laporan Bersepadu) ---
+        window.getCategoryWinnersSummary = function(catObj) {
+            if (!catObj || !Array.isArray(catObj.matches)) return { isFinished: false };
+            const finalMatches = catObj.matches.filter(m => m.group === 'Pusingan Akhir');
+            if (finalMatches.length === 0) return { isFinished: false };
+
+            const finalMatch = finalMatches[finalMatches.length - 1];
+            if (finalMatch.status !== 'completed') return { isFinished: false };
+
+            const thirdPlaceMatches = catObj.matches.filter(m => m.group === 'Penentuan Tempat Ke-3 & Ke-4');
+            if (thirdPlaceMatches.length > 0 && thirdPlaceMatches.some(m => m.status !== 'completed')) {
+                return { isFinished: false };
+            }
+
+            const finalEval = window.getMatchSetEvaluation(finalMatch);
+            const champion = finalEval.winnerTeamNum !== 2 ? finalMatch.team1 : finalMatch.team2;
+            const runnerUp = finalEval.winnerTeamNum !== 2 ? finalMatch.team2 : finalMatch.team1;
+
+            let thirdPlace = [];
+            let fourthPlace = null;
+            let isJointThird = true;
+
+            if (thirdPlaceMatches.length > 0) {
+                const tpMatch = thirdPlaceMatches[thirdPlaceMatches.length - 1];
+                const tpEval = window.getMatchSetEvaluation(tpMatch);
+                const tpWinner = tpEval.winnerTeamNum !== 2 ? tpMatch.team1 : tpMatch.team2;
+                const tpLoser = tpEval.winnerTeamNum !== 2 ? tpMatch.team2 : tpMatch.team1;
+                thirdPlace = [tpWinner];
+                fourthPlace = tpLoser;
+                isJointThird = false;
+            } else {
+                const semiMatches = catObj.matches.filter(m => m.group === 'Separuh Akhir' && m.status === 'completed');
+                semiMatches.forEach(sm => {
+                    const smEval = window.getMatchSetEvaluation(sm);
+                    const loser = smEval.winnerTeamNum !== 2 ? sm.team2 : sm.team1;
+                    if (loser && loser.id !== 'bye') thirdPlace.push(loser);
+                });
+                isJointThird = true;
+            }
+
+            return {
+                isFinished: true,
+                champion,
+                runnerUp,
+                thirdPlace,
+                fourthPlace,
+                isJointThird,
+                finalMatch,
+                finalEval
+            };
+        };
+
+        window.isAnyCategoryFinished = function() {
+            window.saveRootToActiveCategory();
+            return Object.values(window.state.categories || {}).some(cat => window.getCategoryWinnersSummary(cat).isFinished);
+        };
+
+        window.calculateCategoryStandings = function(catObj, groupName) {
+            let teamsInGroup = (catObj.groups && catObj.groups[groupName]) ? catObj.groups[groupName] : [];
+            let stats = {};
+            teamsInGroup.forEach(t => {
+                stats[t.id] = { id: t.id, name: t.name, p: 0, w: 0, l: 0, pf: 0, pa: 0, diff: 0, pts: 0 };
+            });
+
+            let groupMatches = (catObj.matches || []).filter(m => m.group === groupName && m.status === 'completed');
+            groupMatches.forEach(m => {
+                let id1 = m.team1.id;
+                let id2 = m.team2.id;
+                if (!stats[id1] || !stats[id2]) return;
+                const evalRes = window.getMatchSetEvaluation(m);
+                stats[id1].p++; stats[id2].p++;
+                stats[id1].pf += evalRes.totalPoints1; stats[id1].pa += evalRes.totalPoints2;
+                stats[id2].pf += evalRes.totalPoints2; stats[id2].pa += evalRes.totalPoints1;
+                if (evalRes.winnerTeamNum === 1) { stats[id1].w++; stats[id1].pts += 2; stats[id2].l++; }
+                else if (evalRes.winnerTeamNum === 2) { stats[id2].w++; stats[id2].pts += 2; stats[id1].l++; }
+                else { stats[id1].pts += 1; stats[id2].pts += 1; }
+            });
+
+            let arr = Object.values(stats);
+            arr.forEach(item => { item.diff = item.pf - item.pa; });
+            arr.sort((a, b) => (b.pts - a.pts) || (b.diff - a.diff) || (b.pf - a.pf));
+            return arr;
+        };
+
+        // --- Muat Turun Keputusan Penuh Kejohanan (Semua Kategori - Excel & Word) ---
         window.downloadFullResultsExcel = function() {
-            const summary = window.getTournamentWinnersSummary();
-            if (!summary.isFinished) {
-                showModal('Belum Tamat', 'Muat turun keputusan penuh hanya dibenarkan selepas perlawanan Pusingan Akhir selesai.', 'error');
+            window.saveRootToActiveCategory();
+            if (!window.isAnyCategoryFinished()) {
+                showModal('Belum Tamat', 'Muat turun keputusan penuh hanya dibenarkan selepas sekurang-kurangnya satu kategori menamatkan Pusingan Akhir.', 'error');
                 return;
             }
 
@@ -2824,145 +3386,190 @@
                 return;
             }
 
-            const tName = window.state.settings.tournamentName || 'Kejohanan Badminton KPDN Pulau Pinang';
+            const tName = window.state.globalSettings?.tournamentName || 'Kejohanan Piala CEO KPDN 2026';
             const wb = XLSX.utils.book_new();
 
-            const winnerRows = [
-                [`SHUTTLEPOWER - ${tName.toUpperCase()}`],
-                ["KEPUTUSAN RASMI KEJOHANAN"],
-                [],
-                ["KEDUDUKAN", "NAMA REGU / PASUKAN"],
-                ["JOHAN (TEMPAT PERTAMA)", summary.champion.name],
-                ["NAIB JOHAN (TEMPAT KEDUA)", summary.runnerUp.name]
-            ];
+            Object.values(window.state.categories || {}).forEach(cat => {
+                if ((!cat.teams || cat.teams.length === 0) && (!cat.matches || cat.matches.length === 0)) return;
+                const summary = window.getCategoryWinnersSummary(cat);
+                const code = (cat.shortCode || 'KAT').slice(0, 6);
 
-            if (summary.isJointThird) {
-                const thirdNames = summary.thirdPlace.map(t => t.name).join(" & ");
-                winnerRows.push(["TEMPAT KETIGA BERSAMA", thirdNames || "-"]);
-            } else {
-                winnerRows.push(["TEMPAT KETIGA", summary.thirdPlace[0]?.name || "-"]);
-                winnerRows.push(["TEMPAT KEEMPAT", summary.fourthPlace?.name || "-"]);
-            }
+                const winnerRows = [
+                    [`SHUTTLEPOWER - ${tName.toUpperCase()}`],
+                    [`KATEGORI: ${cat.name.toUpperCase()} (${cat.shortCode})`],
+                    [],
+                    ["KEDUDUKAN", "NAMA REGU / PASUKAN"]
+                ];
 
-            winnerRows.push([]);
-            winnerRows.push(["KEDUDUKAN PERINGKAT KUMPULAN"]);
-
-            const groupKeys = Object.keys(window.state.groups).sort();
-            groupKeys.forEach(g => {
-                winnerRows.push([]);
-                winnerRows.push([`KUMPULAN ${g}`]);
-                winnerRows.push(["Kedudukan", "Nama Regu", "Main (P)", "Menang (M)", "Kalah (K)", "Skor Masuk", "Skor Bolos", "Beza (+/-)", "Mata (PTS)"]);
-                const st = window.calculateStandings(g);
-                st.forEach((item, idx) => {
-                    winnerRows.push([idx + 1, item.name, item.p, item.w, item.l, item.pf, item.pa, item.diff, item.pts]);
-                });
-            });
-
-            const wsSummary = XLSX.utils.aoa_to_sheet(winnerRows);
-            wsSummary['!cols'] = [{ wch: 28 }, { wch: 35 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }];
-            XLSX.utils.book_append_sheet(wb, wsSummary, "Pemenang_&_Kumpulan");
-
-            const matchRows = [
-                [`SHUTTLEPOWER - ${tName.toUpperCase()}`],
-                ["SENARAI KEPUTUSAN KESELURUHAN PERLAWANAN (DARI MULA HINGGA TAMAT)"],
-                [],
-                ["Bil", "Kod Perlawanan", "Peringkat / Kumpulan", "Nama Pengadil", "Regu 1", "Keputusan / Skor Set", "Regu 2", "Pemenang", "Status"]
-            ];
-
-            window.state.matches.forEach((m, index) => {
-                const isGroup = groupKeys.includes(m.group);
-                const phaseLabel = isGroup ? `Kumpulan ${m.group}` : m.group;
-                const evalRes = window.getMatchSetEvaluation(m);
-                let winnerName = "-";
-                if (m.status === 'completed') {
-                    winnerName = evalRes.winnerTeamNum === 1 ? m.team1.name : (evalRes.winnerTeamNum === 2 ? m.team2.name : "Seri");
+                if (summary.isFinished) {
+                    winnerRows.push(["JOHAN (TEMPAT PERTAMA)", summary.champion.name]);
+                    winnerRows.push(["NAIB JOHAN (TEMPAT KEDUA)", summary.runnerUp.name]);
+                    if (summary.isJointThird) {
+                        winnerRows.push(["TEMPAT KETIGA BERSAMA", summary.thirdPlace.map(t => t.name).join(" & ") || "-"]);
+                    } else {
+                        winnerRows.push(["TEMPAT KETIGA", summary.thirdPlace[0]?.name || "-"]);
+                        winnerRows.push(["TEMPAT KEEMPAT", summary.fourthPlace?.name || "-"]);
+                    }
+                } else {
+                    winnerRows.push(["STATUS KATEGORI", "Masih Berlangsung"]);
                 }
-                matchRows.push([
-                    index + 1,
-                    `#${m.matchCode}`,
-                    phaseLabel,
-                    m.umpireName || "-",
-                    m.team1.name,
-                    evalRes.shortSummaryText,
-                    m.team2.name,
-                    winnerName,
-                    m.status === 'completed' ? 'Selesai' : m.status
-                ]);
-            });
 
-            const wsMatches = XLSX.utils.aoa_to_sheet(matchRows);
-            wsMatches['!cols'] = [{ wch: 6 }, { wch: 16 }, { wch: 26 }, { wch: 24 }, { wch: 28 }, { wch: 24 }, { wch: 28 }, { wch: 28 }, { wch: 12 }];
-            XLSX.utils.book_append_sheet(wb, wsMatches, "Semua_Perlawanan");
+                winnerRows.push([]);
+                winnerRows.push(["KEDUDUKAN PERINGKAT KUMPULAN"]);
+
+                const groupKeys = Object.keys(cat.groups || {}).sort();
+                groupKeys.forEach(g => {
+                    winnerRows.push([]);
+                    winnerRows.push([`KUMPULAN ${g}`]);
+                    winnerRows.push(["Kedudukan", "Nama Regu", "Main (P)", "Menang (M)", "Kalah (K)", "Skor Masuk", "Skor Bolos", "Beza (+/-)", "Mata (PTS)"]);
+                    const st = window.calculateCategoryStandings(cat, g);
+                    st.forEach((item, idx) => {
+                        winnerRows.push([idx + 1, item.name, item.p, item.w, item.l, item.pf, item.pa, item.diff, item.pts]);
+                    });
+                });
+
+                winnerRows.push([]);
+                winnerRows.push(["SENARAI KEPUTUSAN PERLAWANAN"]);
+                winnerRows.push(["Bil", "Kod Perlawanan", "Peringkat / Kumpulan", "Nama Pengadil", "Regu 1", "Keputusan / Skor Set", "Regu 2", "Pemenang", "Status"]);
+
+                (cat.matches || []).forEach((m, index) => {
+                    const isGroup = groupKeys.includes(m.group);
+                    const phaseLabel = isGroup ? `Kumpulan ${m.group}` : m.group;
+                    const evalRes = window.getMatchSetEvaluation(m);
+                    let winnerName = "-";
+                    if (m.status === 'completed') {
+                        winnerName = evalRes.winnerTeamNum === 1 ? m.team1.name : (evalRes.winnerTeamNum === 2 ? m.team2.name : "Seri");
+                    }
+                    winnerRows.push([
+                        index + 1,
+                        `#${m.matchCode}`,
+                        phaseLabel,
+                        m.umpireName || "-",
+                        m.team1.name,
+                        evalRes.shortSummaryText,
+                        m.team2.name,
+                        winnerName,
+                        m.status === 'completed' ? 'Selesai' : m.status
+                    ]);
+                });
+
+                const ws = XLSX.utils.aoa_to_sheet(winnerRows);
+                ws['!cols'] = [{ wch: 24 }, { wch: 32 }, { wch: 22 }, { wch: 22 }, { wch: 26 }, { wch: 22 }, { wch: 26 }, { wch: 26 }, { wch: 12 }];
+                XLSX.utils.book_append_sheet(wb, ws, `${code}_${cat.name}`.slice(0, 31));
+            });
 
             const safeFilename = tName.replace(/[^a-zA-Z0-9]/g, '_');
             XLSX.writeFile(wb, `Keputusan_Penuh_${safeFilename}.xlsx`);
         };
 
         window.downloadFullResultsWord = function() {
-            const summary = window.getTournamentWinnersSummary();
-            if (!summary.isFinished) {
-                showModal('Belum Tamat', 'Muat turun keputusan penuh hanya dibenarkan selepas perlawanan Pusingan Akhir selesai.', 'error');
+            window.saveRootToActiveCategory();
+            if (!window.isAnyCategoryFinished()) {
+                showModal('Belum Tamat', 'Muat turun keputusan penuh hanya dibenarkan selepas sekurang-kurangnya satu kategori menamatkan Pusingan Akhir.', 'error');
                 return;
             }
 
-            const tName = window.state.settings.tournamentName || 'Kejohanan Badminton KPDN Pulau Pinang';
-            const groupKeys = Object.keys(window.state.groups).sort();
-            const thirdRowHtml = summary.isJointThird
-                ? `<tr><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">TEMPAT KETIGA BERSAMA</td><td style="padding:8px;border:1px solid #ccc;">${summary.thirdPlace.map(t => t.name).join(' &amp; ') || '-'}</td></tr>`
-                : `<tr><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">TEMPAT KETIGA</td><td style="padding:8px;border:1px solid #ccc;">${summary.thirdPlace[0]?.name || '-'}</td></tr>
-                   <tr><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">TEMPAT KEEMPAT</td><td style="padding:8px;border:1px solid #ccc;">${summary.fourthPlace?.name || '-'}</td></tr>`;
+            const tName = window.state.globalSettings?.tournamentName || 'Kejohanan Piala CEO KPDN 2026';
+            let allCategoriesHtml = '';
 
-            let groupsHtml = '';
-            groupKeys.forEach(g => {
-                const st = window.calculateStandings(g);
-                groupsHtml += `
-                    <h3 style="color:#0369a1;margin-top:18px;">Kumpulan ${g}</h3>
-                    <table style="width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px;">
-                        <thead>
-                            <tr style="background-color:#f3f4f6;">
-                                <th style="padding:6px;border:1px solid #ccc;">Ked</th>
-                                <th style="padding:6px;border:1px solid #ccc;text-align:left;">Nama Regu</th>
-                                <th style="padding:6px;border:1px solid #ccc;">P</th>
-                                <th style="padding:6px;border:1px solid #ccc;">M</th>
-                                <th style="padding:6px;border:1px solid #ccc;">K</th>
-                                <th style="padding:6px;border:1px solid #ccc;">+/-</th>
-                                <th style="padding:6px;border:1px solid #ccc;">PTS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${st.map((item, idx) => `
-                                <tr>
-                                    <td style="padding:6px;border:1px solid #ccc;text-align:center;">${idx + 1}</td>
-                                    <td style="padding:6px;border:1px solid #ccc;">${item.name}</td>
-                                    <td style="padding:6px;border:1px solid #ccc;text-align:center;">${item.p}</td>
-                                    <td style="padding:6px;border:1px solid #ccc;text-align:center;">${item.w}</td>
-                                    <td style="padding:6px;border:1px solid #ccc;text-align:center;">${item.l}</td>
-                                    <td style="padding:6px;border:1px solid #ccc;text-align:center;">${item.diff > 0 ? '+' + item.diff : item.diff}</td>
-                                    <td style="padding:6px;border:1px solid #ccc;text-align:center;font-weight:bold;">${item.pts}</td>
+            Object.values(window.state.categories || {}).forEach(cat => {
+                if ((!cat.teams || cat.teams.length === 0) && (!cat.matches || cat.matches.length === 0)) return;
+                const summary = window.getCategoryWinnersSummary(cat);
+                const groupKeys = Object.keys(cat.groups || {}).sort();
+
+                let winnersHtml = '';
+                if (summary.isFinished) {
+                    const thirdRowHtml = summary.isJointThird
+                        ? `<tr><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">TEMPAT KETIGA BERSAMA</td><td style="padding:8px;border:1px solid #ccc;">${summary.thirdPlace.map(t => t.name).join(' &amp; ') || '-'}</td></tr>`
+                        : `<tr><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">TEMPAT KETIGA</td><td style="padding:8px;border:1px solid #ccc;">${summary.thirdPlace[0]?.name || '-'}</td></tr>
+                           <tr><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">TEMPAT KEEMPAT</td><td style="padding:8px;border:1px solid #ccc;">${summary.fourthPlace?.name || '-'}</td></tr>`;
+
+                    winnersHtml = `
+                        <table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px;">
+                            <tr style="background-color:#fef3c7;"><td style="padding:8px;border:1px solid #ccc;font-weight:bold;width:35%;">JOHAN (${cat.name.toUpperCase()})</td><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">${summary.champion.name}</td></tr>
+                            <tr style="background-color:#f3f4f6;"><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">NAIB JOHAN</td><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">${summary.runnerUp.name}</td></tr>
+                            ${thirdRowHtml}
+                        </table>
+                    `;
+                }
+
+                let groupsHtml = '';
+                groupKeys.forEach(g => {
+                    const st = window.calculateCategoryStandings(cat, g);
+                    groupsHtml += `
+                        <h4 style="color:#0369a1;margin-top:12px;margin-bottom:6px;">Kumpulan ${g} (${cat.name})</h4>
+                        <table style="width:100%;border-collapse:collapse;margin-bottom:10px;font-size:12px;">
+                            <thead>
+                                <tr style="background-color:#f3f4f6;">
+                                    <th style="padding:6px;border:1px solid #ccc;">Ked</th>
+                                    <th style="padding:6px;border:1px solid #ccc;text-align:left;">Nama Regu</th>
+                                    <th style="padding:6px;border:1px solid #ccc;">P</th>
+                                    <th style="padding:6px;border:1px solid #ccc;">M</th>
+                                    <th style="padding:6px;border:1px solid #ccc;">K</th>
+                                    <th style="padding:6px;border:1px solid #ccc;">+/-</th>
+                                    <th style="padding:6px;border:1px solid #ccc;">PTS</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                ${st.map((item, idx) => `
+                                    <tr>
+                                        <td style="padding:6px;border:1px solid #ccc;text-align:center;">${idx + 1}</td>
+                                        <td style="padding:6px;border:1px solid #ccc;">${item.name}</td>
+                                        <td style="padding:6px;border:1px solid #ccc;text-align:center;">${item.p}</td>
+                                        <td style="padding:6px;border:1px solid #ccc;text-align:center;">${item.w}</td>
+                                        <td style="padding:6px;border:1px solid #ccc;text-align:center;">${item.l}</td>
+                                        <td style="padding:6px;border:1px solid #ccc;text-align:center;">${item.diff > 0 ? '+' + item.diff : item.diff}</td>
+                                        <td style="padding:6px;border:1px solid #ccc;text-align:center;font-weight:bold;">${item.pts}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                });
+
+                let matchesHtml = (cat.matches || []).map(m => {
+                    const isGroup = groupKeys.includes(m.group);
+                    const phaseLabel = isGroup ? `Kumpulan ${m.group}` : m.group;
+                    const evalRes = window.getMatchSetEvaluation(m);
+                    const winnerName = m.status === 'completed'
+                        ? (evalRes.winnerTeamNum === 1 ? m.team1.name : (evalRes.winnerTeamNum === 2 ? m.team2.name : 'Seri'))
+                        : '-';
+                    return `
+                        <tr>
+                            <td style="padding:6px;border:1px solid #ccc;text-align:center;font-weight:bold;">#${m.matchCode}</td>
+                            <td style="padding:6px;border:1px solid #ccc;">${phaseLabel}</td>
+                            <td style="padding:6px;border:1px solid #ccc;">${m.umpireName || '-'}</td>
+                            <td style="padding:6px;border:1px solid #ccc;text-align:right;font-weight:bold;">${m.team1.name}</td>
+                            <td style="padding:6px;border:1px solid #ccc;text-align:center;font-weight:bold;">${evalRes.shortSummaryText}</td>
+                            <td style="padding:6px;border:1px solid #ccc;font-weight:bold;">${m.team2.name}</td>
+                            <td style="padding:6px;border:1px solid #ccc;">${winnerName}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                allCategoriesHtml += `
+                    <div style="margin-top:24px;padding-top:12px;border-top:2px solid #0284c7;">
+                        <h2 style="color:#06152d;margin-bottom:8px;">KATEGORI: ${cat.name.toUpperCase()} [${cat.shortCode}]</h2>
+                        ${winnersHtml}
+                        ${groupsHtml}
+                        <h4 style="color:#1e3a8a;margin-top:16px;margin-bottom:6px;">Rekod Perlawanan (${cat.name})</h4>
+                        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                            <thead>
+                                <tr style="background-color:#e0e7ff;">
+                                    <th style="padding:6px;border:1px solid #ccc;">Kod</th>
+                                    <th style="padding:6px;border:1px solid #ccc;text-align:left;">Peringkat</th>
+                                    <th style="padding:6px;border:1px solid #ccc;text-align:left;">Pengadil</th>
+                                    <th style="padding:6px;border:1px solid #ccc;text-align:right;">Regu 1</th>
+                                    <th style="padding:6px;border:1px solid #ccc;">Keputusan Set</th>
+                                    <th style="padding:6px;border:1px solid #ccc;text-align:left;">Regu 2</th>
+                                    <th style="padding:6px;border:1px solid #ccc;text-align:left;">Pemenang</th>
+                                </tr>
+                            </thead>
+                            <tbody>${matchesHtml}</tbody>
+                        </table>
+                    </div>
                 `;
             });
-
-            let matchesHtml = window.state.matches.map((m, idx) => {
-                const isGroup = groupKeys.includes(m.group);
-                const phaseLabel = isGroup ? `Kumpulan ${m.group}` : m.group;
-                const evalRes = window.getMatchSetEvaluation(m);
-                const winnerName = evalRes.winnerTeamNum === 1 ? m.team1.name : (evalRes.winnerTeamNum === 2 ? m.team2.name : 'Seri');
-                return `
-                    <tr>
-                        <td style="padding:6px;border:1px solid #ccc;text-align:center;font-weight:bold;">#${m.matchCode}</td>
-                        <td style="padding:6px;border:1px solid #ccc;">${phaseLabel}</td>
-                        <td style="padding:6px;border:1px solid #ccc;">${m.umpireName || '-'}</td>
-                        <td style="padding:6px;border:1px solid #ccc;text-align:right;font-weight:bold;">${m.team1.name}</td>
-                        <td style="padding:6px;border:1px solid #ccc;text-align:center;font-weight:bold;">${evalRes.shortSummaryText}</td>
-                        <td style="padding:6px;border:1px solid #ccc;font-weight:bold;">${m.team2.name}</td>
-                        <td style="padding:6px;border:1px solid #ccc;">${winnerName}</td>
-                    </tr>
-                `;
-            }).join('');
 
             const docContent = `
                 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -2970,33 +3577,8 @@
                 <body style="font-family:Arial,sans-serif;color:#1f2937;">
                     <p style="text-align:center;font-size:11px;font-weight:bold;color:#0284c7;letter-spacing:2px;margin-bottom:2px;">SHUTTLEPOWER OFFICIAL TOURNAMENT REPORT</p>
                     <h1 style="text-align:center;color:#06152d;margin-top:0;margin-bottom:4px;">${tName.toUpperCase()}</h1>
-                    <p style="text-align:center;font-size:12px;color:#6b7280;margin-top:0;">LAPORAN RASMI KEPUTUSAN KESELURUHAN KEJOHANAN</p>
-                    <hr/>
-                    <h2 style="color:#1e3a8a;">1. Senarai Pemenang Utama</h2>
-                    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px;">
-                        <tr style="background-color:#fef3c7;"><td style="padding:8px;border:1px solid #ccc;font-weight:bold;width:35%;">JOHAN (TEMPAT PERTAMA)</td><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">${summary.champion.name}</td></tr>
-                        <tr style="background-color:#f3f4f6;"><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">NAIB JOHAN (TEMPAT KEDUA)</td><td style="padding:8px;border:1px solid #ccc;font-weight:bold;">${summary.runnerUp.name}</td></tr>
-                        ${thirdRowHtml}
-                    </table>
-
-                    <h2 style="color:#1e3a8a;">2. Kedudukan Akhir Peringkat Kumpulan</h2>
-                    ${groupsHtml}
-
-                    <h2 style="color:#1e3a8a;margin-top:24px;">3. Rekod Keputusan Semua Perlawanan &amp; Pengadil Bertugas</h2>
-                    <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                        <thead>
-                            <tr style="background-color:#e0e7ff;">
-                                <th style="padding:6px;border:1px solid #ccc;">Kod</th>
-                                <th style="padding:6px;border:1px solid #ccc;text-align:left;">Peringkat</th>
-                                <th style="padding:6px;border:1px solid #ccc;text-align:left;">Pengadil</th>
-                                <th style="padding:6px;border:1px solid #ccc;text-align:right;">Regu 1</th>
-                                <th style="padding:6px;border:1px solid #ccc;">Keputusan Set</th>
-                                <th style="padding:6px;border:1px solid #ccc;text-align:left;">Regu 2</th>
-                                <th style="padding:6px;border:1px solid #ccc;text-align:left;">Pemenang</th>
-                            </tr>
-                        </thead>
-                        <tbody>${matchesHtml}</tbody>
-                    </table>
+                    <p style="text-align:center;font-size:12px;color:#6b7280;margin-top:0;">LAPORAN RASMI KEPUTUSAN KESELURUHAN MENGIKUT KATEGORI</p>
+                    ${allCategoriesHtml}
                 </body>
                 </html>
             `;
@@ -3016,6 +3598,7 @@
         // --- Rendering Engine ---
         function renderAll() {
             applyAccessControlUI();
+            renderCategorySwitcherBar();
             renderTeams();
             renderGroupsManagement();
             renderAdminSchedule();
@@ -3149,36 +3732,69 @@
         function renderUmpireSelection() {
             const listContainer = document.getElementById('umpire-matches-list');
             const phaseInd = document.getElementById('umpire-phase-indicator');
+            const filterBtn = document.getElementById('btn-umpire-filter-mode');
             if (!listContainer) return;
 
-            if (window.state.matches.length === 0) {
+            window.saveRootToActiveCategory();
+            const activeCat = window.getActiveCategory();
+
+            if (filterBtn) {
+                if (window.umpireShowAllCategories) {
+                    filterBtn.innerHTML = `<i class="fa-solid fa-layer-group mr-1 text-sky-600"></i> Tunjuk: Semua Kategori`;
+                    filterBtn.className = "text-xs bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 px-3 py-1.5 rounded-lg font-bold transition";
+                } else {
+                    filterBtn.innerHTML = `<i class="fa-solid fa-filter mr-1 text-indigo-600"></i> Tunjuk: ${activeCat.name} Sahaja`;
+                    filterBtn.className = "text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 px-3 py-1.5 rounded-lg font-bold transition";
+                }
+            }
+
+            let targetCategories = window.umpireShowAllCategories
+                ? Object.values(window.state.categories || {})
+                : [activeCat];
+
+            let allActiveItems = [];
+            let totalMatchesExist = 0;
+
+            targetCategories.forEach(cat => {
+                if (!cat || !Array.isArray(cat.matches)) return;
+                totalMatchesExist += cat.matches.length;
+                const gKeys = Object.keys(cat.groups || {});
+                cat.matches.filter(m => m.status !== 'completed').forEach(m => {
+                    allActiveItems.push({
+                        match: m,
+                        category: cat,
+                        isGroup: gKeys.includes(m.group)
+                    });
+                });
+            });
+
+            if (totalMatchesExist === 0) {
                 listContainer.innerHTML = `<div class="text-center text-gray-400 py-10 col-span-full">Sila jana jadual di bahagian Pendaftaran.</div>`;
                 if (phaseInd) phaseInd.innerText = 'Tiada Perlawanan';
                 return;
             }
-
-            const groupKeys = Object.keys(window.state.groups);
-            const activeMatches = window.state.matches.filter(m => m.status !== 'completed');
             
             if (phaseInd) {
-                phaseInd.innerText = `${activeMatches.length} Perlawanan Menunggu / Sedang Berlangsung`;
+                phaseInd.innerText = `${allActiveItems.length} Perlawanan Menunggu / Sedang Berlangsung`;
             }
 
-            if (activeMatches.length === 0) {
+            if (allActiveItems.length === 0) {
                 listContainer.innerHTML = `<div class="text-center text-green-600 font-bold py-10 col-span-full bg-green-50 rounded-xl border border-green-200">Semua perlawanan semasa telah tamat!</div>`;
                 return;
             }
 
-            listContainer.innerHTML = activeMatches.map(m => {
-                const isGroup = groupKeys.includes(m.group);
+            listContainer.innerHTML = allActiveItems.map(({ match: m, category: cat, isGroup }) => {
                 const isLive = m.status === 'in_progress';
                 const evalRes = window.getMatchSetEvaluation(m);
                 return `
                     <div class="border rounded-xl p-4 bg-white shadow-2xs hover:shadow-md transition flex flex-col justify-between border-l-4 ${isLive ? 'border-l-red-500 ring-2 ring-red-100' : (isGroup ? 'border-l-sky-500' : 'border-l-indigo-500')}">
                         <div>
-                            <div class="flex justify-between items-center mb-3">
-                                <span class="text-xs font-black bg-[#07162c] text-cyan-300 px-2.5 py-1 rounded shadow-2xs">#${m.matchCode}</span>
-                                <span class="text-xs font-bold ${isGroup ? 'text-sky-700 bg-sky-50' : 'text-indigo-700 bg-indigo-50'} px-2.5 py-0.5 rounded">${isGroup ? `Kumpulan ${m.group}` : m.group}</span>
+                            <div class="flex justify-between items-center mb-3 gap-1">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-xs font-black bg-[#07162c] text-cyan-300 px-2.5 py-1 rounded shadow-2xs">#${m.matchCode}</span>
+                                    <span class="text-[10px] font-extrabold bg-slate-100 text-slate-700 border px-2 py-0.5 rounded uppercase">${cat.name}</span>
+                                </div>
+                                <span class="text-xs font-bold ${isGroup ? 'text-sky-700 bg-sky-50' : 'text-indigo-700 bg-indigo-50'} px-2.5 py-0.5 rounded shrink-0">${isGroup ? `Kump. ${m.group}` : m.group}</span>
                             </div>
                             <div class="flex justify-between items-center mb-3 text-sm font-bold text-gray-800">
                                 <span class="flex-1 text-right truncate pr-2">${m.team1.name}</span>
@@ -3187,7 +3803,7 @@
                             </div>
                             ${m.umpireName ? `<div class="text-[11px] text-center text-sky-700 bg-sky-50/70 rounded py-1 mb-3 font-semibold"><i class="fa-solid fa-user-tie mr-1"></i>Pengadil: ${m.umpireName}</div>` : ''}
                         </div>
-                        <button onclick="selectMatchForUmpire('${m.id}')" class="w-full ${isLive ? 'bg-amber-500 hover:bg-amber-600 text-gray-900' : 'bg-red-600 hover:bg-red-700 text-white'} py-2.5 rounded-lg text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5">
+                        <button onclick="selectMatchForUmpire('${m.id}', '${cat.id}')" class="w-full ${isLive ? 'bg-amber-500 hover:bg-amber-600 text-gray-900' : 'bg-red-600 hover:bg-red-700 text-white'} py-2.5 rounded-lg text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-whistle"></i> ${isLive ? `Sambung Mengadil (#${m.matchCode})` : `Pilih & Masukkan Nama Pengadil (#${m.matchCode})`}
                         </button>
                     </div>
@@ -3202,35 +3818,51 @@
                 tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-400">Tiada rekod ketetapan.</td></tr>`;
                 return;
             }
-            tbody.innerHTML = window.state.settingsHistory.map(r => `
-                <tr class="border-b hover:bg-gray-100 text-xs">
-                    <td class="p-2.5 font-mono text-gray-500">${r.time}</td>
-                    <td class="p-2.5 font-semibold text-gray-800">${r.details}</td>
+            tbody.innerHTML = window.state.settingsHistory.map((item, idx) => `
+                <tr class="border-b last:border-b-0 ${idx === 0 ? 'bg-sky-50/60 font-semibold text-gray-800' : 'text-gray-600'}">
+                    <td class="p-2.5 text-xs whitespace-nowrap">${item.time}</td>
+                    <td class="p-2.5 text-xs">
+                        ${item.details}
+                        ${idx === 0 ? '<span class="ml-1 text-[10px] bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-bold">Aktif</span>' : ''}
+                    </td>
                     <td class="p-2.5 text-center">
-                        <button onclick="deleteSettingsRecord('${r.id}')" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
+                        <button onclick="deleteSettingsRecord('${item.id}')" class="text-red-500 hover:text-red-700 text-xs p-1" title="Padam Rekod">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
                     </td>
                 </tr>
             `).join('');
         }
 
         function renderPublicView() {
+            const winnerPosterEl = document.getElementById('public-winner-poster');
+            const knockoutContainer = document.getElementById('public-knockout-container');
+            const groupClause = document.getElementById('public-group-clause');
+            const groupClauseBadge = document.getElementById('group-clause-status-badge');
             const standingsContainer = document.getElementById('standings-container');
             const matchesContainer = document.getElementById('public-matches-container');
-            const groupClause = document.getElementById('public-group-clause');
-            const knockoutContainer = document.getElementById('public-knockout-container');
-            const winnerPosterEl = document.getElementById('public-winner-poster');
-            
             if (!standingsContainer || !matchesContainer) return;
 
-            const groupKeys = Object.keys(window.state.groups);
+            const groupKeys = Object.keys(window.state.groups).sort();
             const knockoutMatches = window.state.matches.filter(m => !groupKeys.includes(m.group));
             const hasKnockout = knockoutMatches.length > 0;
 
-            // 1. Poster Pemenang Rasmi Bertema SHUTTLEPOWER
+            if (groupClauseBadge) {
+                if (hasKnockout) {
+                    groupClauseBadge.className = 'text-[11px] bg-green-100 text-green-800 px-2 py-0.5 rounded font-semibold';
+                    groupClauseBadge.innerText = 'Selesai / Arkib';
+                } else {
+                    groupClauseBadge.className = 'text-[11px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-semibold';
+                    groupClauseBadge.innerText = 'Aktif';
+                }
+            }
+
+            // 1. Poster Pemenang Rasmi Bertema SHUTTLEPOWER (Mengikut Kategori Aktif)
             const winnerSummary = window.getTournamentWinnersSummary();
+            const activeCat = window.getActiveCategory();
             if (winnerPosterEl) {
                 if (winnerSummary.isFinished) {
-                    const tName = window.state.settings.tournamentName || 'Kejohanan Badminton KPDN Pulau Pinang';
+                    const tName = window.state.settings.tournamentName || 'Kejohanan Piala CEO KPDN 2026';
                     const customLogo = window.state?.settings?.customLogoDataUrl || localStorage.getItem('shuttlePowerCustomLogo') || '';
                     const posterLogoHtml = customLogo
                         ? `<img src="${customLogo}" alt="SHUTTLEPOWER" class="w-20 h-20 object-contain mx-auto mb-2 rounded-2xl border border-cyan-400/40 bg-[#051020] p-1">`
@@ -3262,12 +3894,12 @@
                                     <span class="text-white">SHUTTLE</span><span class="text-cyan-400">POWER</span> <span class="text-lime-400 not-italic">CHAMPIONSHIP</span>
                                 </div>
                                 <span class="inline-flex items-center gap-1.5 bg-gradient-to-r from-yellow-400 to-amber-300 text-slate-900 text-xs font-black px-3.5 py-1 rounded-full uppercase tracking-wider shadow-sm mb-3">
-                                    <i class="fa-solid fa-star"></i> Keputusan Rasmi Kejohanan <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i> Keputusan Rasmi Kategori: ${activeCat ? activeCat.name : ''} <i class="fa-solid fa-star"></i>
                                 </span>
                                 <h2 class="text-2xl sm:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-lime-300">
                                     ${tName}
                                 </h2>
-                                <p class="text-xs sm:text-sm text-cyan-200 mt-1">Tahniah kepada semua pemenang dan pasukan yang mengambil bahagian!</p>
+                                <p class="text-xs sm:text-sm text-cyan-200 mt-1">Tahniah kepada semua pemenang kategori <strong>${activeCat ? activeCat.name : ''}</strong>!</p>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 items-stretch">
@@ -3279,7 +3911,7 @@
 
                                 <div class="bg-gradient-to-b from-yellow-500/30 to-amber-600/20 backdrop-blur-xs border-2 border-yellow-400 rounded-2xl p-5 text-center flex flex-col justify-center shadow-lg transform md:-translate-y-2 order-1 md:order-2">
                                     <div class="text-yellow-400 text-4xl mb-1 animate-bounce"><i class="fa-solid fa-trophy"></i></div>
-                                    <div class="text-xs uppercase tracking-widest text-yellow-300 font-black">Johan Kejohanan</div>
+                                    <div class="text-xs uppercase tracking-widest text-yellow-300 font-black">Johan (${activeCat ? activeCat.shortCode : ''})</div>
                                     <div class="text-xl sm:text-2xl font-black text-white mt-1">${winnerSummary.champion.name}</div>
                                     <div class="text-[11px] text-yellow-200 mt-2 font-mono bg-black/30 px-2.5 py-0.5 rounded-full self-center">
                                         Keputusan Akhir (#${winnerSummary.finalMatch.matchCode}): ${winnerSummary.finalEval.shortSummaryText}
@@ -3468,17 +4100,17 @@
             const quickMethodSelect = document.getElementById('quick-qualify-method');
             const quickThirdSelect = document.getElementById('quick-third-place-method');
 
-            const winnerSummary = window.getTournamentWinnersSummary();
+            const anyFinished = window.isAnyCategoryFinished();
             const btnExportExcel = document.getElementById('btn-export-excel');
             const btnExportWord = document.getElementById('btn-export-word');
             const exportBadge = document.getElementById('export-status-badge');
 
             if (btnExportExcel && btnExportWord && exportBadge) {
-                if (winnerSummary.isFinished) {
+                if (anyFinished) {
                     btnExportExcel.disabled = false;
                     btnExportWord.disabled = false;
                     exportBadge.className = 'text-[10px] bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full font-bold';
-                    exportBadge.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Sedia Dimuat Turun';
+                    exportBadge.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Sedia Dimuat Turun (Semua Kategori)';
                 } else {
                     btnExportExcel.disabled = true;
                     btnExportWord.disabled = true;

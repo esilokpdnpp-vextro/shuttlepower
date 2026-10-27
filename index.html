@@ -300,7 +300,7 @@
                         </div>
                     </div>
                     
-                    <div id="group-management-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 mb-4 min-h-[150px] max-h-[350px] overflow-y-auto p-1">
+                    <div id="group-management-container" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mb-4 min-h-[150px] max-h-[380px] overflow-y-auto p-1">
                         <div class="text-center text-gray-400 py-6 col-span-full text-sm">Pilih bilangan kumpulan (1-10) atau kosongkan dan klik 'Set Kumpulan'.</div>
                     </div>
 
@@ -3646,27 +3646,29 @@
                 let options = unassigned.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
 
                 return `
-                    <div class="border rounded-xl p-3 bg-gray-50 flex flex-col justify-between shadow-xs">
-                        <div>
-                            <div class="flex justify-between items-center mb-2 pb-2 border-b">
-                                <span class="font-bold text-sky-700 text-sm"><i class="fa-solid fa-layer-group mr-1"></i> Kumpulan ${g}</span>
-                                <span class="text-[11px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-bold">${teamsInG.length} Regu</span>
+                    <div class="border rounded-xl p-3 bg-gray-50 flex flex-col justify-between shadow-xs min-w-0 overflow-hidden">
+                        <div class="min-w-0">
+                            <div class="flex justify-between items-center mb-2 pb-2 border-b gap-1">
+                                <span class="font-bold text-sky-700 text-sm truncate"><i class="fa-solid fa-layer-group mr-1"></i> Kumpulan ${g}</span>
+                                <span class="text-[11px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-bold shrink-0">${teamsInG.length} Regu</span>
                             </div>
                             <ul class="space-y-1 mb-3 max-h-32 overflow-y-auto">
                                 ${teamsInG.length === 0 ? '<li class="text-gray-400 text-xs italic py-1">Kosong</li>' : teamsInG.map(t => `
-                                    <li class="text-xs bg-white border px-2 py-1 rounded flex justify-between items-center shadow-2xs">
-                                        <span class="truncate">${t.name}</span>
-                                        <button onclick="removeFromGroup('${g}', '${t.id}')" class="text-red-500 hover:text-red-700 ml-1"><i class="fa-solid fa-xmark"></i></button>
+                                    <li class="text-xs bg-white border px-2 py-1 rounded flex justify-between items-center shadow-2xs min-w-0">
+                                        <span class="truncate pr-1">${t.name}</span>
+                                        <button type="button" onclick="removeFromGroup('${g}', '${t.id}')" class="text-red-500 hover:text-red-700 ml-1 shrink-0"><i class="fa-solid fa-xmark"></i></button>
                                     </li>
                                 `).join('')}
                             </ul>
                         </div>
-                        <div class="flex gap-1 mt-2">
-                            <select id="select-group-${g}" class="text-xs border rounded px-2 py-1 bg-white flex-1 focus:outline-none">
+                        <div class="flex items-center gap-1.5 mt-2 w-full min-w-0 pt-2 border-t border-gray-200/60">
+                            <select id="select-group-${g}" class="text-xs border border-gray-300 rounded-lg px-2 py-1.5 bg-white flex-1 w-0 min-w-0 truncate focus:outline-none focus:ring-2 focus:ring-sky-500">
                                 <option value="">-- Pilih Regu --</option>
                                 ${options}
                             </select>
-                            <button onclick="assignToGroup('${g}')" class="bg-sky-600 text-white px-2.5 py-1 rounded text-xs hover:bg-sky-700 font-bold"><i class="fa-solid fa-plus"></i></button>
+                            <button type="button" onclick="assignToGroup('${g}')" class="shrink-0 bg-sky-600 text-white px-3 py-1.5 rounded-lg text-xs hover:bg-sky-700 font-bold shadow-2xs transition flex items-center justify-center" title="Tambah Regu ke Kumpulan ${g}">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
                         </div>
                     </div>
                 `;
